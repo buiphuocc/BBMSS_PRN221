@@ -1,0 +1,42 @@
+﻿@page
+@model BBMSRazorPages.Pages.Courts.IndexModel
+
+@{
+    ViewData["Title"] = "Courts List";
+}
+
+<h1 style="text-align:center">Courts List</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Court[0].CourtName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Court[0].PricePerHour)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Court) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.CourtName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PricePerHour)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.CourtId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.CourtId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.CourtId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -30,7 +30,7 @@ namespace BBMSRazorPages.Pages.Authentication
                 {
                     HttpContext.Session.SetInt32("UserId", user.UserId);
                     HttpContext.Session.SetString("UserRole", user.Role);
-                    return RedirectToPage("/Index");
+                    return RedirectToPage("/Courts/Index");
                 }
                 else
                 {
