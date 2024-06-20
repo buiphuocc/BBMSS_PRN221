@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DataAccessLayer.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,54 +11,48 @@ namespace DataAccessLayer
 {
     public class BookingDAO
     {
-        public static List<Booking> GetBookings()
+        private readonly BadmintonBookingSystemContext _context;
+
+        public BookingDAO(BadmintonBookingSystemContext context)
         {
-            var bookings = new List<Booking>();
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                bookings = dbContext.Bookings.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return bookings;
+            _context = context;
         }
 
-        public static Booking? GetBookingById(int id)
+        public List<Booking> GetAllBookings()
         {
-            using var dbContext = new BBMSDbContext();
-            return dbContext.Bookings.FirstOrDefault(b => b.Id == id);
+            return _context.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Court)
+                .ToList();
         }
 
-        public static bool CreateBooking(Booking booking)
+        public Booking GetBookingById(int id)
         {
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Add(booking);
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            return _context.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Court)
+                .FirstOrDefault(b => b.BookingId == id);
         }
 
-        public static bool UpdateBooking(Booking booking)
+        public void AddBooking(Booking booking)
         {
-            try
+            _context.Bookings.Add(booking);
+            _context.SaveChanges();
+        }
+
+        public void UpdateBooking(Booking booking)
+        {
+            _context.Entry(booking).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        public void DeleteBooking(int id)
+        {
+            var booking = _context.Bookings.Find(id);
+            if (booking != null)
             {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Entry(booking).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
+                _context.Bookings.Remove(booking);
+                _context.SaveChanges();
             }
         }
     }

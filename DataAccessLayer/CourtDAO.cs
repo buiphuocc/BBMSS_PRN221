@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DataAccessLayer.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,54 +11,42 @@ namespace DataAccessLayer
 {
     public class CourtDAO
     {
-        public static List<Court> GetCourts()
+        private readonly BadmintonBookingSystemContext _context;
+
+        public CourtDAO(BadmintonBookingSystemContext context)
         {
-            var courts = new List<Court>();
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                courts = dbContext.Courts.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return courts;
+            _context = context;
         }
 
-        public static Court? GetCourtById(int id)
+        public List<Court> GetAllCourts()
         {
-            using var dbContext = new BBMSDbContext();
-            return dbContext.Courts.FirstOrDefault(b => b.Id == id);
+            return _context.Courts.ToList();
         }
 
-        public static bool CreateCourt(Court court)
+        public Court GetCourtById(int id)
         {
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Add(court);
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            return _context.Courts.Find(id);
         }
 
-        public static bool UpdateCourt(Court court)
+        public void AddCourt(Court court)
         {
-            try
+            _context.Courts.Add(court);
+            _context.SaveChanges();
+        }
+
+        public void UpdateCourt(Court court)
+        {
+            _context.Entry(court).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        public void DeleteCourt(int id)
+        {
+            var court = _context.Courts.Find(id);
+            if (court != null)
             {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Entry(court).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
+                _context.Courts.Remove(court);
+                _context.SaveChanges();
             }
         }
     }

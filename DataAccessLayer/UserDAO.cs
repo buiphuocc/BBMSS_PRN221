@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DataAccessLayer.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,58 +12,43 @@ namespace DataAccessLayer
 {
     public class UserDAO
     {
-        public static List<User> GetUsers()
+        private readonly BadmintonBookingSystemContext _context;
+
+        public UserDAO(BadmintonBookingSystemContext context)
         {
-            var users = new List<User>();
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                users = dbContext.Users.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return users;
+            _context = context;
         }
 
-        public static User? GetUserById(int id)
+        public List<User> GetAllUsers()
         {
-            using var dbContext = new BBMSDbContext();
-            return dbContext.Users.FirstOrDefault(u => u.Id == id);
+            return _context.Users.ToList();
         }
 
-        public static bool CreateUser(User user)
+        public User GetUserById(int id)
         {
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Add(user);
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                //return false;
-                throw new Exception(ex.Message);
-            } 
+            return _context.Users.Find(id);
         }
 
-        public static bool UpdateUser(User user)
+        public void AddUser(User user)
         {
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Entry(user).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                //return false;
-                throw new Exception(ex.Message);
-            }
+            _context.Users.Add(user);
+            _context.SaveChanges();
         }
 
+        public void UpdateUser(User user)
+        {
+            _context.Entry(user).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        public void DeleteUser(int id)
+        {
+            var user = _context.Users.Find(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                _context.SaveChanges();
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DataAccessLayer.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,54 +11,42 @@ namespace DataAccessLayer
 {
     public class ServiceDAO
     {
-        public static List<Service> GetServices()
+        private readonly BadmintonBookingSystemContext _context;
+
+        public ServiceDAO(BadmintonBookingSystemContext context)
         {
-            var services = new List<Service>();
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                services = dbContext.Services.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return services;
+            _context = context;
         }
 
-        public static Service? GetServiceById(int id)
+        public List<Service> GetAllServices()
         {
-            using var dbContext = new BBMSDbContext();
-            return dbContext.Services.FirstOrDefault(b => b.Id == id);
+            return _context.Services.ToList();
         }
 
-        public static bool CreateService(Service service)
+        public Service GetServiceById(int id)
         {
-            try
-            {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Add(service);
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            return _context.Services.Find(id);
         }
 
-        public static bool UpdateService(Service service)
+        public void AddService(Service service)
         {
-            try
+            _context.Services.Add(service);
+            _context.SaveChanges();
+        }
+
+        public void UpdateService(Service service)
+        {
+            _context.Entry(service).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        public void DeleteService(int id)
+        {
+            var service = _context.Services.Find(id);
+            if (service != null)
             {
-                using var dbContext = new BBMSDbContext();
-                dbContext.Entry(service).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                dbContext.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
+                _context.Services.Remove(service);
+                _context.SaveChanges();
             }
         }
     }
