@@ -13,8 +13,11 @@ builder.Services.AddDbContext<BadmintonBookingSystemContext>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddScoped<UserDAO>();
+builder.Services.AddScoped<BookingDAO>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookingReppository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, Services.BookingService>();
 
 var app = builder.Build();
 

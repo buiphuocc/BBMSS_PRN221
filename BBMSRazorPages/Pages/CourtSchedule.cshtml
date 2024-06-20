@@ -1,0 +1,70 @@
+﻿@page
+@model BBMSRazorPages.Pages.CourtScheduleModel
+@{
+    ViewData["Title"] = "Court Schedule";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Schedule</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BBMSRazorPages.styles.css" asp-append-version="true" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .booked {
+            background-color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Court Schedule</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Court</th>
+                @for (int hour = 5; hour <= 23; hour++)
+                {
+                    <th>@hour:00 - @hour:30</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in Model.Bookings)
+            {
+                <tr>
+                    <td>@booking.Court.CourtName</td>
+                    @for (int hour = 5; hour <= 23; hour++)
+                    {
+                        
+                        var slot1 = new TimeSpan(hour, 0, 0);
+                        var slot2 = new TimeSpan(hour, 30, 0);
+                        bool isBooked = Model.IsTimeSlotBooked(booking.Court, slot1, slot2);
+                        <td class="@( isBooked ? "booked" : "")" >
+                            
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
