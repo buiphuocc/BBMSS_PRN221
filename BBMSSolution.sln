@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories", "Repositorie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{71F505F4-A38C-4452-94F5-077907D25CC3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBMSRazorPages", "BBMSRazorPages\BBMSRazorPages.csproj", "{47B2D597-0467-48EE-95F8-7DF9167E699F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBMSRazorPages", "BBMSRazorPages\BBMSRazorPages.csproj", "{47B2D597-0467-48EE-95F8-7DF9167E699F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

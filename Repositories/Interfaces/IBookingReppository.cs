@@ -9,12 +9,10 @@ namespace Repositories.Interfaces
 {
     public interface IBookingReppository
     {
-        List<Booking> GetBookings();
-
-        Booking? GetBookingById(int id);
-
-        bool CreateBooking(Booking booking);
-
-        bool UpdateBooking(Booking booking);
+        List<Booking> GetAllBookings();
+        Booking GetBookingById(int id);
+        void AddBooking(Booking booking);
+        void UpdateBooking(Booking booking);
+        void DeleteBooking(int id);
     }
 }

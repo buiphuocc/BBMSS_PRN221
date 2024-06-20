@@ -9,12 +9,16 @@ namespace Services.Interfaces
 {
     public interface IUserService
     {
-        List<User> GetUsers();
+        List<User> GetAllUsers();
 
-        User? GetUserById(int id);
+        User GetUserById(int id);
 
-        bool CreateUser(User user);
+        User? GetUserByUserName(string userName);
 
-        bool UpdateUser(User user);
+        void AddUser(User user);
+
+        void UpdateUser(User user);
+
+        void DeleteUser(int id);
     }
 }

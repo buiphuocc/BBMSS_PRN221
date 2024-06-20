@@ -1,5 +1,4 @@
 ﻿using BusinessObjects;
-using DataAccessLayer.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,6 +21,12 @@ namespace DataAccessLayer
         public List<User> GetAllUsers()
         {
             return _context.Users.ToList();
+        }
+
+        public User GetUserByUserName(string userName)
+        {
+            User user = _context.Users.FirstOrDefault(u=> u.Username.Equals(userName));
+            return user;
         }
 
         public User GetUserById(int id)

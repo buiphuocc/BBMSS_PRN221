@@ -9,12 +9,14 @@ namespace Repositories.Interfaces
 {
     public interface ICourtRepository
     {
-        List<Court> GetCourts();
+        List<Court> GetAllCourts();
 
-        Court? GetCourtById(int id);
+        Court GetCourtById(int id);
 
-        bool CreateCourt(Court court);
+        void AddCourt(Court court);
 
-        bool UpdateCourt(Court court);
+        void UpdateCourt(Court court);
+
+        void DeleteCourt(int id);
     }
 }

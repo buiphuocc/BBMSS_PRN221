@@ -11,16 +11,36 @@ namespace Repositories
 {
     public class BookingRepository : IBookingReppository
     {
-        public bool CreateBooking(Booking booking)
-            => BookingDAO.CreateBooking(booking);
+        private readonly BookingDAO bookingDAO;
 
-        public Booking? GetBookingById(int id)
-            => BookingDAO.GetBookingById(id);
+        public BookingRepository(BookingDAO bookingDAO)
+        {
+            this.bookingDAO = bookingDAO;
+        }
 
-        public List<Booking> GetBookings()
-            => BookingDAO.GetBookings();
+        public void AddBooking(Booking booking)
+        {
+            bookingDAO.AddBooking(booking);
+        }
 
-        public bool UpdateBooking(Booking booking)
-            => BookingDAO.UpdateBooking(booking);
+        public void DeleteBooking(int id)
+        {
+            bookingDAO.DeleteBooking(id);
+        }
+
+        public List<Booking> GetAllBookings()
+        {
+            return bookingDAO.GetAllBookings();
+        }
+
+        public Booking GetBookingById(int id)
+        {
+            return bookingDAO.GetBookingById(id);
+        }
+
+        public void UpdateBooking(Booking booking)
+        {
+            bookingDAO.UpdateBooking(booking);
+        }
     }
 }

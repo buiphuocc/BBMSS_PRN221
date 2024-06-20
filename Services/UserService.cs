@@ -16,24 +16,35 @@ namespace Services
         {
             this.userRepository = userRepository;
         }
-        public bool CreateUser(User user)
+
+        public void AddUser(User user)
         {
-            return userRepository.CreateUser(user);
+            userRepository.AddUser(user);
         }
 
-        public User? GetUserById(int id)
+        public void DeleteUser(int id)
         {
-            return userRepository?.GetUserById(id);
+            userRepository.DeleteUser(id);  
         }
 
-        public List<User> GetUsers()
+        public List<User> GetAllUsers()
         {
-            return userRepository.GetUsers();
+            return userRepository.GetAllUsers();
         }
 
-        public bool UpdateUser(User user)
+        public User GetUserById(int id)
         {
-            return userRepository.UpdateUser(user);
+            return (userRepository.GetUserById(id));
+        }
+
+        public User? GetUserByUserName(string userName)
+        {
+            return userRepository.GetUserByUserName(userName);
+        }
+
+        public void UpdateUser(User user)
+        {
+            userRepository.UpdateUser(user);
         }
     }
 }

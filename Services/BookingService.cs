@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using Repositories.Interfaces;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,29 +11,36 @@ namespace Services
 {
     public class BookingService : IBookingService
     {
-        private readonly IBookingService bookingService;
-        public BookingService(IBookingService bookingService)
+        private readonly IBookingReppository bookingReppository;
+
+        public BookingService(IBookingReppository bookingReppository)
         {
-            this.bookingService = bookingService;
-        }
-        public bool CreateBooking(Booking booking)
-        {
-            return bookingService.CreateBooking(booking);
+            this.bookingReppository = bookingReppository;
         }
 
-        public Booking? GetBookingById(int id)
+        public void AddBooking(Booking booking)
         {
-            return bookingService.GetBookingById(id);
+            bookingReppository.AddBooking(booking);
         }
 
-        public List<Booking> GetBookings()
+        public void DeleteBooking(int id)
         {
-            return bookingService.GetBookings();
+            bookingReppository.DeleteBooking(id);
         }
 
-        public bool UpdateBooking(Booking booking)
+        public List<Booking> GetAllBookings()
         {
-            return bookingService.UpdateBooking(booking);   
+            return bookingReppository.GetAllBookings();
+        }
+
+        public Booking GetBookingById(int id)
+        {
+            return bookingReppository.GetBookingById(id);
+        }
+
+        public void UpdateBooking(Booking booking)
+        {
+            bookingReppository.UpdateBooking(booking);
         }
     }
 }

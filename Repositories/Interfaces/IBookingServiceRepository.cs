@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,10 @@ namespace Repositories.Interfaces
 {
     public interface IBookingServiceRepository
     {
+        List<BookingService> GetAllBookingServices();
+        BookingService GetBookingServiceById(int id);
+        void AddBookingService(BookingService bookingService);
+        void UpdateBookingService(BookingService bookingService);
+        void DeleteBookingService(int id);
     }
 }
