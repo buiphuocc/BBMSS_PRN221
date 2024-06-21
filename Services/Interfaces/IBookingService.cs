@@ -14,5 +14,6 @@ namespace Services.Interfaces
         void AddBooking(Booking booking);
         void UpdateBooking(Booking booking);
         void DeleteBooking(int id);
+        List<Booking> GetBookingsByBookingDate(DateTime bookingDate);
     }
 }

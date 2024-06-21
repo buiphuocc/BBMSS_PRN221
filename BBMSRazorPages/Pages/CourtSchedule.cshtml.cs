@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services.Interfaces;
@@ -15,6 +16,12 @@ namespace BBMSRazorPages.Pages
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
+        public string Message { get; set; }
+
+        [BindProperty]
+        public DateTime SelectedDate { get; set; }
+
+        public string BookingDate { get; set; }
 
         [BindProperty]
         public int CourtId { get; set; }
@@ -25,15 +32,21 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public TimeSpan EndTime { get; set; }
 
+        [BindProperty]
+        public DateTime DateForm { get; set; }
+
         public CourtScheduleModel(IBookingService bookingService, ICourtService courtService)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
         }
 
-        public void OnGet()
+        public void OnGet(DateTime bookingDate, string message)
         {
-            Bookings = bookingService.GetAllBookings();
+            Message = message;
+            BookingDate = bookingDate.ToString("yyyy-MM-dd");
+            SelectedDate = bookingDate;
+            Bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
             Courts = courtService.GetAllCourts();
         }
 
@@ -44,6 +57,7 @@ namespace BBMSRazorPages.Pages
 
         public IActionResult OnPost()
         {
+            Bookings = bookingService.GetBookingsByBookingDate(DateForm);
             if (ModelState.IsValid)
             {
                 // Additional validation logic for 30-minute intervals
@@ -55,15 +69,29 @@ namespace BBMSRazorPages.Pages
                     return Page();
                 }
 
+
+                bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime <= b.EndTime) || (b.StartTime <= EndTime && EndTime <= b.EndTime)));
+                Court court = courtService.GetCourtById(CourtId);
+
+                bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
+                if (isBooked)
+                    {
+                        ModelState.AddModelError(string.Empty, "This time range is booked");
+                        return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This time range and court is booked" });
+                    }
+                
+
                 var newBooking = new BusinessObjects.Booking
                 {
                     CourtId = CourtId,
                     StartTime = StartTime,
                     EndTime = EndTime,
+                    BookingDate = DateForm,
+                    PaymentMethod = "test"
                 };
 
                 bookingService.AddBooking(newBooking);
-                return RedirectToPage();
+                return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "" });
             }
 
             // If we got this far, something failed; redisplay form

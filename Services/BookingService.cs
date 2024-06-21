@@ -38,6 +38,11 @@ namespace Services
             return bookingReppository.GetBookingById(id);
         }
 
+        public List<Booking> GetBookingsByBookingDate(DateTime bookingDate)
+        {
+            return bookingReppository.GetBookingsByBookingDate(bookingDate);
+        }
+
         public void UpdateBooking(Booking booking)
         {
             bookingReppository.UpdateBooking(booking);
