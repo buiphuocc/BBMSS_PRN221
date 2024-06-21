@@ -59,7 +59,10 @@
                         var slot2 = new TimeSpan(hour, 30, 0);
                         bool isBooked = Model.IsTimeSlotBooked(booking.Court, slot1, slot2);
                         <td class="@( isBooked ? "booked" : "")" >
-                            
+                            @if (!isBooked)
+                            {
+                                <a asp-page="/Bookings/BookCourt" asp-route-courtId="@booking.Court.CourtId" asp-route-fromTime="@slot1" asp-route-toTime="@slot2"></a>
+                            }
                         </td>
                     }
                 </tr>
