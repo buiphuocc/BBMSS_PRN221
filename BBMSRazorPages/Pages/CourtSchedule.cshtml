@@ -43,11 +43,12 @@
         <input type="date" id="datepicker" name="bookingDate" value="@Model.BookingDate">
     </form>
     @* asp-for="@Model.SelectedDate" *@
+    
     <table>
         <thead>
             <tr>
                 <th>Court</th>
-                @for (int hour = 5; hour <= 23; hour++)
+                @for (int hour = 5; hour <= 22; hour++)
                 {
                     <th>@hour:00 - @hour:30</th>
                     <th>@hour:30 - @(hour + 1):00</th>
@@ -55,11 +56,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var booking in Model.Bookings)
+            @foreach (var booking in Model.Bookings.DistinctBy(b => b.Court.CourtName))
             {
                 <tr>
                     <td>@booking.Court.CourtName</td>
-                    @for (int hour = 5; hour <= 23; hour++)
+                    @for (int hour = 5; hour <= 22; hour++)
                     {
                         var slot1 = new TimeSpan(hour, 0, 0);
                         var slot2 = new TimeSpan(hour, 30, 0);

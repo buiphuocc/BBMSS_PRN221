@@ -58,21 +58,29 @@ namespace BBMSRazorPages.Pages
         public IActionResult OnPost()
         {
             Bookings = bookingService.GetBookingsByBookingDate(DateForm);
+            TimeSpan workingStart = new TimeSpan(5, 0, 0);
+            TimeSpan workingEnd = new TimeSpan(23, 0, 0);
             if (ModelState.IsValid)
             {
+                bool isStartTimeInRange = workingStart <= StartTime && StartTime < workingEnd;
+                bool isEndTimeInRange = workingStart < StartTime && StartTime <= workingEnd;
+                if (!(isStartTimeInRange && isEndTimeInRange) || (StartTime > EndTime))
+                {
+                    ModelState.AddModelError(string.Empty, "Not a valid time range");
+                    return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Not a valid time range" });
+                }
                 // Additional validation logic for 30-minute intervals
                 if ((EndTime - StartTime).TotalMinutes < 30 ||
                     StartTime.Minutes % 30 != 0 ||
                     EndTime.Minutes % 30 != 0)
                 {
                     ModelState.AddModelError(string.Empty, "Time slots must be in 30-minute intervals.");
-                    return Page();
+                    return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Time slots must be in 30-minute intervals." });
                 }
 
 
                 bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime <= b.EndTime) || (b.StartTime <= EndTime && EndTime <= b.EndTime)));
                 Court court = courtService.GetCourtById(CourtId);
-
                 bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
                 if (isBooked)
                     {
@@ -91,7 +99,7 @@ namespace BBMSRazorPages.Pages
                 };
 
                 bookingService.AddBooking(newBooking);
-                return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "" });
+                return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
             }
 
             // If we got this far, something failed; redisplay form
