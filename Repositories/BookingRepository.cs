@@ -47,5 +47,11 @@ namespace Repositories
         {
             BookingDAO.UpdateBooking(booking);
         }
+
+        public IList<Booking> GetBookingsByUserId(int userId)
+        {
+            return BookingDAO.GetBookingsByUserId(userId);
+        }
+
     }
 }

@@ -47,5 +47,9 @@ namespace Services
         {
             bookingReppository.UpdateBooking(booking);
         }
+        public IList<Booking> GetBookingsByUserId(int userId)
+        {
+            return bookingReppository.GetBookingsByUserId(userId);
+        }
     }
 }

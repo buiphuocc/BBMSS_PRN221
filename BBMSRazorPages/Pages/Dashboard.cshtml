@@ -1,0 +1,53 @@
+﻿@page
+@model BBMSRazorPages.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1 style="text-align:center">Dashboard</h1>
+
+<h2>Your Bookings</h2>
+
+@if (Model.Bookings.Count == 0)
+{
+    <p>You have no bookings.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Court ID</th>
+                <th>Booking Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Price</th>
+                <th>Payment Method</th>
+                <th>Services</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in Model.Bookings)
+            {
+                <tr>
+                    <td>@booking.BookingId</td>
+                    <td>@booking.CourtId</td>
+                    <td>@booking.BookingDate.ToShortDateString()</td>
+                    <td>@booking.StartTime</td>
+                    <td>@booking.EndTime</td>
+                    <td>@booking.TotalPrice</td>
+                    <td>@booking.PaymentMethod</td>
+                    <td>
+                        <ul>
+                            @foreach (var service in booking.BookingServices)
+                            {
+                                <li>@service.Service.ServiceName - Quantity: @service.Quantity</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

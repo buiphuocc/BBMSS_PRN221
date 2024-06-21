@@ -1,0 +1,42 @@
+﻿@page
+@model BBMSRazorPages.Pages.MyBookingModel
+@{
+    ViewData["Title"] = "User Bookings";
+}
+
+<h1>User Bookings</h1>
+
+@if (Model.Bookings.Count == 0)
+{
+    <p>No bookings found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Court ID</th>
+                <th>Booking Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Price</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in Model.Bookings)
+            {
+                <tr>
+                    <td>@booking.BookingId</td>
+                    <td>@booking.CourtId</td>
+                    <td>@booking.BookingDate.ToShortDateString()</td>
+                    <td>@booking.StartTime</td>
+                    <td>@booking.EndTime</td>
+                    <td>@booking.TotalPrice</td>
+                    <td>@booking.PaymentMethod</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
