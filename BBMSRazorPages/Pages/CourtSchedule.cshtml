@@ -36,7 +36,11 @@
 </head>
 <body>
     <h1 style="text-align:center">Court Schedule</h1>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal">Book a Court</button>
+    @if(Model.UserId != null)
+    {
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal">Book a Court</button>
+    }
+    
 
     <form id="dateForm" method="get">
         <label for="datepicker">Pick a Date:</label>
@@ -56,18 +60,19 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var booking in Model.Bookings.DistinctBy(b => b.Court.CourtName))
+            @*var booking in Model.Bookings.DistinctBy(b => b.Court.CourtName)*@
+            @foreach (var court in Model.Courts)
             {
                 <tr>
-                    <td>@booking.Court.CourtName</td>
+                    <td>@court.CourtName</td>
                     @for (int hour = 5; hour <= 22; hour++)
                     {
                         var slot1 = new TimeSpan(hour, 0, 0);
                         var slot2 = new TimeSpan(hour, 30, 0);
                         var slot3 = new TimeSpan(hour, 30, 0);
                         var slot4 = new TimeSpan(hour + 1, 0, 0);
-                        bool isBookedSlot1 = Model.IsTimeSlotBooked(booking.Court, slot1, slot2);
-                        bool isBookedSlot2 = Model.IsTimeSlotBooked(booking.Court, slot3, slot4);
+                        bool isBookedSlot1 = Model.IsTimeSlotBooked(court, slot1, slot2);
+                        bool isBookedSlot2 = Model.IsTimeSlotBooked(court, slot3, slot4);
                         <td class="@( isBookedSlot1 ? "booked" : "")"></td>
                         <td class="@( isBookedSlot2 ? "booked" : "")"></td>
                     }
@@ -89,21 +94,29 @@
                     <form method="post">
                         <div class="form-group">
                             <label asp-for="CourtId" class="control-label">Court</label>
-                            <select asp-for="CourtId" class="form-control" asp-items="@(new SelectList(Model.Courts, "CourtId", "CourtName"))">
+                            <select asp-for="CourtId" class="form-control" asp-items="@(new SelectList(Model.Courts, "CourtId", "CourtName"))" required>
                                 <option value="">-- Select Court --</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label asp-for="StartTime" class="control-label">Start Time</label>
-                            <input asp-for="StartTime" class="form-control" type="time" step="1800" />
+                            <input asp-for="StartTime" class="form-control" type="time" step="1800" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="EndTime" class="control-label">End Time</label>
-                            <input asp-for="EndTime" class="form-control" type="time" step="1800" />
+                            <input asp-for="EndTime" class="form-control" type="time" step="1800" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="DateForm" class="control-label">Date</label>
-                            <input asp-for="DateForm" class="form-control" type="date" value="@Model.BookingDate" />
+                            <input asp-for="DateForm" class="form-control" type="date" value="@Model.BookingDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PaymentMethod" class="control-label">Payment Option</label>
+                            <select asp-for="PaymentMethod" class="form-control" required>
+                                <option value="">-- Select Payment Option --</option>
+                                <option value="Online Banking">Online Banking</option>
+                                <option value="Pay at Place">Pay at Place</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Book</button>
                     </form>
@@ -112,15 +125,15 @@
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @* <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script> *@
 </body>
 </html>
 
 @section Scripts {
     <!-- Include jQuery (optional, for easier DOM manipulation) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    @* <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> *@
 
     <script>
         $(document).ready(function () {

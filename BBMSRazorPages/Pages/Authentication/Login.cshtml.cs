@@ -26,11 +26,11 @@ namespace BBMSRazorPages.Pages.Authentication
             User user = userService.GetUserByUserName(LoginUser.Username);
             if (user != null)
             {
-                if (user.Username.Equals(LoginUser.Username))
+                if (user.Password.Equals(LoginUser.Password))
                 {
                     HttpContext.Session.SetInt32("UserId", user.UserId);
                     HttpContext.Session.SetString("UserRole", user.Role);
-                    return RedirectToPage("/Courts/Index");
+                    return RedirectToPage("/Index");
                 }
                 else
                 {

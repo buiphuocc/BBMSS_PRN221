@@ -4,6 +4,7 @@ using Services;
 using Services.Interfaces;
 using DataAccessLayer;
 using BusinessObjects;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
 namespace BBMSSolution
@@ -18,6 +19,7 @@ namespace BBMSSolution
             builder.Services.AddRazorPages();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddDbContext<BadmintonBookingSystemContext>();
 
             // Xóa DAO, link page xuống service layers

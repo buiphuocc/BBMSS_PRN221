@@ -44,6 +44,11 @@
                     </div>
                 </div>
             </form>
+            @if (Request.Query.ContainsKey("handler"))
+            {
+                string handlerValue = Request.Query["handler"];
+                <p>Login failed: @handlerValue</p>
+            }
         </div>
     </div>
 </div>

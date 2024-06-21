@@ -17,15 +17,7 @@ namespace BBMSRazorPages.Pages
 
         public IActionResult OnGet()
         {
-            // Get the user ID from the session
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToPage("/Authentication/Login"); // Redirect to login page if not logged in
-            }
-
-            // Get bookings for the user
-            Bookings = _bookingService.GetBookingsByUserId(userId.Value);
+            Bookings = _bookingService.GetAllBookings();
 
             return Page();
         }
