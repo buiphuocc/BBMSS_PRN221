@@ -2,7 +2,6 @@
 @model BBMSRazorPages.Pages.CourtScheduleModel
 @{
     ViewData["Title"] = "Court Schedule";
-    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -36,7 +35,9 @@
     </style>
 </head>
 <body>
-    <h1>Court Schedule</h1>
+    <h1 style="text-align:center">Court Schedule</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal">Book a Court</button>
+
     <table>
         <thead>
             <tr>
@@ -44,6 +45,7 @@
                 @for (int hour = 5; hour <= 23; hour++)
                 {
                     <th>@hour:00 - @hour:30</th>
+                    <th>@hour:30 - @(hour + 1):00</th>
                 }
             </tr>
         </thead>
@@ -54,17 +56,53 @@
                     <td>@booking.Court.CourtName</td>
                     @for (int hour = 5; hour <= 23; hour++)
                     {
-                        
                         var slot1 = new TimeSpan(hour, 0, 0);
                         var slot2 = new TimeSpan(hour, 30, 0);
-                        bool isBooked = Model.IsTimeSlotBooked(booking.Court, slot1, slot2);
-                        <td class="@( isBooked ? "booked" : "")" >
-                            
-                        </td>
+                        var slot3 = new TimeSpan(hour, 30, 0);
+                        var slot4 = new TimeSpan(hour + 1, 0, 0);
+                        bool isBookedSlot1 = Model.IsTimeSlotBooked(booking.Court, slot1, slot2);
+                        bool isBookedSlot2 = Model.IsTimeSlotBooked(booking.Court, slot3, slot4);
+                        <td class="@( isBookedSlot1 ? "booked" : "")"></td>
+                        <td class="@( isBookedSlot2 ? "booked" : "")"></td>
                     }
                 </tr>
             }
         </tbody>
     </table>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Book a Court</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post">
+                        <div class="form-group">
+                            <label asp-for="CourtId" class="control-label">Court</label>
+                            <select asp-for="CourtId" class="form-control" asp-items="@(new SelectList(Model.Courts, "CourtId", "CourtName"))">
+                                <option value="">-- Select Court --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="StartTime" class="control-label">Start Time</label>
+                            <input asp-for="StartTime" class="form-control" type="time" step="1800" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="EndTime" class="control-label">End Time</label>
+                            <input asp-for="EndTime" class="form-control" type="time" step="1800" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Book</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 </html>
