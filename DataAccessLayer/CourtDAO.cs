@@ -10,37 +10,42 @@ namespace DataAccessLayer
 {
     public class CourtDAO
     {
-        private readonly BadmintonBookingSystemContext _context;
+        //private readonly BadmintonBookingSystemContext _context;
 
-        public CourtDAO(BadmintonBookingSystemContext context)
-        {
-            _context = context;
-        }
+        //public CourtDAO(BadmintonBookingSystemContext context)
+        //{
+        //    _context = context;
+        //}
 
-        public List<Court> GetAllCourts()
+        public static List<Court> GetAllCourts()
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Courts.ToList();
         }
 
-        public Court GetCourtById(int id)
+        public static Court GetCourtById(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Courts.Find(id);
         }
 
-        public void AddCourt(Court court)
+        public static void AddCourt(Court court)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Courts.Add(court);
             _context.SaveChanges();
         }
 
-        public void UpdateCourt(Court court)
+        public static void UpdateCourt(Court court)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Entry(court).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
-        public void DeleteCourt(int id)
+        public static void DeleteCourt(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             var court = _context.Courts.Find(id);
             if (court != null)
             {

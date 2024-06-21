@@ -11,43 +11,49 @@ namespace DataAccessLayer
 {
     public class UserDAO
     {
-        private readonly BadmintonBookingSystemContext _context;
+        //private readonly BadmintonBookingSystemContext _context;
 
-        public UserDAO(BadmintonBookingSystemContext context)
-        {
-            _context = context;
-        }
+        //public UserDAO(BadmintonBookingSystemContext context)
+        //{
+        //    _context = context;
+        //}
 
-        public List<User> GetAllUsers()
+        public static List<User> GetAllUsers()
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Users.ToList();
         }
 
-        public User GetUserByUserName(string userName)
+        public static User GetUserByUserName(string userName)
         {
+            using var _context = new BadmintonBookingSystemContext();
             User user = _context.Users.FirstOrDefault(u=> u.Username.Equals(userName));
             return user;
         }
 
-        public User GetUserById(int id)
+        public static User GetUserById(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Users.Find(id);
         }
 
-        public void AddUser(User user)
+        public static void AddUser(User user)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Users.Add(user);
             _context.SaveChanges();
         }
 
-        public void UpdateUser(User user)
+        public static void UpdateUser(User user)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Entry(user).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
-        public void DeleteUser(int id)
+        public static void DeleteUser(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             var user = _context.Users.Find(id);
             if (user != null)
             {

@@ -10,37 +10,42 @@ namespace DataAccessLayer
 {
     public class ServiceDAO
     {
-        private readonly BadmintonBookingSystemContext _context;
+        //private readonly BadmintonBookingSystemContext _context;
 
-        public ServiceDAO(BadmintonBookingSystemContext context)
-        {
-            _context = context;
-        }
+        //public ServiceDAO(BadmintonBookingSystemContext context)
+        //{
+        //    _context = context;
+        //}
 
-        public List<Service> GetAllServices()
+        public static List<Service> GetAllServices()
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Services.ToList();
         }
 
-        public Service GetServiceById(int id)
+        public static Service GetServiceById(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.Services.Find(id);
         }
 
-        public void AddService(Service service)
+        public static void AddService(Service service)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Services.Add(service);
             _context.SaveChanges();
         }
 
-        public void UpdateService(Service service)
+        public static void UpdateService(Service service)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Entry(service).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
-        public void DeleteService(int id)
+        public static void DeleteService(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             var service = _context.Services.Find(id);
             if (service != null)
             {

@@ -11,28 +11,28 @@ namespace Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly UserDAO userDAO;
+        //private readonly UserDAO userDAO;
 
-        public UserRepository(UserDAO userDAO)
-        {
-            this.userDAO = userDAO;
-        }
+        //public UserRepository(UserDAO userDAO)
+        //{
+        //    this.userDAO = userDAO;
+        //}
         public void AddUser(User user)
-            => userDAO.AddUser(user);
+            => UserDAO.AddUser(user);
 
         public void DeleteUser(int id)
-            => userDAO.DeleteUser(id);
+            => UserDAO.DeleteUser(id);
 
         public List<User> GetAllUsers()
-            => userDAO.GetAllUsers();
+            => UserDAO.GetAllUsers();
 
         public User GetUserById(int id)
-            => userDAO.GetUserById(id);
+            => UserDAO.GetUserById(id);
 
         public User? GetUserByUserName(string userName)
-            => userDAO.GetUserByUserName(userName);
+            => UserDAO.GetUserByUserName(userName);
 
         public void UpdateUser(User user)
-            => userDAO.UpdateUser(user);
+            => UserDAO.UpdateUser(user);
     }
 }

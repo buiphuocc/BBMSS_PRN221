@@ -21,10 +21,10 @@ namespace BBMSSolution
             builder.Services.AddDbContext<BadmintonBookingSystemContext>();
 
             // Xóa DAO, link page xuống service layers
-            builder.Services.AddScoped<UserDAO>();
-            builder.Services.AddScoped<BookingDAO>();
-            builder.Services.AddScoped<BookingServiceDAO>();
-            builder.Services.AddScoped<CourtDAO>();
+            //builder.Services.AddScoped<UserDAO>();
+            //builder.Services.AddScoped<BookingDAO>();
+            //builder.Services.AddScoped<BookingServiceDAO>();
+            //builder.Services.AddScoped<CourtDAO>();
 
 
             //BookingService

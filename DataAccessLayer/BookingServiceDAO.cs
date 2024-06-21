@@ -11,43 +11,48 @@ namespace DataAccessLayer
     public class BookingServiceDAO
     {
 
-        private readonly BadmintonBookingSystemContext _context;
+        //private readonly BadmintonBookingSystemContext _context;
 
-        public BookingServiceDAO(BadmintonBookingSystemContext context)
-        {
-            _context = context;
-        }
+        //public BookingServiceDAO(BadmintonBookingSystemContext context)
+        //{
+        //    _context = context;
+        //}
 
-        public List<BookingService> GetAllBookingServices()
+        public static List<BookingService> GetAllBookingServices()
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.BookingServices
                 .Include(bs => bs.Booking)
                 .Include(bs => bs.Service)
                 .ToList();
         }
 
-        public BookingService GetBookingServiceById(int id)
+        public static BookingService GetBookingServiceById(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             return _context.BookingServices
                 .Include(bs => bs.Booking)
                 .Include(bs => bs.Service)
                 .FirstOrDefault(bs => bs.BookingServiceId == id);
         }
 
-        public void AddBookingService(BookingService bookingService)
+        public static void AddBookingService(BookingService bookingService)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.BookingServices.Add(bookingService);
             _context.SaveChanges();
         }
 
-        public void UpdateBookingService(BookingService bookingService)
+        public static void UpdateBookingService(BookingService bookingService)
         {
+            using var _context = new BadmintonBookingSystemContext();
             _context.Entry(bookingService).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
-        public void DeleteBookingService(int id)
+        public static void DeleteBookingService(int id)
         {
+            using var _context = new BadmintonBookingSystemContext();
             var bookingService = _context.BookingServices.Find(id);
             if (bookingService != null)
             {

@@ -11,36 +11,36 @@ namespace Repositories
 {
     public class CourtRepository : ICourtRepository
     {
-        private readonly CourtDAO courtDAO;
+        //private readonly CourtDAO courtDAO;
 
-        public CourtRepository(CourtDAO courtDAO)
-        {
-            this.courtDAO = courtDAO;
-        }
+        //public CourtRepository(CourtDAO courtDAO)
+        //{
+        //    this.courtDAO = courtDAO;
+        //}
 
         public void AddCourt(Court court)
         {
-            courtDAO.AddCourt(court);
+            CourtDAO.AddCourt(court);
         }
 
         public void DeleteCourt(int id)
         {
-            courtDAO.DeleteCourt(id);
+            CourtDAO.DeleteCourt(id);
         }
 
         public List<Court> GetAllCourts()
         {
-            return courtDAO.GetAllCourts();
+            return CourtDAO.GetAllCourts();
         }
 
         public Court GetCourtById(int id)
         {
-            return courtDAO.GetCourtById(id);
+            return CourtDAO.GetCourtById(id);
         }
 
         public void UpdateCourt(Court court)
         {
-            courtDAO.UpdateCourt(court);
+            CourtDAO.UpdateCourt(court);
         }
     }
 }

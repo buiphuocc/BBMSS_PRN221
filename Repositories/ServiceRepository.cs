@@ -11,35 +11,25 @@ namespace Repositories
 {
     public class ServiceRepository : IServiceRepository
     {
-        private readonly ServiceDAO serviceDAO;
+        //private readonly ServiceDAO serviceDAO;
 
-        public ServiceRepository(ServiceDAO serviceDAO)
-        {
-            this.serviceDAO = serviceDAO;
-        }
+        //public ServiceRepository(ServiceDAO serviceDAO)
+        //{
+        //    this.serviceDAO = serviceDAO;
+        //}
         public void AddService(Service service)
-        {
-            serviceDAO.AddService(service);
-        }
+            => ServiceDAO.AddService(service);
 
         public void DeleteService(int id)
-        {
-            serviceDAO.DeleteService(id);
-        }
+            => ServiceDAO.DeleteService(id);
 
         public List<Service> GetAllServices()
-        {
-            return serviceDAO.GetAllServices();
-        }
+            =>ServiceDAO.GetAllServices();
 
         public Service GetServiceById(int id)
-        {
-            return (serviceDAO.GetServiceById(id));
-        }
+            =>ServiceDAO.GetServiceById(id);
 
         public void UpdateService(Service service)
-        {
-            serviceDAO.UpdateService(service);
-        }
+            => ServiceDAO.UpdateService(service);
     }
 }
