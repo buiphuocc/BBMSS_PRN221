@@ -38,6 +38,11 @@ namespace Repositories
             return BookingServiceDAO.GetBookingServiceById(id);
         }
 
+        public List<BookingService> GetBookingServicesByBookingId(int? id)
+        {
+            return BookingServiceDAO.GetBookingServicesByBookingId(id);
+        }
+
         public void UpdateBookingService(BookingService bookingService)
         {
             BookingServiceDAO.UpdateBookingService(bookingService);

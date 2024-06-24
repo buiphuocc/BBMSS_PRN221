@@ -2,6 +2,7 @@
 using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,16 @@ namespace BBMSRazorPages.Pages
     {
         private readonly IBookingService bookingService;
         private readonly ICourtService courtService;
+        private readonly IServiceService serviceService;
+        private readonly IBookingServiceService bookingServiceService;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
         public string Message { get; set; }
         public int? UserId { get; set; }
+        public List<Service> Services { get; set; }
+
+
 
         [BindProperty]
         public DateTime SelectedDate { get; set; }
@@ -39,10 +45,19 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService)
+        [BindProperty]
+        public List<int> SelectedServices { get; set; }
+
+
+        [BindProperty]
+        public Dictionary<int, int> ServiceQuantities { get; set; }
+
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
+            this.serviceService = serviceService;
+            this.bookingServiceService = bookingServiceService;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -53,6 +68,7 @@ namespace BBMSRazorPages.Pages
             Bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
             Courts = courtService.GetAllCourts();
             UserId = HttpContext.Session.GetInt32("UserId");
+            Services = serviceService.GetAllServices();
         }
 
         public bool IsTimeSlotBooked(Court court, TimeSpan slot1, TimeSpan slot2)
@@ -61,19 +77,16 @@ namespace BBMSRazorPages.Pages
             return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
         }
 
-        public Court GetCourtInBooking(int courtId)
-        {
-            return courtService.GetCourtById(courtId);
-        }
-
         public IActionResult OnPost()
         {
-            Bookings = bookingService.GetBookingsByBookingDate(DateForm);
-            TimeSpan workingStart = new TimeSpan(5, 0, 0);
-            TimeSpan workingEnd = new TimeSpan(23, 0, 0);
             UserId = HttpContext.Session.GetInt32("UserId");
             if (UserId != null)
             {
+                Bookings = bookingService.GetBookingsByBookingDate(DateForm);
+                TimeSpan workingStart = new TimeSpan(5, 0, 0);
+                TimeSpan workingEnd = new TimeSpan(23, 0, 0);
+                UserId = HttpContext.Session.GetInt32("UserId");
+
                 if (ModelState.IsValid)
                 {
                     bool isStartTimeInRange = workingStart <= StartTime && StartTime < workingEnd;
@@ -93,7 +106,7 @@ namespace BBMSRazorPages.Pages
                     }
 
 
-                    bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime <= b.EndTime) || (b.StartTime <= EndTime && EndTime <= b.EndTime)));
+                    bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime <= b.EndTime) || (b.StartTime <= EndTime && EndTime <= b.EndTime)) && b.CourtId == CourtId);
                     Court court = courtService.GetCourtById(CourtId);
                     bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
                     if (isBooked)
@@ -116,6 +129,25 @@ namespace BBMSRazorPages.Pages
                     };
 
                     bookingService.AddBooking(newBooking);
+
+                    if (!SelectedServices.IsNullOrEmpty())
+                    {
+                        foreach (var serviceId in SelectedServices)
+                        {
+                            if (ServiceQuantities.TryGetValue(serviceId, out int quantity))
+                            {
+                                var bookingService = new BusinessObjects.BookingService
+                                {
+                                    BookingId = newBooking.BookingId,
+                                    ServiceId = serviceId,
+                                    Quantity = quantity
+                                };
+                                bookingServiceService.AddBookingService(bookingService);
+                            }
+
+                        }
+                    }
+                    
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
                 }
                 // If we got this far, something failed; redisplay form

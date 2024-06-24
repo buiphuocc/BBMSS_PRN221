@@ -42,8 +42,8 @@ namespace BBMSSolution
             builder.Services.AddScoped<ICourtRepository, CourtRepository>();
             builder.Services.AddScoped<ICourtService, CourtService>();
             //Service
-            /*builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
-            builder.Services.AddScoped<IServiceService, ServiceService>();*/
+            builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
 
             var app = builder.Build();
 

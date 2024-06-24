@@ -38,6 +38,11 @@ namespace Services
             return bookingServiceRepository.GetBookingServiceById(id);
         }
 
+        public List<BusinessObjects.BookingService> GetBookingServicesByBookingId(int? id)
+        {
+            return bookingServiceRepository.GetBookingServicesByBookingId(id);
+        }
+
         public void UpdateBookingService(BusinessObjects.BookingService bookingService)
         {
             bookingServiceRepository.UpdateBookingService(bookingService);

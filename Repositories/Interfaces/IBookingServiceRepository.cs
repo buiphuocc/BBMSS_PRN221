@@ -11,6 +11,7 @@ namespace Repositories.Interfaces
     {
         List<BookingService> GetAllBookingServices();
         BookingService GetBookingServiceById(int id);
+        List<BookingService> GetBookingServicesByBookingId(int? id);
         void AddBookingService(BookingService bookingService);
         void UpdateBookingService(BookingService bookingService);
         void DeleteBookingService(int id);
