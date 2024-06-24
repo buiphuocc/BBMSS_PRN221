@@ -130,8 +130,10 @@ namespace BBMSRazorPages.Pages
 
                     bookingService.AddBooking(newBooking);
 
+                    
                     if (!SelectedServices.IsNullOrEmpty())
                     {
+                        decimal totalServicePrice = 0;
                         foreach (var serviceId in SelectedServices)
                         {
                             if (ServiceQuantities.TryGetValue(serviceId, out int quantity))
@@ -142,10 +144,13 @@ namespace BBMSRazorPages.Pages
                                     ServiceId = serviceId,
                                     Quantity = quantity
                                 };
+                                totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
                                 bookingServiceService.AddBookingService(bookingService);
                             }
 
                         }
+                        newBooking.TotalPrice += totalServicePrice;
+                        bookingService.UpdateBooking(newBooking);
                     }
                     
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
