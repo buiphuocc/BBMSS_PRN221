@@ -90,7 +90,7 @@ namespace BBMSRazorPages.Pages
                 if (ModelState.IsValid)
                 {
                     bool isStartTimeInRange = workingStart <= StartTime && StartTime < workingEnd;
-                    bool isEndTimeInRange = workingStart < StartTime && StartTime <= workingEnd;
+                    bool isEndTimeInRange = workingStart < EndTime && EndTime <= workingEnd;
                     if (!(isStartTimeInRange && !isEndTimeInRange) || (StartTime > EndTime))
                     {
                         ModelState.AddModelError(string.Empty, "Not a valid time range");
