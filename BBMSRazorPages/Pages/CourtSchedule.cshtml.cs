@@ -91,7 +91,7 @@ namespace BBMSRazorPages.Pages
                 {
                     bool isStartTimeInRange = workingStart <= StartTime && StartTime < workingEnd;
                     bool isEndTimeInRange = workingStart < EndTime && EndTime <= workingEnd;
-                    if (!(isStartTimeInRange && !isEndTimeInRange) || (StartTime > EndTime))
+                    if (!(isStartTimeInRange && isEndTimeInRange) || (StartTime > EndTime))
                     {
                         ModelState.AddModelError(string.Empty, "Not a valid time range");
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Not a valid time range" });
