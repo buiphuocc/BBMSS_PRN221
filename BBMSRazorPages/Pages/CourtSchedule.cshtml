@@ -32,6 +32,10 @@
         .booked {
             background-color: #d9534f;
         }
+
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -100,11 +104,11 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="StartTime" class="control-label">Start Time</label>
-                            <input asp-for="StartTime" class="form-control" type="time" step="1800" required />
+                            <input asp-for="StartTime" id="StartTime" class="form-control" type="time" value="05:00" step="1800" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="EndTime" class="control-label">End Time</label>
-                            <input asp-for="EndTime" class="form-control" type="time" step="1800" required />
+                            <input asp-for="EndTime" id="EndTime" class="form-control" type="time" value="06:00" step="1800" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="DateForm" class="control-label">Date</label>
@@ -154,6 +158,14 @@
                 // Submit the form when a date is picked
                 $('#dateForm').submit();
             });
+        });
+
+        document.getElementById('StartTime').addEventListener('focus', function (event) {
+            event.target.blur();
+        });
+
+        document.getElementById('EndTime').addEventListener('focus', function (event) {
+            event.target.blur();
         });
 
     </script>
