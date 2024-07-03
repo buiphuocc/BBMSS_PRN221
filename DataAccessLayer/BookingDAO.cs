@@ -74,6 +74,7 @@ namespace DataAccessLayer
             using var _context = new BadmintonBookingSystemContext();
 
             return _context.Bookings
+                .Include(b => b.Court)
                 .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.Service)
                 .Where(b => b.UserId == userId)

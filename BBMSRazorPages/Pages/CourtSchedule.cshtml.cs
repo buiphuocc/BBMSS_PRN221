@@ -83,10 +83,13 @@ namespace BBMSRazorPages.Pages
             if (UserId != null)
             {
                 Bookings = bookingService.GetBookingsByBookingDate(DateForm);
+                if(DateForm< DateTime.Now.Date)
+                {
+                    return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
+                }
                 TimeSpan workingStart = new TimeSpan(5, 0, 0);
                 TimeSpan workingEnd = new TimeSpan(23, 0, 0);
                 UserId = HttpContext.Session.GetInt32("UserId");
-
                 if (ModelState.IsValid)
                 {
                     bool isStartTimeInRange = workingStart <= StartTime && StartTime < workingEnd;

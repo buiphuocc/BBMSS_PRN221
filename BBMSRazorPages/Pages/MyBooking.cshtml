@@ -15,8 +15,8 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Booking ID</th>
-                <th>Court ID</th>
+                @* <th>Booking ID</th> *@
+                <th>Court Name</th>
                 <th>Booking Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
@@ -28,8 +28,8 @@ else
             @foreach (var booking in Model.Bookings)
             {
                 <tr>
-                    <td>@booking.BookingId</td>
-                    <td>@booking.CourtId</td>
+                    @* <td>@booking.BookingId</td> *@
+                    <td>@booking.Court.CourtName</td>
                     <td>@booking.BookingDate.ToShortDateString()</td>
                     <td>@booking.StartTime</td>
                     <td>@booking.EndTime</td>
