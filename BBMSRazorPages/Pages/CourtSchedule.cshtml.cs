@@ -45,13 +45,6 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        [BindProperty]
-        public List<int> SelectedServices { get; set; }
-
-
-        [BindProperty]
-        public Dictionary<int, int> ServiceQuantities { get; set; }
-
         public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService)
         {
             this.bookingService = bookingService;
@@ -83,10 +76,7 @@ namespace BBMSRazorPages.Pages
             if (UserId != null)
             {
                 Bookings = bookingService.GetBookingsByBookingDate(DateForm);
-                if(DateForm< DateTime.Now.Date)
-                {
-                    return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
-                }
+                
                 TimeSpan workingStart = new TimeSpan(5, 0, 0);
                 TimeSpan workingEnd = new TimeSpan(23, 0, 0);
                 UserId = HttpContext.Session.GetInt32("UserId");
@@ -99,6 +89,12 @@ namespace BBMSRazorPages.Pages
                         ModelState.AddModelError(string.Empty, "Not a valid time range");
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Not a valid time range" });
                     }
+
+                    TimeSpan currentTime = DateTime.Now.TimeOfDay;
+                    if (DateForm < DateTime.Now.Date || StartTime < currentTime || EndTime < currentTime)
+                    {
+                        return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
+                    }
                     // Additional validation logic for 30-minute intervals
                     if ((EndTime - StartTime).TotalMinutes < 30 ||
                         StartTime.Minutes % 30 != 0 ||
@@ -109,7 +105,7 @@ namespace BBMSRazorPages.Pages
                     }
 
 
-                    bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime <= b.EndTime) || (b.StartTime <= EndTime && EndTime <= b.EndTime)) && b.CourtId == CourtId);
+                    bool inTimeRange = Bookings.Any(b => ((b.StartTime < StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime < b.EndTime)) && b.CourtId == CourtId);
                     Court court = courtService.GetCourtById(CourtId);
                     bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
                     if (isBooked)
@@ -133,13 +129,52 @@ namespace BBMSRazorPages.Pages
 
                     bookingService.AddBooking(newBooking);
 
-                    
-                    if (!SelectedServices.IsNullOrEmpty())
+                    // Handle selected services
+                    var selectedServicesString = Request.Form["SelectedServices"];
+                    var serviceQuantitiesString = Request.Form["ServiceQuantities"];
+
+                    // Convert the selected services to a list of integers
+                    var selectedServices = selectedServicesString
+                            .ToString()
+                            .Split(',')
+                            .Select(int.Parse)
+                            .ToList();
+
+                    // Convert the service quantities to a dictionary<int, int>
+                    var serviceQuantities = new Dictionary<int, int>();
+
+                    foreach (var key in Request.Form.Keys)
+                    {
+                        if (key.StartsWith("ServiceQuantities["))
+                        {
+                            var serviceIdStr = key.Substring(18, key.Length - 19);
+                            if (int.TryParse(serviceIdStr, out int serviceId))
+                            {
+                                var quantityStr = Request.Form[key];
+                                if (int.TryParse(quantityStr, out int quantity))
+                                {
+                                    serviceQuantities[serviceId] = quantity;
+                                }
+                            }
+                        }
+                    }
+
+                    // Log the service quantities for debugging
+                    foreach (var entry in serviceQuantities)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
+                    }
+
+
+
+
+                    if (!selectedServices.IsNullOrEmpty())
                     {
                         decimal totalServicePrice = 0;
-                        foreach (var serviceId in SelectedServices)
+
+                        foreach (var serviceId in selectedServices)
                         {
-                            if (ServiceQuantities.TryGetValue(serviceId, out int quantity))
+                            if (serviceQuantities.TryGetValue(serviceId, out int quantity))
                             {
                                 var bookingService = new BusinessObjects.BookingService
                                 {
@@ -155,7 +190,7 @@ namespace BBMSRazorPages.Pages
                         newBooking.TotalPrice += totalServicePrice;
                         bookingService.UpdateBooking(newBooking);
                     }
-                    
+
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
                 }
                 // If we got this far, something failed; redisplay form
