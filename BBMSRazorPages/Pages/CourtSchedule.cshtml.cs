@@ -133,62 +133,66 @@ namespace BBMSRazorPages.Pages
                     var selectedServicesString = Request.Form["SelectedServices"];
                     var serviceQuantitiesString = Request.Form["ServiceQuantities"];
 
-                    // Convert the selected services to a list of integers
-                    var selectedServices = selectedServicesString
-                            .ToString()
-                            .Split(',')
-                            .Select(int.Parse)
-                            .ToList();
-
-                    // Convert the service quantities to a dictionary<int, int>
-                    var serviceQuantities = new Dictionary<int, int>();
-
-                    foreach (var key in Request.Form.Keys)
+                    if(!selectedServicesString.IsNullOrEmpty() && !serviceQuantitiesString.IsNullOrEmpty())
                     {
-                        if (key.StartsWith("ServiceQuantities["))
+                        // Convert the selected services to a list of integers
+                        var selectedServices = selectedServicesString
+                                .ToString()
+                                .Split(',')
+                                .Select(int.Parse)
+                                .ToList();
+
+                        // Convert the service quantities to a dictionary<int, int>
+                        var serviceQuantities = new Dictionary<int, int>();
+
+                        foreach (var key in Request.Form.Keys)
                         {
-                            var serviceIdStr = key.Substring(18, key.Length - 19);
-                            if (int.TryParse(serviceIdStr, out int serviceId))
+                            if (key.StartsWith("ServiceQuantities["))
                             {
-                                var quantityStr = Request.Form[key];
-                                if (int.TryParse(quantityStr, out int quantity))
+                                var serviceIdStr = key.Substring(18, key.Length - 19);
+                                if (int.TryParse(serviceIdStr, out int serviceId))
                                 {
-                                    serviceQuantities[serviceId] = quantity;
+                                    var quantityStr = Request.Form[key];
+                                    if (int.TryParse(quantityStr, out int quantity))
+                                    {
+                                        serviceQuantities[serviceId] = quantity;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // Log the service quantities for debugging
-                    foreach (var entry in serviceQuantities)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
-                    }
-
-
-
-
-                    if (!selectedServices.IsNullOrEmpty())
-                    {
-                        decimal totalServicePrice = 0;
-
-                        foreach (var serviceId in selectedServices)
+                        // Log the service quantities for debugging
+                        foreach (var entry in serviceQuantities)
                         {
-                            if (serviceQuantities.TryGetValue(serviceId, out int quantity))
-                            {
-                                var bookingService = new BusinessObjects.BookingService
-                                {
-                                    BookingId = newBooking.BookingId,
-                                    ServiceId = serviceId,
-                                    Quantity = quantity
-                                };
-                                totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
-                                bookingServiceService.AddBookingService(bookingService);
-                            }
-
+                            System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
                         }
-                        newBooking.TotalPrice += totalServicePrice;
-                        bookingService.UpdateBooking(newBooking);
+
+                        if (!selectedServices.IsNullOrEmpty())
+                        {
+                            decimal totalServicePrice = 0;
+
+                            foreach (var serviceId in selectedServices)
+                            {
+                                if (serviceQuantities.TryGetValue(serviceId, out int quantity))
+                                {
+                                    var bookingService = new BusinessObjects.BookingService
+                                    {
+                                        BookingId = newBooking.BookingId,
+                                        ServiceId = serviceId,
+                                        Quantity = quantity
+                                    };
+                                    totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
+                                    bookingServiceService.AddBookingService(bookingService);
+                                }
+
+                            }
+                            newBooking.TotalPrice += totalServicePrice;
+                            bookingService.UpdateBooking(newBooking);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Selected service or Quantity is null or empty");
                     }
 
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
