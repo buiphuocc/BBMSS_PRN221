@@ -6,16 +6,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Services
 {
+    [SessionRoleAuthorize("Admin")]
     public class CreateModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IServiceService _serviceService;
 
-        public CreateModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public CreateModel(IServiceService serviceService)
         {
-            _context = context;
+            _serviceService = serviceService;
         }
 
         public IActionResult OnGet()
@@ -25,18 +28,17 @@ namespace BBMSRazorPages.Pages.Services
 
         [BindProperty]
         public Service Service { get; set; } = default!;
-        
+
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
-          if (!ModelState.IsValid || _context.Services == null || Service == null)
+            if (!ModelState.IsValid || _serviceService == null || Service == null)
             {
                 return Page();
             }
 
-            _context.Services.Add(Service);
-            await _context.SaveChangesAsync();
+            _serviceService.AddService(Service);
 
             return RedirectToPage("./Index");
         }

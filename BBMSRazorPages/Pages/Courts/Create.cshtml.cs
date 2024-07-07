@@ -6,16 +6,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Courts
 {
+    [SessionRoleAuthorize("Admin")]
     public class CreateModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly ICourtService _courtService;
 
-        public CreateModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public CreateModel(ICourtService courtService)
         {
-            _context = context;
+            _courtService = courtService;
         }
 
         public IActionResult OnGet()
@@ -25,18 +28,17 @@ namespace BBMSRazorPages.Pages.Courts
 
         [BindProperty]
         public Court Court { get; set; } = default!;
-        
+
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
-          if (!ModelState.IsValid || _context.Courts == null || Court == null)
+            if (!ModelState.IsValid || _courtService == null || Court == null)
             {
                 return Page();
             }
 
-            _context.Courts.Add(Court);
-            await _context.SaveChangesAsync();
+            _courtService.AddCourt(Court);
 
             return RedirectToPage("./Index");
         }

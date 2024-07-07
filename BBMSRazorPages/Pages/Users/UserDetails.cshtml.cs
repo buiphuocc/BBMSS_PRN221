@@ -8,13 +8,16 @@ namespace BBMSRazorPages.Pages.Users
     public class UserDetailsModel : PageModel
     {
 		private readonly IUserService userService;
+
+        public UserDetailsModel(IUserService userService)
+        {
+            this.userService = userService;
+        }
+
         [BindProperty]
         public User UserDetail { get; set; }
         public string Message { get; set; }
-        public UserDetailsModel(IUserService userService)
-        {
-			this.userService = userService;
-		}
+
         public void OnGet(int id, string message)
         {
             UserDetail = userService.GetUserById(id);

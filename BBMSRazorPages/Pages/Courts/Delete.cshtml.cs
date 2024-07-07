@@ -6,55 +6,52 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Courts
 {
+    [SessionRoleAuthorize("Admin")]
     public class DeleteModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly ICourtService _courtService;
 
-        public DeleteModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public DeleteModel(ICourtService courtService)
         {
-            _context = context;
+            _courtService = courtService;
         }
 
         [BindProperty]
       public Court Court { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Courts == null)
+            if (id == null || _courtService == null)
             {
                 return NotFound();
             }
 
-            var court = await _context.Courts.FirstOrDefaultAsync(m => m.CourtId == id);
+            var court = _courtService.GetCourtById((int)id);
 
             if (court == null)
             {
                 return NotFound();
             }
-            else 
+            else
             {
                 Court = court;
             }
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public IActionResult OnPost(int? id)
         {
-            if (id == null || _context.Courts == null)
+            if (id == null || _courtService == null)
             {
                 return NotFound();
             }
-            var court = await _context.Courts.FindAsync(id);
 
-            if (court != null)
-            {
-                Court = court;
-                _context.Courts.Remove(Court);
-                await _context.SaveChangesAsync();
-            }
+            _courtService.DeleteCourt((int)id);
 
             return RedirectToPage("./Index");
         }

@@ -1,35 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Courts
 {
+    [SessionRoleAuthorize("Admin")]
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly ICourtService _courtService;
 
-        public EditModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public EditModel(ICourtService courtService)
         {
-            _context = context;
+            _courtService = courtService;
         }
 
         [BindProperty]
         public Court Court { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Courts == null)
+            if (id == null || _courtService == null)
             {
                 return NotFound();
             }
 
-            var court =  await _context.Courts.FirstOrDefaultAsync(m => m.CourtId == id);
+            var court = _courtService.GetCourtById((int)id);
+
             if (court == null)
             {
                 return NotFound();
@@ -40,37 +38,16 @@ namespace BBMSRazorPages.Pages.Courts
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(Court).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourtExists(Court.CourtId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _courtService.UpdateCourt(Court);
 
             return RedirectToPage("./Index");
-        }
-
-        private bool CourtExists(int id)
-        {
-          return (_context.Courts?.Any(e => e.CourtId == id)).GetValueOrDefault();
         }
     }
 }

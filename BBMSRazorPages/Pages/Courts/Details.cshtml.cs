@@ -1,38 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Courts
 {
+    [SessionRoleAuthorize("Admin")]
     public class DetailsModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly ICourtService _courtService;
 
-        public DetailsModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public DetailsModel(ICourtService courtService)
         {
-            _context = context;
+            _courtService = courtService;
         }
 
-      public Court Court { get; set; } = default!; 
+        public Court Court { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Courts == null)
+            if (id == null || _courtService == null)
             {
                 return NotFound();
             }
 
-            var court = await _context.Courts.FirstOrDefaultAsync(m => m.CourtId == id);
+            var court = _courtService.GetCourtById((int)id);
             if (court == null)
             {
                 return NotFound();
             }
-            else 
+            else
             {
                 Court = court;
             }

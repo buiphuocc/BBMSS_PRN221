@@ -11,7 +11,6 @@ namespace BBMSRazorPages.Pages
         private readonly IBookingServiceService bookingServiceService;
         private readonly ICourtService _courtService;
 
-
         public DashboardModel(IBookingService bookingService, IBookingServiceService bookingServiceService,ICourtService courtService)
         {
             _bookingService = bookingService;
@@ -22,7 +21,6 @@ namespace BBMSRazorPages.Pages
         public IList<BusinessObjects.Booking> Bookings { get; set; } = new List<BusinessObjects.Booking>();
         public IList<BusinessObjects.BookingService> BookingServices { get; set; } = new List<BusinessObjects.BookingService>();
         public IList<BusinessObjects.Court> Courts { get; set; } = new List<BusinessObjects.Court>();
-
 
         public IActionResult OnGet()
         {

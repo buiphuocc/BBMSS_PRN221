@@ -5,6 +5,7 @@ using Services.Interfaces;
 using DataAccessLayer;
 using BusinessObjects;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using BBMSRazorPages.Pages.Authentication;
 
 
 namespace BBMSSolution
@@ -27,7 +28,6 @@ namespace BBMSSolution
             //builder.Services.AddScoped<BookingDAO>();
             //builder.Services.AddScoped<BookingServiceDAO>();
             //builder.Services.AddScoped<CourtDAO>();
-
 
             //BookingService
             builder.Services.AddScoped<IBookingServiceService, BookingServiceService>();

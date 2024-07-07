@@ -2,31 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BBMSRazorPages.Pages.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using BusinessObjects;
+using Services.Interfaces;
 
 namespace BBMSRazorPages.Pages.Booking
 {
+    [SessionRoleAuthorize("Admin")]
     public class IndexModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IBookingService _service;
 
-        public IndexModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public IndexModel(IBookingService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        public IList<BusinessObjects.Booking> Booking { get;set; } = default!;
+        public IList<BusinessObjects.Booking> Bookings { get;set; } = default!;
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
-            if (_context.Bookings != null)
+            if (_service != null)
             {
-                Booking = await _context.Bookings
-                .Include(b => b.Court)
-                .Include(b => b.User).ToListAsync();
+                Bookings = _service.GetAllBookings();
             }
         }
     }

@@ -9,7 +9,7 @@ namespace Services.Interfaces
 {
     public interface IBookingService
     {
-        List<Booking> GetAllBookings();
+        IList<Booking> GetAllBookings();
         Booking GetBookingById(int id);
         void AddBooking(Booking booking);
         void UpdateBooking(Booking booking);
