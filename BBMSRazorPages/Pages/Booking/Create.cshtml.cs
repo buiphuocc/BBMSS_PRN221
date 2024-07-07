@@ -6,39 +6,42 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BusinessObjects;
+using Services.Interfaces;
 
 namespace BBMSRazorPages.Pages.Booking
 {
     public class CreateModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IBookingService _bookingService;
+        private readonly ICourtService _courtService;
+        private readonly IUserService _userService;
 
-        public CreateModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public CreateModel(IBookingService bookingService, ICourtService courtService, IUserService userService)
         {
-            _context = context;
+            _bookingService = bookingService;
+            _courtService = courtService;
+            _userService = userService;
         }
 
         public IActionResult OnGet()
         {
-        ViewData["CourtId"] = new SelectList(_context.Courts, "CourtId", "CourtName");
-        ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email");
+            ViewData["CourtId"] = new SelectList(_courtService.GetAllCourts(), "CourtId", "CourtName");
+            ViewData["UserId"] = new SelectList(_userService.GetAllUsers(), "UserId", "Email");
             return Page();
         }
 
         [BindProperty]
         public BusinessObjects.Booking Booking { get; set; } = default!;
-        
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
-          if (!ModelState.IsValid || _context.Bookings == null || Booking == null)
+            if (!ModelState.IsValid || _bookingService == null || Booking == null)
             {
                 return Page();
             }
 
-            _context.Bookings.Add(Booking);
-            await _context.SaveChangesAsync();
+            _bookingService.AddBooking(Booking);
 
             return RedirectToPage("./Index");
         }

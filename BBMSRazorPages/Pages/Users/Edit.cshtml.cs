@@ -7,29 +7,32 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Users
 {
+    [SessionRoleAuthorize("Admin")]
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IUserService _userService;
 
-        public EditModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public EditModel(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [BindProperty]
         public User User { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Users == null)
+            if (id == null || _userService == null)
             {
                 return NotFound();
             }
 
-            var user =  await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
+            var user = _userService.GetUserById((int)id);
             if (user == null)
             {
                 return NotFound();
@@ -40,37 +43,16 @@ namespace BBMSRazorPages.Pages.Users
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(User).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(User.UserId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _userService.UpdateUser(User);
 
             return RedirectToPage("./Index");
-        }
-
-        private bool UserExists(int id)
-        {
-          return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }

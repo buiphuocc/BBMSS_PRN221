@@ -7,27 +7,25 @@ namespace BBMSRazorPages.Pages
 {
     public class DashboardModel : PageModel
     {
-        private readonly IBookingService bookingService;
+        private readonly IBookingService _bookingService;
         private readonly IBookingServiceService bookingServiceService;
-        private readonly ICourtService courtService;
+        private readonly ICourtService _courtService;
+
+        public DashboardModel(IBookingService bookingService, IBookingServiceService bookingServiceService,ICourtService courtService)
+        {
+            _bookingService = bookingService;
+            this.bookingServiceService = bookingServiceService;
+            _courtService = courtService;
+        }
 
         public IList<BusinessObjects.Booking> Bookings { get; set; } = new List<BusinessObjects.Booking>();
         public IList<BusinessObjects.BookingService> BookingServices { get; set; } = new List<BusinessObjects.BookingService>();
         public IList<BusinessObjects.Court> Courts { get; set; } = new List<BusinessObjects.Court>();
 
-
-        public DashboardModel(IBookingService bookingService, IBookingServiceService bookingServiceService,ICourtService courtService)
-        {
-            this.bookingService = bookingService;
-            this.bookingServiceService = bookingServiceService;
-            this.courtService = courtService;
-        }
-
-
         public IActionResult OnGet()
         {
-            Bookings = bookingService.GetAllBookings();
-            Courts = courtService.GetAllCourts();
+            Bookings = _bookingService.GetAllBookings();
+            Courts = _courtService.GetAllCourts();
             BookingServices = bookingServiceService.GetAllBookingServices();
             return Page();
         }

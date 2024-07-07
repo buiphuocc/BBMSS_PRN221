@@ -7,72 +7,58 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Booking
 {
+    [SessionRoleAuthorize("Admin")]
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IBookingService _bookingService;
+        private readonly ICourtService _courtService;
+        private readonly IUserService _userService;
 
-        public EditModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public EditModel(IBookingService bookingService, ICourtService courtService, IUserService userService)
         {
-            _context = context;
+            _bookingService = bookingService;
+            _courtService = courtService;
+            _userService = userService;
         }
 
         [BindProperty]
         public BusinessObjects.Booking Booking { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Bookings == null)
+            if (id == null || _bookingService == null)
             {
                 return NotFound();
             }
 
-            var booking =  await _context.Bookings.FirstOrDefaultAsync(m => m.BookingId == id);
+            var booking = _bookingService.GetBookingById((int)id);
             if (booking == null)
             {
                 return NotFound();
             }
             Booking = booking;
-           ViewData["CourtId"] = new SelectList(_context.Courts, "CourtId", "CourtName");
-           ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email");
+            ViewData["CourtId"] = new SelectList(_courtService.GetAllCourts(), "CourtId", "CourtName");
+            ViewData["UserId"] = new SelectList(_userService.GetAllUsers(), "UserId", "Email");
             return Page();
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(Booking).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BookingExists(Booking.BookingId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _bookingService.UpdateBooking(Booking);
 
             return RedirectToPage("./Index");
-        }
-
-        private bool BookingExists(int id)
-        {
-          return (_context.Bookings?.Any(e => e.BookingId == id)).GetValueOrDefault();
         }
     }
 }

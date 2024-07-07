@@ -97,18 +97,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var booking in Model.Bookings)
+                    @foreach (var bookingService in Model.BookingServices.DistinctBy(bs => bs.Booking))
                     {
                         <tr>
-                            <td>@booking.BookingId</td>
-                            <td>@booking.CourtId</td>
-                            <td>@booking.BookingDate.ToShortDateString()</td>
-                            <td>@booking.StartTime</td>
-                            <td>@booking.EndTime</td>
-                            <td>@booking.TotalPrice</td>
-                            <td>@booking.PaymentMethod</td>
+                            <td>@bookingService.Booking.BookingId</td>
+                            <td>@bookingService.Booking.CourtId</td>
+                            <td>@bookingService.Booking.BookingDate.ToShortDateString()</td>
+                            <td>@bookingService.Booking.StartTime</td>
+                            <td>@bookingService.Booking.EndTime</td>
+                            <td>@bookingService.Booking.TotalPrice</td>
+                            <td>@bookingService.Booking.PaymentMethod</td>
                             <td>
-                                @foreach (var service in Model.GetBookingServicesByBookingId(booking.BookingId))
+                                @foreach (var service in Model.GetBookingServicesByBookingId(bookingService.BookingId))
                                 {
                                     <ul>
                                         <li>@service.Service.ServiceName - Quantity: @service.Quantity</li>
