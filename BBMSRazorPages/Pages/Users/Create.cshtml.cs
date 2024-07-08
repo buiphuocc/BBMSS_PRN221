@@ -37,10 +37,9 @@ namespace BBMSRazorPages.Pages.Users
             {
                 return Page();
             }
-
             _userService.AddUser(User);
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("/Authentication/Login");
         }
     }
 }
