@@ -11,7 +11,7 @@ namespace BBMSRazorPages.Pages
         private readonly IBookingServiceService bookingServiceService;
         private readonly ICourtService _courtService;
 
-        public DashboardModel(IBookingService bookingService, IBookingServiceService bookingServiceService,ICourtService courtService)
+        public DashboardModel(IBookingService bookingService, IBookingServiceService bookingServiceService, ICourtService courtService)
         {
             _bookingService = bookingService;
             this.bookingServiceService = bookingServiceService;
