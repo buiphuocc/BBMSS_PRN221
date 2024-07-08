@@ -16,17 +16,15 @@ namespace BBMSRazorPages.Pages.Authentication
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            string ContextAccount = context.HttpContext.Session.GetString("UserRole");
+            string UserRole = context.HttpContext.Session.GetString("UserRole");
 
-            if (string.IsNullOrEmpty(ContextAccount))
+            if (string.IsNullOrEmpty(UserRole))
             {
                 context.Result = new RedirectToPageResult("/Error");
             }
             else
             {
-                string UserRole = JsonConvert.DeserializeObject<string>(ContextAccount);
-
-                if (UserRole == null || UserRole.Equals(_role))
+                if (UserRole == null || !UserRole.Equals(_role))
                 {
                     context.Result = new RedirectToPageResult("/Error");
                 }
