@@ -41,6 +41,7 @@ public partial class BadmintonBookingSystemContext : DbContext
             entity.Property(e => e.BookingDate).HasColumnType("date");
             entity.Property(e => e.CourtId).HasColumnName("CourtID");
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 

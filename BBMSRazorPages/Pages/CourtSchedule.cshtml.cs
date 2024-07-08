@@ -69,6 +69,24 @@ namespace BBMSRazorPages.Pages
             List<BusinessObjects.Booking> bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
             return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
         }
+        public string GetBookingStatusClass(Court court, TimeSpan slot1, TimeSpan slot2)
+        {
+            var booking = Bookings.FirstOrDefault(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
+
+            if (booking != null)
+            {
+                if (booking.Status == "Pending" || booking.Status==null)
+                {
+                    return "Pending";
+                }
+                else if (booking.Status == "Confirm")
+                {
+                    return "Confirm";
+                }
+            }
+
+            return ""; // Default class if no booking or status doesn't match
+        }
 
         public IActionResult OnPost()
         {
@@ -124,7 +142,8 @@ namespace BBMSRazorPages.Pages
                         BookingDate = DateForm,
                         PaymentMethod = PaymentMethod,
                         UserId = UserId,
-                        TotalPrice = totalSlots * court.PricePerHour
+                        TotalPrice = totalSlots * court.PricePerHour,
+                        Status = "Pending" // Set the default status as Pending
                     };
 
                     bookingService.AddBooking(newBooking);

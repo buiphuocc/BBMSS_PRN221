@@ -33,6 +33,14 @@
             background-color: #d9534f;
         }
 
+        .Pending {
+            background-color: yellow !important; /* Màu vàng cho trạng thái Pending hoặc null */
+        }
+
+        .Confirm {
+            background-color: #d9534f; /* Màu đỏ cho trạng thái Confirm */
+        }
+
         input[type="time"]::-webkit-calendar-picker-indicator {
             display: none;
         }
@@ -75,13 +83,27 @@
                         var slot2 = new TimeSpan(hour, 30, 0);
                         var slot3 = new TimeSpan(hour, 30, 0);
                         var slot4 = new TimeSpan(hour + 1, 0, 0);
+
                         bool isBookedSlot1 = Model.IsTimeSlotBooked(court, slot1, slot2);
-                        bool isBookedSlot2 = Model.IsTimeSlotBooked(court, slot3, slot4);
-                        <td class="@( isBookedSlot1 ? "booked" : "")"></td>
-                        <td class="@( isBookedSlot2 ? "booked" : "")"></td>
+                        var bookingStatusClass1 = Model.GetBookingStatusClass(court, slot1,slot2);
+
+                        bool isBookedSlot2 = Model.IsTimeSlotBooked(court, slot3,slot4);
+                        var bookingStatusClass2 = Model.GetBookingStatusClass(court, slot3,slot4);
+
+                        <td class="@(isBookedSlot1 ? "booked" : "") @(bookingStatusClass1)">
+
+                                <span>@bookingStatusClass1</span>
+                            
+                        </td>
+                        <td class="@(isBookedSlot2 ? "booked" : "") @(bookingStatusClass2)">
+
+                                <span>@bookingStatusClass2</span>
+                            
+                        </td>
                     }
                 </tr>
             }
+
         </tbody>
     </table>
     <h3>@Model.Message</h3>

@@ -72,6 +72,7 @@
                     <th>Services</th>
                     <th>Payment Method</th>
                     <th>Total Price</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -93,6 +94,18 @@
                         </td>
                         <td>@booking.PaymentMethod</td>
                         <td>@booking.TotalPrice</td>
+                        <td>
+                            @{
+                                if (string.IsNullOrEmpty(booking.Status))
+                                {
+                                    <text>Pending</text>
+                                }
+                                else
+                                {
+                                    @booking.Status
+                                }
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
