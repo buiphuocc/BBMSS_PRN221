@@ -14,31 +14,31 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
+                @Html.DisplayNameFor(model => model.Bookings[0].BookingDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].StartTime)
+                @Html.DisplayNameFor(model => model.Bookings[0].StartTime)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].EndTime)
+                @Html.DisplayNameFor(model => model.Bookings[0].EndTime)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].TotalPrice)
+                @Html.DisplayNameFor(model => model.Bookings[0].TotalPrice)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].PaymentMethod)
+                @Html.DisplayNameFor(model => model.Bookings[0].PaymentMethod)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].Court)
+                @Html.DisplayNameFor(model => model.Bookings[0].Court)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].User)
+                @Html.DisplayNameFor(model => model.Bookings[0].User)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Booking) {
+@foreach (var item in Model.Bookings) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.BookingDate)

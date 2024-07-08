@@ -6,8 +6,8 @@ namespace BBMSRazorPages.Pages.Users
 {
     public class LogoutModel : PageModel
     {
-        
-        public async Task<IActionResult> OnPost()
+
+        public IActionResult OnPost()
         {
             HttpContext?.Session.Clear();
             return RedirectToPage("/Index");  // Redirect to desired page after logout

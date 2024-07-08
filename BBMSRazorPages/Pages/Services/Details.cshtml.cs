@@ -6,33 +6,36 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using Services.Interfaces;
+using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Services
 {
+    [SessionRoleAuthorize("Admin")]
     public class DetailsModel : PageModel
     {
-        private readonly BusinessObjects.BadmintonBookingSystemContext _context;
+        private readonly IServiceService _serviceService;
 
-        public DetailsModel(BusinessObjects.BadmintonBookingSystemContext context)
+        public DetailsModel(IServiceService serviceService)
         {
-            _context = context;
+            _serviceService = serviceService;
         }
 
-      public Service Service { get; set; } = default!; 
+        public Service Service { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int? id)
         {
-            if (id == null || _context.Services == null)
+            if (id == null || _serviceService == null)
             {
                 return NotFound();
             }
 
-            var service = await _context.Services.FirstOrDefaultAsync(m => m.ServiceId == id);
+            var service = _serviceService.GetServiceById((int)id);
             if (service == null)
             {
                 return NotFound();
             }
-            else 
+            else
             {
                 Service = service;
             }
