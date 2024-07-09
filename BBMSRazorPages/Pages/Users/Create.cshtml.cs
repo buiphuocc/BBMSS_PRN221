@@ -11,7 +11,7 @@ using Services.Interfaces;
 
 namespace BBMSRazorPages.Pages.Users
 {
-    [SessionRoleAuthorize("Admin")]
+    //[SessionRoleAuthorize("Admin")]
     public class CreateModel : PageModel
     {
         private readonly IUserService _userService;
