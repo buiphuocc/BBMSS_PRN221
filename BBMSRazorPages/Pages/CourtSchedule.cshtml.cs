@@ -3,6 +3,7 @@ using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
+using Services;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,9 @@ namespace BBMSRazorPages.Pages
         private readonly ICourtService courtService;
         private readonly IServiceService serviceService;
         private readonly IBookingServiceService bookingServiceService;
+
+        private readonly IUserService _userService;
+        private readonly IEmailSender _emailSender;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
@@ -45,12 +49,14 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService)
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
             this.serviceService = serviceService;
             this.bookingServiceService = bookingServiceService;
+            _userService = userService;
+            _emailSender = emailSender;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -91,7 +97,7 @@ namespace BBMSRazorPages.Pages
                     }
 
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
-                    if (DateForm < DateTime.Now.Date || StartTime < currentTime || EndTime < currentTime)
+                    if (DateForm < DateTime.Now.Date || (DateForm == DateTime.Now.Date && (StartTime < currentTime || EndTime < currentTime)))
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
                     }
@@ -133,62 +139,100 @@ namespace BBMSRazorPages.Pages
                     var selectedServicesString = Request.Form["SelectedServices"];
                     var serviceQuantitiesString = Request.Form["ServiceQuantities"];
 
-                    // Convert the selected services to a list of integers
-                    var selectedServices = selectedServicesString
-                            .ToString()
-                            .Split(',')
-                            .Select(int.Parse)
-                            .ToList();
-
-                    // Convert the service quantities to a dictionary<int, int>
-                    var serviceQuantities = new Dictionary<int, int>();
-
-                    foreach (var key in Request.Form.Keys)
+                    if (!selectedServicesString.IsNullOrEmpty())
                     {
-                        if (key.StartsWith("ServiceQuantities["))
+                        // Convert the selected services to a list of integers
+                        var selectedServices = selectedServicesString
+                                .ToString()
+                                .Split(',')
+                                .Select(int.Parse)
+                                .ToList();
+
+                        // Convert the service quantities to a dictionary<int, int>
+                        var serviceQuantities = new Dictionary<int, int>();
+
+                        foreach (var key in Request.Form.Keys)
                         {
-                            var serviceIdStr = key.Substring(18, key.Length - 19);
-                            if (int.TryParse(serviceIdStr, out int serviceId))
+                            if (key.StartsWith("ServiceQuantities["))
                             {
-                                var quantityStr = Request.Form[key];
-                                if (int.TryParse(quantityStr, out int quantity))
+                                var serviceIdStr = key.Substring(18, key.Length - 19);
+                                if (int.TryParse(serviceIdStr, out int serviceId))
                                 {
-                                    serviceQuantities[serviceId] = quantity;
+                                    var quantityStr = Request.Form[key];
+                                    if (int.TryParse(quantityStr, out int quantity))
+                                    {
+                                        serviceQuantities[serviceId] = quantity;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // Log the service quantities for debugging
-                    foreach (var entry in serviceQuantities)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
-                    }
-
-
-
-
-                    if (!selectedServices.IsNullOrEmpty())
-                    {
-                        decimal totalServicePrice = 0;
-
-                        foreach (var serviceId in selectedServices)
+                        // Log the service quantities for debugging
+                        foreach (var entry in serviceQuantities)
                         {
-                            if (serviceQuantities.TryGetValue(serviceId, out int quantity))
-                            {
-                                var bookingService = new BusinessObjects.BookingService
-                                {
-                                    BookingId = newBooking.BookingId,
-                                    ServiceId = serviceId,
-                                    Quantity = quantity
-                                };
-                                totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
-                                bookingServiceService.AddBookingService(bookingService);
-                            }
-
+                            System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
                         }
-                        newBooking.TotalPrice += totalServicePrice;
-                        bookingService.UpdateBooking(newBooking);
+
+                        if (!selectedServices.IsNullOrEmpty())
+                        {
+                            decimal totalServicePrice = 0;
+
+                            foreach (var serviceId in selectedServices)
+                            {
+                                if (serviceQuantities.TryGetValue(serviceId, out int quantity))
+                                {
+                                    var bookingService = new BusinessObjects.BookingService
+                                    {
+                                        BookingId = newBooking.BookingId,
+                                        ServiceId = serviceId,
+                                        Quantity = quantity
+                                    };
+                                    totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
+                                    bookingServiceService.AddBookingService(bookingService);
+                                }
+
+                            }
+                            newBooking.TotalPrice += totalServicePrice;
+                            bookingService.UpdateBooking(newBooking);
+                        }
+                    }
+
+                    User user = _userService.GetUserById((int)UserId);
+
+                    if (user != null)
+                    {
+                        var bookedCourt = courtService.GetCourtById((int) newBooking.CourtId);
+                        var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
+
+                        string subject = "Badminton Court Booking Confirmation";
+                        string message =
+                            $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                            $"<strong>Booking Details:</strong><br>" +
+                            $"Court name: {bookedCourt.CourtName}<br>" +
+                            $"On date: {newBooking.BookingDate}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
+
+                        if (bookingServices != null && bookingServices.Any())
+                        {
+                            message += "<br><strong>Additional Services:</strong><br>";
+                            foreach (var bookingService in bookingServices)
+                            {
+                                Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
+                                message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
+                            }
+                        }
+                        else
+                        {
+                            message += "<br><strong>Additional Services:</strong> None.<br>";
+                        }
+
+                        message +=
+                            $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
+                            $"Payment method: {newBooking.PaymentMethod}<br><br>" +
+                            "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+
+                        _emailSender.SendEmailAsync(user.Email, subject, message);
+
+                        Console.WriteLine("Sent email to " + user.Email);
                     }
 
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });

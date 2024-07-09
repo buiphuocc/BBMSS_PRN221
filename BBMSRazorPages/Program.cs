@@ -6,6 +6,7 @@ using DataAccessLayer;
 using BusinessObjects;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using BBMSRazorPages.Pages.Authentication;
+using System.Configuration;
 
 
 namespace BBMSSolution
@@ -44,6 +45,8 @@ namespace BBMSSolution
             //Service
             builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
+            //Email sender
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
 
             var app = builder.Build();
 
