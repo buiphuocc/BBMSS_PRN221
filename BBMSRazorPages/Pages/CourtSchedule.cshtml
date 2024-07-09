@@ -252,9 +252,6 @@
             });
         });
 
-        document.getElementById('StartTime').addEventListener('focus', function (event) {
-            event.target.blur();
-        });
 
         document.getElementById('StartTime').addEventListener('blur', function (event) {
             const input = event.target;
@@ -288,9 +285,6 @@
             }
         });
 
-        document.getElementById('EndTime').addEventListener('focus', function (event) {
-            event.target.blur();
-        });
 
         document.getElementById('EndTime').addEventListener('blur', function (event) {
             const input = event.target;
@@ -324,6 +318,98 @@
                 }
             }
         });
+
+        document.getElementById('DateForm').addEventListener('blur', function (event) {
+            document.getElementById('error-message1+').style.display = 'none';
+            document.getElementById('error-message2+').style.display = 'none';
+
+            const input = event.target;
+            const dateValue = input.value;
+            const inputformDate = new Date(dateValue);
+            document.getElementById('DateForm').value = dateValue;
+
+            const startTimeInput = document.getElementById('StartTime');
+            const startTimeValue = startTimeInput.value;
+            const [startHours, startMinutes] = startTimeValue.split(':');
+
+            const endTimeInput = document.getElementById('EndTime');
+            const endTimeValue = endTimeInput.value;
+            const [endHours, endMinutes] = endTimeValue.split(':');
+            
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+
+
+            // Create Date objects for comparison
+            const startInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), startHours, startMinutes);
+            const endInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), endHours, endMinutes);
+            const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
+
+            if (startMinutes !== '00' && startMinutes !== '30') {
+                // input.value = '05:00';
+                document.getElementById('error-message1').style.display = 'inline';
+                document.getElementById('error-message1+').style.display = 'none';
+            }
+            if (endMinutes !== '00' && endMinutes !== '30') {
+                // input.value = '05:00';
+                document.getElementById('error-message2').style.display = 'inline';
+                document.getElementById('error-message2+').style.display = 'none';
+            }
+
+            if (startInputDate < currentDate) {
+                document.getElementById('error-message1+').style.display = 'inline';
+            }
+            if (endInputDate < currentDate) {
+                document.getElementById('error-message2+').style.display = 'inline';
+            }
+        })
+
+        document.getElementById('DateForm').addEventListener('change', function (event) {
+            document.getElementById('error-message1+').style.display = 'none';
+            document.getElementById('error-message2+').style.display = 'none';
+
+            const input = event.target;
+            const dateValue = input.value;
+            const inputformDate = new Date(dateValue);
+            document.getElementById('DateForm').value = dateValue;
+
+            const startTimeInput = document.getElementById('StartTime');
+            const startTimeValue = startTimeInput.value;
+            const [startHours, startMinutes] = startTimeValue.split(':');
+
+            const endTimeInput = document.getElementById('EndTime');
+            const endTimeValue = endTimeInput.value;
+            const [endHours, endMinutes] = endTimeValue.split(':');
+
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+
+
+            // Create Date objects for comparison
+            const startInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), startHours, startMinutes);
+            const endInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), endHours, endMinutes);
+            const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
+
+            if (startMinutes !== '00' && startMinutes !== '30') {
+                // input.value = '05:00';
+                document.getElementById('error-message1').style.display = 'inline';
+                document.getElementById('error-message1+').style.display = 'none';
+            }
+            if (endMinutes !== '00' && endMinutes !== '30') {
+                // input.value = '05:00';
+                document.getElementById('error-message2').style.display = 'inline';
+                document.getElementById('error-message2+').style.display = 'none';
+            }
+
+            if (startInputDate < currentDate) {
+                document.getElementById('error-message1+').style.display = 'inline';
+            }
+            if (endInputDate < currentDate) {
+                document.getElementById('error-message2+').style.display = 'inline';
+            }
+        })
 
         function validateForm(event) {
             // Get the element you want to check
