@@ -133,11 +133,7 @@ namespace BBMSRazorPages.Pages
                     }
 
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
-<<<<<<< HEAD
                     if (DateForm < DateTime.Now.Date && (StartTime < currentTime || EndTime < currentTime))
-=======
-                    if (DateForm < DateTime.Now.Date || (DateForm == DateTime.Now.Date && (StartTime < currentTime || EndTime < currentTime)))
->>>>>>> 8398ccc741ccee1e41aeab2cfbc6b906b9519124
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
                     }
