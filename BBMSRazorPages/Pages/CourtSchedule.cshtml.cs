@@ -2,7 +2,9 @@
 using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Services;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -87,7 +89,25 @@ namespace BBMSRazorPages.Pages
 
             return ""; // Default class if no booking or status doesn't match
         }
+        public IActionResult OnPostChangeStatus(int BookingId, string NewStatus)
+        {
+            var booking = bookingService.GetBookingById(BookingId);
+            if (booking != null)
+            {
+                booking.Status = NewStatus;
+                bookingService.UpdateBooking(booking);
+            }
 
+            // Reload the bookings
+            BookingDate= DateTime.Now.ToString("yyyy-MM-dd");
+            SelectedDate = DateTime.Now;
+            Bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
+            Courts = courtService.GetAllCourts();
+            UserId = HttpContext.Session.GetInt32("UserId");
+            Services = serviceService.GetAllServices();
+
+            return Page();
+        }
         public IActionResult OnPost()
         {
             UserId = HttpContext.Session.GetInt32("UserId");
