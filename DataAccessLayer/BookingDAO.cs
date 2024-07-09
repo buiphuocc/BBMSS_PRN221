@@ -80,5 +80,17 @@ namespace DataAccessLayer
                 .Where(b => b.UserId == userId)
                 .ToList();
         }
+
+        public static IList<Booking> GetBookingsByCourtId(int? courtId)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+
+            return _context.Bookings
+                .Include(b => b.Court)
+                .Include(b => b.BookingServices)
+                .ThenInclude(bs => bs.Service)
+                .Where(b => b.CourtId == courtId)
+                .ToList();
+        }
     }
 }

@@ -53,5 +53,9 @@ namespace Repositories
             return BookingDAO.GetBookingsByUserId(userId);
         }
 
+        public IList<Booking> GetBookingsByCourtId(int? courtId)
+        {
+            return BookingDAO.GetBookingsByCourtId(courtId);
+        }
     }
 }

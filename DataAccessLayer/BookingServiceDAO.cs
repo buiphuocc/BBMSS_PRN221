@@ -45,6 +45,15 @@ namespace DataAccessLayer
                 .Where(bs => bs.BookingId == id).ToList();
         }
 
+        public static List<BookingService> GetBookingServicesByServiceId(int? id)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            return _context.BookingServices
+                .Include(bs => bs.Booking)
+                .Include(bs => bs.Service)
+                .Where(bs => bs.ServiceId == id).ToList();
+        }
+
         public static void AddBookingService(BookingService bookingService)
         {
             using var _context = new BadmintonBookingSystemContext();

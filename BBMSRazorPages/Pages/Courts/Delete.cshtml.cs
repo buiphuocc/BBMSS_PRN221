@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using Services.Interfaces;
 using BBMSRazorPages.Pages.Authentication;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BBMSRazorPages.Pages.Courts
 {
@@ -15,16 +16,19 @@ namespace BBMSRazorPages.Pages.Courts
     public class DeleteModel : PageModel
     {
         private readonly ICourtService _courtService;
+        private readonly IBookingService bookingService;
 
-        public DeleteModel(ICourtService courtService)
+        public DeleteModel(ICourtService courtService, IBookingService bookingService)
         {
             _courtService = courtService;
+            this.bookingService = bookingService;
         }
+
 
         [BindProperty]
       public Court Court { get; set; } = default!;
 
-        public IActionResult OnGet(int? id)
+        public IActionResult OnGet(int? id, string message)
         {
             if (id == null || _courtService == null)
             {
@@ -46,14 +50,30 @@ namespace BBMSRazorPages.Pages.Courts
 
         public IActionResult OnPost(int? id)
         {
-            if (id == null || _courtService == null)
+            try
             {
-                return NotFound();
+                string message= "";
+                if (id == null || _courtService == null)
+                {
+                    return NotFound();
+                }
+                if (!bookingService.GetBookingsByCourtId(id).IsNullOrEmpty())
+                {
+                    message = "Cannot delete because there are bookings of the court";
+                }
+                else
+                {
+                    _courtService.DeleteCourt((int)id);
+                }
+
+                
+
+                return RedirectToPage("./Index", new {message});
             }
-
-            _courtService.DeleteCourt((int)id);
-
-            return RedirectToPage("./Index");
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

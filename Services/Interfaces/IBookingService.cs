@@ -16,7 +16,7 @@ namespace Services.Interfaces
         void DeleteBooking(int id);
         List<Booking> GetBookingsByBookingDate(DateTime bookingDate);
         public IList<Booking> GetBookingsByUserId(int userId);
-
+        IList<Booking> GetBookingsByCourtId(int? courtId);
     }
 }
  

@@ -51,5 +51,10 @@ namespace Services
         {
             return bookingReppository.GetBookingsByUserId(userId);
         }
+
+        public IList<Booking> GetBookingsByCourtId(int? courtId)
+        {
+            return bookingReppository.GetBookingsByCourtId(courtId);
+        }
     }
 }

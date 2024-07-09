@@ -12,6 +12,7 @@ namespace Services.Interfaces
         List<BusinessObjects.BookingService> GetAllBookingServices();
         BusinessObjects.BookingService GetBookingServiceById(int id);
         List<BusinessObjects.BookingService> GetBookingServicesByBookingId(int? id);
+        List<BusinessObjects.BookingService> GetBookingServicesByServiceId(int? id);
         void AddBookingService(BusinessObjects.BookingService bookingService);
         void UpdateBookingService(BusinessObjects.BookingService bookingService);
         void DeleteBookingService(int id);

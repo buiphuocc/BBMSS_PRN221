@@ -8,30 +8,33 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using Services.Interfaces;
 using BBMSRazorPages.Pages.Authentication;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BBMSRazorPages.Pages.Services
 {
     [SessionRoleAuthorize("Admin")]
     public class DeleteModel : PageModel
     {
-        private readonly IServiceService _serviceService;
+        private readonly IServiceService serviceService;
+        private readonly IBookingServiceService bookingServiceService;
 
-        public DeleteModel(IServiceService serviceService)
+        public DeleteModel(IServiceService serviceService, IBookingServiceService bookingServiceService)
         {
-            _serviceService = serviceService;
+            this.serviceService = serviceService;
+            this.bookingServiceService = bookingServiceService;
         }
 
         [BindProperty]
-      public Service Service { get; set; } = default!;
+        public Service Service { get; set; } = default!;
 
         public IActionResult OnGet(int? id)
         {
-            if (id == null || _serviceService == null)
+            if (id == null || serviceService == null)
             {
                 return NotFound();
             }
 
-            var service = _serviceService.GetServiceById((int)id);
+            var service = serviceService.GetServiceById((int)id);
 
             if (service == null)
             {
@@ -46,14 +49,23 @@ namespace BBMSRazorPages.Pages.Services
 
         public IActionResult OnPost(int? id)
         {
-            if (id == null || _serviceService == null)
+            string message = "";
+            if (id == null || serviceService == null)
             {
                 return NotFound();
             }
+            if (!bookingServiceService.GetBookingServicesByServiceId(id).IsNullOrEmpty())
+            {
+                message = "Cannot delete because there are Bookings of it";
+            }
+            else
+            {
+                serviceService.DeleteService((int)id);
+            }
 
-            _serviceService.DeleteService((int)id);
+            
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("./Index", new {message});
         }
     }
 }

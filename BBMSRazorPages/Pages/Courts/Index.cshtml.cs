@@ -20,7 +20,7 @@ namespace BBMSRazorPages.Pages.Courts
         {
             _courtService = courtService;
         }
-
+        public string Message { get; set; }
         public IList<Court> Courts { get;set; } = default!;
 
         public void OnGet()
