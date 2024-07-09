@@ -18,6 +18,8 @@ namespace BBMSRazorPages.Pages
         private readonly ICourtService courtService;
         private readonly IServiceService serviceService;
         private readonly IBookingServiceService bookingServiceService;
+        private readonly IUserService userService;
+        private readonly IEmailSender emailSender;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
@@ -47,12 +49,14 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService)
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
             this.serviceService = serviceService;
             this.bookingServiceService = bookingServiceService;
+            this.userService = userService;
+            this.emailSender = emailSender;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -129,7 +133,7 @@ namespace BBMSRazorPages.Pages
                     }
 
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
-                    if (DateForm < DateTime.Now.Date || StartTime < currentTime || EndTime < currentTime)
+                    if (DateForm < DateTime.Now.Date || (DateForm == DateTime.Now.Date && (StartTime < currentTime || EndTime < currentTime)))
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
                     }
@@ -230,6 +234,46 @@ namespace BBMSRazorPages.Pages
                         }
 
                     }
+
+                    // Send email to user
+                    User user = userService.GetUserById((int) UserId);
+
+                    if (user != null)
+                    {
+                        var bookedCourt = courtService.GetCourtById((int)newBooking.CourtId);
+                        var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
+
+                        string subject = "Badminton Court Booking Confirmation";
+                        string message =
+                            $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                            $"<strong>Booking Details:</strong><br>" +
+                            $"Court name: {bookedCourt.CourtName}<br>" +
+                            $"On date: {newBooking.BookingDate}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
+
+                        if (bookingServices != null && bookingServices.Any())
+                        {
+                            message += "<br><strong>Additional Services:</strong><br>";
+                            foreach (var bookingService in bookingServices)
+                            {
+                                Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
+                                message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
+                            }
+                        }
+                        else
+                        {
+                            message += "<br><strong>Additional Services:</strong> None.<br>";
+                        }
+
+                        message +=
+                            $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
+                            $"Payment method: {newBooking.PaymentMethod}<br><br>" +
+                            "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+
+                        emailSender.SendEmailAsync(user.Email, subject, message);
+
+                        Console.WriteLine("Sent email to " + user.Email);
+                    }
+
                     return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
                 }
                 // If we got this far, something failed; redisplay form
