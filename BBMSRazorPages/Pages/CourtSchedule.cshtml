@@ -325,6 +325,21 @@
             }
         });
 
+        function validateForm(event) {
+            // Get the element you want to check
+            var errorMess1 = document.getElementById('error-message1');
+            var errorMess1Plus = document.getElementById('error-message1+');
+            var errorMess2 = document.getElementById('error-message2');
+            var errorMess2Plus = document.getElementById('error-message2+');
+
+            // Check if the display property is set to 'inline'
+            if (errorMess1.style.display === 'inline' || errorMess1Plus.style.display === 'inline' || errorMess2.style.display === 'inline' || errorMess2Plus.style.display === 'inline') {
+                // Prevent the form from being submitted
+                event.preventDefault();
+                alert('Data is not valid');
+            }
+        }
+
         function addService() {
             const serviceSelector = document.getElementById('serviceSelector');
             const selectedServiceId = serviceSelector.value;

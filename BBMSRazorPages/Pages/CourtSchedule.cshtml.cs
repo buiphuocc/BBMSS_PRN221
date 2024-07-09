@@ -170,9 +170,8 @@ namespace BBMSRazorPages.Pages
 
                     // Handle selected services
                     var selectedServicesString = Request.Form["SelectedServices"];
-                    var serviceQuantitiesString = Request.Form["ServiceQuantities"];
 
-                    if(!selectedServicesString.IsNullOrEmpty() && !serviceQuantitiesString.IsNullOrEmpty())
+                    if(!selectedServicesString.IsNullOrEmpty())
                     {
                         // Convert the selected services to a list of integers
                         var selectedServices = selectedServicesString
