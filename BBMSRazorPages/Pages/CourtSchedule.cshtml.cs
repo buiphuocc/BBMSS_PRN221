@@ -133,7 +133,7 @@ namespace BBMSRazorPages.Pages
                     }
 
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
-                    if (DateForm < DateTime.Now.Date && (StartTime < currentTime || EndTime < currentTime))
+                    if (DateForm < DateTime.Now && (StartTime < currentTime || EndTime < currentTime))
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Cannot book in the past" });
                     }
@@ -147,7 +147,7 @@ namespace BBMSRazorPages.Pages
                     }
 
 
-                    bool inTimeRange = Bookings.Any(b => ((b.StartTime < StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime < b.EndTime)) && b.CourtId == CourtId);
+                    bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime <= b.EndTime)) && b.CourtId == CourtId);
                     Court court = courtService.GetCourtById(CourtId);
                     bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
                     if (isBooked)
