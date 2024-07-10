@@ -186,15 +186,15 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="StartTime" class="control-label">Start Time</label>
-                            <input asp-for="StartTime" id="StartTime" class="form-control" type="time" value="05:00"  required />
+                            <input asp-for="StartTime" id="StartTime" class="form-control" type="time" value="05:00" required />
                             <span id="error-message1" style="color: red; display: none;">Invalid time. Please select a time with minutes 00 or 30.</span>
-                            <span id="error-message1+" style="color: red; display: none;">Invalid time. Can not pick time in the past</span>
+                            <span id="error-message1+" style="color: red; display: none;">Invalid time. Cannot pick time in the past</span>
                         </div>
                         <div class="form-group">
                             <label asp-for="EndTime" class="control-label">End Time</label>
-                            <input asp-for="EndTime" id="EndTime" class="form-control" type="time" value="06:00"  required />
+                            <input asp-for="EndTime" id="EndTime" class="form-control" type="time" value="06:00" required />
                             <span id="error-message2" style="color: red; display: none;">Invalid time. Please select a time with minutes 00 or 30.</span>
-                            <span id="error-message2+" style="color: red; display: none;">Invalid time. Can not pick time in the past</span>
+                            <span id="error-message2+" style="color: red; display: none;">Invalid time. Cannot pick time in the past</span>
                         </div>
                         <div class="form-group">
                             <label asp-for="DateForm" class="control-label">Date</label>
@@ -211,21 +211,19 @@
                         <div class="form-group align-items-center">
                             <label class="control-label mr-2">Services</label>
                             <div class="d-flex">
-                            <select id="serviceSelector" class="form-control mr-2">
-                                <option value="">-- Select Service --</option>
-                                @foreach (var service in Model.Services)
-                                {
-                                    <option value="@service.ServiceId">@service.ServiceName</option>
-                                }
-                            </select>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="addService()">Add Service</button>
+                                <select id="serviceSelector" class="form-control mr-2">
+                                    <option value="">-- Select Service --</option>
+                                    @foreach (var service in Model.Services)
+                                    {
+                                        <option value="@service.ServiceId">@service.ServiceName</option>
+                                    }
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="addService()">Add Service</button>
                             </div>
                         </div>
-
                         <div id="servicesContainer" class="form-group">
                             <!-- Services will be added here dynamically -->
                         </div>
-                        
                         <button type="submit" class="btn btn-primary">Book</button>
                     </form>
                 </div>
@@ -263,179 +261,69 @@
             });
         });
 
+        document.getElementById('bookingForm').addEventListener("submit", function (event) {
+            const dateInput = document.getElementById('DateForm');
+            const dateValue = dateInput.value;
+            const inputformDate = new Date(dateValue);
 
-        document.getElementById('StartTime').addEventListener('blur', function (event) {
-            const input = event.target;
-            const timeValue = input.value;
-            const [hours, minutes] = timeValue.split(':');
+            const startTimeInput = document.getElementById('StartTime');
+            const startTimeValue = startTimeInput.value;
+            const [startHours, startMinutes] = startTimeValue.split(':').map(Number);
 
-            if (minutes !== '00' && minutes !== '30') {
-                // input.value = '05:00';
+            const endTimeInput = document.getElementById('EndTime');
+            const endTimeValue = endTimeInput.value;
+            const [endHours, endMinutes] = endTimeValue.split(':').map(Number);
+
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+
+            // Create Date objects for comparison
+            const startInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), startHours, startMinutes);
+            const endInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), endHours, endMinutes);
+            const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
+
+            let isValid = true;
+
+            // Check if start and end minutes are either 00 or 30
+            if (startMinutes !== 0 && startMinutes !== 30) {
+                isValid = false;
                 document.getElementById('error-message1').style.display = 'inline';
-                document.getElementById('error-message1+').style.display = 'none';
             } else {
                 document.getElementById('error-message1').style.display = 'none';
-                document.getElementById('error-message1+').style.display = 'none';
-                // Get the current time
-                const now = new Date();
-                const currentHours = now.getHours();
-                const currentMinutes = now.getMinutes();
-
-                // Create Date objects for comparison
-                const inputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), hours, minutes);
-                const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
-
-                console.log('Input Time:', inputDate);
-                console.log('Current Time:', currentDate);
-
-                // Compare the times
-                if (inputDate < currentDate) {
-                    document.getElementById('error-message1').style.display = 'none';
-                    document.getElementById('error-message1+').style.display = 'inline';
-                }
             }
-        });
 
-
-        document.getElementById('EndTime').addEventListener('blur', function (event) {
-            const input = event.target;
-            const timeValue = input.value;
-            const [hours, minutes] = timeValue.split(':');
-
-            if (minutes !== '00' && minutes !== '30') {
-                //input.value = '06:00';
+            if (endMinutes !== 0 && endMinutes !== 30) {
+                isValid = false;
                 document.getElementById('error-message2').style.display = 'inline';
-                document.getElementById('error-message2+').style.display = 'none';
             } else {
                 document.getElementById('error-message2').style.display = 'none';
+            }
+
+            // Check if start or end times are in the past
+            if (startInputDate < currentDate) {
+                isValid = false;
+                document.getElementById('error-message1+').style.display = 'inline';
+            } else {
+                document.getElementById('error-message1+').style.display = 'none';
+            }
+
+            if (endInputDate < currentDate) {
+                isValid = false;
+                document.getElementById('error-message2+').style.display = 'inline';
+            } else {
                 document.getElementById('error-message2+').style.display = 'none';
-                // Get the current time
-                const now = new Date();
-                const currentHours = now.getHours();
-                const currentMinutes = now.getMinutes();
+            }
 
-
-                // Create Date objects for comparison
-                const inputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), hours, minutes);
-                const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
-
-                console.log('Input Time:', inputDate);
-                console.log('Current Time:', currentDate);
-
-                // Compare the times
-                if (inputDate < currentDate) {
-                    document.getElementById('error-message2').style.display = 'none';
-                    document.getElementById('error-message2+').style.display = 'inline';
-                }
+            // Prevent the form from being submitted if any validation fails
+            if (!isValid) {
+                event.preventDefault();
+                console.log('Data is not valid');
             }
         });
-
-        document.getElementById('DateForm').addEventListener('blur', function (event) {
-            document.getElementById('error-message1+').style.display = 'none';
-            document.getElementById('error-message2+').style.display = 'none';
-
-            const input = event.target;
-            const dateValue = input.value;
-            const inputformDate = new Date(dateValue);
-            document.getElementById('DateForm').value = dateValue;
-
-            const startTimeInput = document.getElementById('StartTime');
-            const startTimeValue = startTimeInput.value;
-            const [startHours, startMinutes] = startTimeValue.split(':');
-
-            const endTimeInput = document.getElementById('EndTime');
-            const endTimeValue = endTimeInput.value;
-            const [endHours, endMinutes] = endTimeValue.split(':');
+        // function validateForm(event) {
             
-            const now = new Date();
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-
-
-            // Create Date objects for comparison
-            const startInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), startHours, startMinutes);
-            const endInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), endHours, endMinutes);
-            const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
-
-            if (startMinutes !== '00' && startMinutes !== '30') {
-                // input.value = '05:00';
-                document.getElementById('error-message1').style.display = 'inline';
-                document.getElementById('error-message1+').style.display = 'none';
-            }
-            if (endMinutes !== '00' && endMinutes !== '30') {
-                // input.value = '05:00';
-                document.getElementById('error-message2').style.display = 'inline';
-                document.getElementById('error-message2+').style.display = 'none';
-            }
-
-            if (startInputDate < currentDate) {
-                document.getElementById('error-message1+').style.display = 'inline';
-            }
-            if (endInputDate < currentDate) {
-                document.getElementById('error-message2+').style.display = 'inline';
-            }
-        })
-
-        document.getElementById('DateForm').addEventListener('change', function (event) {
-            document.getElementById('error-message1+').style.display = 'none';
-            document.getElementById('error-message2+').style.display = 'none';
-
-            const input = event.target;
-            const dateValue = input.value;
-            const inputformDate = new Date(dateValue);
-            document.getElementById('DateForm').value = dateValue;
-
-            const startTimeInput = document.getElementById('StartTime');
-            const startTimeValue = startTimeInput.value;
-            const [startHours, startMinutes] = startTimeValue.split(':');
-
-            const endTimeInput = document.getElementById('EndTime');
-            const endTimeValue = endTimeInput.value;
-            const [endHours, endMinutes] = endTimeValue.split(':');
-
-            const now = new Date();
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-
-
-            // Create Date objects for comparison
-            const startInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), startHours, startMinutes);
-            const endInputDate = new Date(inputformDate.getFullYear(), inputformDate.getMonth(), inputformDate.getDate(), endHours, endMinutes);
-            const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), currentHours, currentMinutes);
-
-            if (startMinutes !== '00' && startMinutes !== '30') {
-                // input.value = '05:00';
-                document.getElementById('error-message1').style.display = 'inline';
-                document.getElementById('error-message1+').style.display = 'none';
-            }
-            if (endMinutes !== '00' && endMinutes !== '30') {
-                // input.value = '05:00';
-                document.getElementById('error-message2').style.display = 'inline';
-                document.getElementById('error-message2+').style.display = 'none';
-            }
-
-            if (startInputDate < currentDate) {
-                document.getElementById('error-message1+').style.display = 'inline';
-            }
-            if (endInputDate < currentDate) {
-                document.getElementById('error-message2+').style.display = 'inline';
-            }
-        })
-
-        function validateForm(event) {
-            // Get the element you want to check
-            var errorMess1 = document.getElementById('error-message1');
-            var errorMess1Plus = document.getElementById('error-message1+');
-            var errorMess2 = document.getElementById('error-message2');
-            var errorMess2Plus = document.getElementById('error-message2+');
-
-            // Check if the display property is set to 'inline'
-            if (errorMess1.style.display === 'inline' || errorMess1Plus.style.display === 'inline' || errorMess2.style.display === 'inline' || errorMess2Plus.style.display === 'inline') {
-                // Prevent the form from being submitted
-                event.preventDefault();
-                alert('Data is not valid');
-            }
-        }
+        // }
 
         function addService() {
             const serviceSelector = document.getElementById('serviceSelector');
@@ -449,25 +337,30 @@
             serviceDiv.className = 'form-group';
 
             serviceDiv.innerHTML = `
-                    <label>${selectedServiceText}</label>
-                    <input type="hidden" name="SelectedServices" value="${selectedServiceId}" />
-                    <input class="form-control" type="number" min="1" value="1" name="ServiceQuantities[${selectedServiceId}]" style="display: inline-block; width: auto; margin-left: 10px;" />
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeService(this)">Remove</button>
-                `;
+                <label>${selectedServiceText}</label>
+                <input type="hidden" name="SelectedServices" value="${selectedServiceId}" />
+                <input class="form-control" type="number" min="1" value="1" name="ServiceQuantities[${selectedServiceId}]" style="display: inline-block; width: auto; margin-left: 10px;" />
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeService(this, '${selectedServiceId}')">Remove</button>
+            `;
 
             servicesContainer.appendChild(serviceDiv);
+
+            // Disable the selected option
+            serviceSelector.options[serviceSelector.selectedIndex].disabled = true;
+            serviceSelector.value = ""; // Reset the selector
         }
 
-        function removeService(button) {
-            button.parentElement.remove();
-        }
-        document.getElementById('bookingForm').addEventListener('submit', function (event) {
-            const formData = new FormData(this);
-            console.log('Form data entries:');
-            for (const [name, value] of formData.entries()) {
-                console.log(name, value);
+        function removeService(button, serviceId) {
+            const serviceDiv = button.parentElement;
+            serviceDiv.remove();
+
+            // Enable the previously selected option in the dropdown
+            const serviceSelector = document.getElementById('serviceSelector');
+            const option = serviceSelector.querySelector(`option[value='${serviceId}']`);
+            if (option) {
+                option.disabled = false;
             }
-        });
+        }
 
     </script>
 }
