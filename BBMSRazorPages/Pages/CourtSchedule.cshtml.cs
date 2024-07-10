@@ -72,7 +72,7 @@ namespace BBMSRazorPages.Pages
         public bool IsTimeSlotBooked(Court court, TimeSpan slot1, TimeSpan slot2)
         {
             List<BusinessObjects.Booking> bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
-            return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
+            return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId && b.Status!="Cancelled");
         }
         public string GetBookingStatusClass(Court court, TimeSpan slot1, TimeSpan slot2)
         {
