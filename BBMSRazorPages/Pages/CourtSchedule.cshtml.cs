@@ -72,11 +72,11 @@ namespace BBMSRazorPages.Pages
         public bool IsTimeSlotBooked(Court court, TimeSpan slot1, TimeSpan slot2)
         {
             List<BusinessObjects.Booking> bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
-            return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
+            return Bookings.Any(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId && b.Status!="Cancelled");
         }
         public string GetBookingStatusClass(Court court, TimeSpan slot1, TimeSpan slot2)
         {
-            var booking = Bookings.FirstOrDefault(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId);
+            var booking = Bookings.FirstOrDefault(b => slot1 >= b.StartTime && slot2 <= b.EndTime && b.Court.CourtId == court.CourtId && b.Status != "Cancelled");
 
             if (booking != null)
             {
@@ -118,6 +118,7 @@ namespace BBMSRazorPages.Pages
             if (UserId != null)
             {
                 Bookings = bookingService.GetBookingsByBookingDate(DateForm);
+                List<BusinessObjects.Booking> bookingsNotCancelled = Bookings.Where(b => b.Status != "Cancelled").ToList();
                 
                 TimeSpan workingStart = new TimeSpan(5, 0, 0);
                 TimeSpan workingEnd = new TimeSpan(23, 0, 0);
@@ -147,9 +148,9 @@ namespace BBMSRazorPages.Pages
                     }
 
 
-                    bool inTimeRange = Bookings.Any(b => ((b.StartTime <= StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime <= b.EndTime)) && b.CourtId == CourtId);
+                    bool inTimeRange = bookingsNotCancelled.Any(b => ((b.StartTime <= StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime <= b.EndTime)));
                     Court court = courtService.GetCourtById(CourtId);
-                    bool isBooked = Bookings.Any(b => inTimeRange && b.Court.CourtId == CourtId);
+                    bool isBooked = bookingsNotCancelled.Any(b => inTimeRange && b.Court.CourtId == CourtId);
                     if (isBooked)
                     {
                         ModelState.AddModelError(string.Empty, "This time range is booked");
