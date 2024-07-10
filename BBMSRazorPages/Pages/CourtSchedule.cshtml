@@ -73,12 +73,19 @@
     {
         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#statusModal">Change Booking Status</button>
     }
-    
+    @if (Model.UserId != null)
+    {
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#userStatusModal">
+        Cancel My Booking
+    </button>
+    }
 
-    <form id="dateForm" method="get" asp-page-handler="OnGet">
+    <form id="dateForm" method="get" asp-page-handler="OnGet" style="margin:10px auto">
         <label for="datepicker">Pick a Date:</label>
         <input type="date" id="datepicker" name="bookingDate" value="@Model.BookingDate" onchange="this.form.submit()">
     </form>
+
+
     @* asp-for="@Model.SelectedDate" *@
     
     <table>
@@ -194,6 +201,58 @@
             </div>
         </div>
     }
+    @* userStatusModal *@
+    @if (Model.UserId!=null)
+    {
+        <div class="modal fade" id="userStatusModal" tabindex="-1" aria-labelledby="userStatusModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userStatusModalLabel">All your pending booking:</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped" id="userBookingTable">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Court ID</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model.Bookings.Where(b => b.UserId == Model.UserId && b.Status == "Pending"))
+                                {
+                                    <tr>
+                                        <td>@booking.BookingId</td>
+                                        <td>@booking.CourtId</td>
+                                        <td>@booking.StartTime</td>
+                                        <td>@booking.EndTime</td>
+                                        <td>@booking.Status</td>
+                                        <td>
+                                            <form method="post" asp-page-handler="ChangeStatus">
+                                                <input type="hidden" name="BookingId" value="@booking.BookingId" />
+                                                <select name="NewStatus" class="form-control" required>
+                                                    <option value="">-- Select Status --</option>
+                                                    <option value="Cancelled">Cancelled</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-primary btn-sm">Change Status</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
     <!-- Booking Modal -->
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
         <div class="modal-dialog">
