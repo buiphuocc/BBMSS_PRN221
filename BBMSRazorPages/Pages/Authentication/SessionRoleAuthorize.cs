@@ -30,5 +30,10 @@ namespace BBMSRazorPages.Pages.Authentication
                 }
             }
         }
+
+        public static string GetRole(AuthorizationFilterContext context)
+        {
+            return context.HttpContext.Session.GetString("UserRole");
+        }
     }
 }

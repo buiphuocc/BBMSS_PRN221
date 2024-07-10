@@ -1,4 +1,5 @@
 ﻿@page
+@using BBMSRazorPages.Pages.Authentication
 @model BBMSRazorPages.Pages.CourtScheduleModel
 @{
     ViewData["Title"] = "Court Schedule";
@@ -48,11 +49,17 @@
 </head>
 <body>
     <h1 style="text-align:center">Court Schedule</h1>
+    <!-- Note Section -->
+    <div class="alert alert-info text-center">
+        <strong>Note:</strong>
+        <span style="color: #d9534f; font-weight: bold;">Red squares</span> indicate Confirmed bookings,
+        and <span style="color: yellow; font-weight: bold;">Yellow squares</span> indicate Pending bookings.
+    </div>
     @if(Model.UserId != null)
     {
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal">Book a Court</button>
     }
-    @if (Model.UserId != null)
+    @if (Model.isSessionUserAdmin())
     {
         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#statusModal">Change Booking Status</button>
     }
@@ -112,54 +119,55 @@
     </table>
     <h3>@Model.Message</h3>
     <!-- Status Modal -->
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusModalLabel">Change Booking Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-striped" id="bookingTable">
-                    <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Court ID</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var booking in Model.Bookings)
-                        {
-                            <tr>
-                                <td>@booking.BookingId</td>
-                                <td>@booking.CourtId</td>
-                                <td>@booking.StartTime</td>
-                                <td>@booking.EndTime</td>
-                                <td>@booking.Status</td>
-                                <td>
-                                    <form method="post" asp-page-handler="ChangeStatus">
-                                        <input type="hidden" name="BookingId" value="@booking.BookingId" />
-                                        <select name="NewStatus" class="form-control" required>
-                                            <option value="">-- Select Status --</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Confirmed">Confirmed</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-primary btn-sm">Change Status</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    @if (Model.isSessionUserAdmin()) {
+        <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="statusModalLabel">Change Booking Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped" id="bookingTable">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Court ID</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model.Bookings)
+                                {
+                                    <tr>
+                                        <td>@booking.BookingId</td>
+                                        <td>@booking.CourtId</td>
+                                        <td>@booking.StartTime</td>
+                                        <td>@booking.EndTime</td>
+                                        <td>@booking.Status</td>
+                                        <td>
+                                            <form method="post" asp-page-handler="ChangeStatus">
+                                                <input type="hidden" name="BookingId" value="@booking.BookingId" />
+                                                <select name="NewStatus" class="form-control" required>
+                                                    <option value="">-- Select Status --</option>
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Confirmed">Confirmed</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-primary btn-sm">Change Status</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
+    }
     <!-- Booking Modal -->
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -200,17 +208,20 @@
                                 <option value="Pay at Place">Pay at Place</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label">Services</label>
-                            <select id="serviceSelector" class="form-control">
+                        <div class="form-group align-items-center">
+                            <label class="control-label mr-2">Services</label>
+                            <div class="d-flex">
+                            <select id="serviceSelector" class="form-control mr-2">
                                 <option value="">-- Select Service --</option>
                                 @foreach (var service in Model.Services)
                                 {
                                     <option value="@service.ServiceId">@service.ServiceName</option>
                                 }
                             </select>
-                            <button type="button" class="btn btn-secondary" onclick="addService()">Add Service</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addService()">Add Service</button>
+                            </div>
                         </div>
+
                         <div id="servicesContainer" class="form-group">
                             <!-- Services will be added here dynamically -->
                         </div>

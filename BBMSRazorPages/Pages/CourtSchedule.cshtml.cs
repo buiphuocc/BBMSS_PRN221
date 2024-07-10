@@ -28,7 +28,6 @@ namespace BBMSRazorPages.Pages
         public List<Service> Services { get; set; }
 
 
-
         [BindProperty]
         public DateTime SelectedDate { get; set; }
 
@@ -283,6 +282,13 @@ namespace BBMSRazorPages.Pages
                 return Page();
             }
             return RedirectToPage("/Authentication/Login");
+        }
+
+        public bool isSessionUserAdmin()
+        {
+            string userRole = HttpContext.Session.GetString("UserRole");
+
+            return userRole != null && userRole.Equals("Admin");
         }
     }
 }
