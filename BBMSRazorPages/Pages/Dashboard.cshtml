@@ -39,7 +39,7 @@
             <div class="card text-white bg-warning mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Pending Payments</h5>
-                    <p class="card-text">fix</p>
+                    <p class="card-text">@Model.Bookings.Where(b => b.Status == "Pending").Count()</p>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
             <div class="card text-white bg-danger mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Cancelled Bookings</h5>
-                    <p class="card-text">fix</p>
+                    <p class="card-text">@Model.Bookings.Where(b => b.Status == "Cancelled").Count()</p>
                 </div>
             </div>
         </div>
