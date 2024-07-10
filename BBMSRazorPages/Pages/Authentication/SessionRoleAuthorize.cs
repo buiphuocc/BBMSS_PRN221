@@ -7,11 +7,11 @@ namespace BBMSRazorPages.Pages.Authentication
 {
     public class SessionRoleAuthorize : Attribute, IAuthorizationFilter
     {
-        private readonly string _role;
+        private readonly List<string> _roles;
 
-        public SessionRoleAuthorize(string role)
+        public SessionRoleAuthorize(params string[] roles)
         {
-            _role = role;
+            _roles = roles.ToList();
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
@@ -24,7 +24,7 @@ namespace BBMSRazorPages.Pages.Authentication
             }
             else
             {
-                if (UserRole == null || !UserRole.Equals(_role))
+                if (UserRole == null || _roles.Contains(UserRole))
                 {
                     context.Result = new RedirectToPageResult("/Error");
                 }

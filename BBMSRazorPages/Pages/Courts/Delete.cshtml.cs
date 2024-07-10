@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BBMSRazorPages.Pages.Courts
 {
-    [SessionRoleAuthorize("Admin")]
+    [SessionRoleAuthorize("Admin", "Manager")]
     public class DeleteModel : PageModel
     {
         private readonly ICourtService _courtService;

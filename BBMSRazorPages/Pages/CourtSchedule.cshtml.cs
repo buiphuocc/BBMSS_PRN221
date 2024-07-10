@@ -112,7 +112,7 @@ namespace BBMSRazorPages.Pages
 
             return Page();
         }
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             UserId = HttpContext.Session.GetInt32("UserId");
             if (UserId != null)
@@ -270,7 +270,7 @@ namespace BBMSRazorPages.Pages
                             $"Payment method: {newBooking.PaymentMethod}<br><br>" +
                             "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
 
-                        emailSender.SendEmailAsync(user.Email, subject, message);
+                        await emailSender.SendEmailAsync(user.Email, subject, message);
 
                         Console.WriteLine("Sent email to " + user.Email);
                     }

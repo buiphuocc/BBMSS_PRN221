@@ -6,7 +6,7 @@ using BBMSRazorPages.Pages.Authentication;
 
 namespace BBMSRazorPages.Pages.Courts
 {
-    [SessionRoleAuthorize("Admin")]
+    [SessionRoleAuthorize("Admin", "Manager")]
     public class DetailsModel : PageModel
     {
         private readonly ICourtService _courtService;
