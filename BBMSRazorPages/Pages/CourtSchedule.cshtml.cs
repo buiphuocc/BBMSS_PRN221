@@ -28,7 +28,6 @@ namespace BBMSRazorPages.Pages
         public List<Service> Services { get; set; }
 
 
-
         [BindProperty]
         public DateTime SelectedDate { get; set; }
 
@@ -93,6 +92,7 @@ namespace BBMSRazorPages.Pages
 
             return ""; // Default class if no booking or status doesn't match
         }
+
         public IActionResult OnPostChangeStatus(int BookingId, string NewStatus)
         {
             var booking = bookingService.GetBookingById(BookingId);
@@ -248,7 +248,7 @@ namespace BBMSRazorPages.Pages
                             $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
                             $"<strong>Booking Details:</strong><br>" +
                             $"Court name: {bookedCourt.CourtName}<br>" +
-                            $"On date: {newBooking.BookingDate}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
+                            $"On date: {newBooking.BookingDate.ToShortDateString()}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
 
                         if (bookingServices != null && bookingServices.Any())
                         {
@@ -282,6 +282,13 @@ namespace BBMSRazorPages.Pages
                 return Page();
             }
             return RedirectToPage("/Authentication/Login");
+        }
+
+        public bool isSessionUserAdmin()
+        {
+            string userRole = HttpContext.Session.GetString("UserRole");
+
+            return userRole != null && userRole.Equals("Admin");
         }
     }
 }

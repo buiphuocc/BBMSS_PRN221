@@ -8,17 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
 using Services.Interfaces;
 using BBMSRazorPages.Pages.Authentication;
+using Microsoft.IdentityModel.Tokens;
+using Services;
 
 namespace BBMSRazorPages.Pages.Users
 {
     [SessionRoleAuthorize("Admin")]
     public class DeleteModel : PageModel
     {
-        private readonly IUserService _userService;
+        private readonly IUserService userService;
+        private readonly IBookingService bookingService;
 
-        public DeleteModel(IUserService userService)
+        public DeleteModel(IUserService userService, IBookingService bookingService)
         {
-            _userService = userService;
+            this.userService = userService;
+            this.bookingService = bookingService;
         }
 
         [BindProperty]
@@ -26,12 +30,12 @@ namespace BBMSRazorPages.Pages.Users
 
         public IActionResult OnGet(int? id)
         {
-            if (id == null || _userService == null)
+            if (id == null || userService == null)
             {
                 return NotFound();
             }
 
-            var user = _userService.GetUserById((int)id);
+            var user = userService.GetUserById((int)id);
 
             if (user == null)
             {
@@ -46,14 +50,30 @@ namespace BBMSRazorPages.Pages.Users
 
         public IActionResult OnPost(int? id)
         {
-            if (id == null || _userService == null)
+            try
             {
-                return NotFound();
+                string message = "";
+                if (id == null || userService == null)
+                {
+                    return NotFound();
+                }
+                if (!bookingService.GetBookingsByUserId((int) id).IsNullOrEmpty())
+                {
+                    message = "Cannot delete because there are bookings of this user.";
+                }
+                else
+                {
+                    userService.DeleteUser((int)id);
+                }
+
+
+
+                return RedirectToPage("./Index", new { message });
             }
-
-            _userService.DeleteUser((int)id);
-
-            return RedirectToPage("./Index");
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
