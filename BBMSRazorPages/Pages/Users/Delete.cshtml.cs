@@ -60,6 +60,7 @@ namespace BBMSRazorPages.Pages.Users
                 if (!bookingService.GetBookingsByUserId((int) id).IsNullOrEmpty())
                 {
                     message = "Cannot delete because there are bookings of this user.";
+                    return RedirectToPage("./Delete", new {id, message });
                 }
                 else
                 {
@@ -68,7 +69,7 @@ namespace BBMSRazorPages.Pages.Users
 
 
 
-                return RedirectToPage("./Index", new { message });
+                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {

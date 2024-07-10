@@ -46,7 +46,44 @@
     
     <form method="post">
         <input type="hidden" asp-for="User.UserId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <input type="submit" value="Delete" class="btn btn-danger" onclick="checkMessage()" /> |
         <a asp-page="./Index">Back to List</a>
     </form>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Notification</h5>
+            </div>
+            <div class="modal-body">
+                @Request.Query["message"]
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var message = '@Request.Query["message"]';
+        if (message) {
+            $('#messageModal').modal('show');
+        }
+    });
+
+    function checkMessage() {
+        var message = '@Request.Query["message"]';
+        if (message) {
+            $('#messageModal').modal('show');
+        } else {
+            submitForm();
+        }
+    }
+
+    function submitForm() {
+        document.getElementById('deleteForm').submit();
+    }
+</script>

@@ -57,6 +57,7 @@ namespace BBMSRazorPages.Pages.Services
             if (!bookingServiceService.GetBookingServicesByServiceId(id).IsNullOrEmpty())
             {
                 message = "Cannot delete because there are Bookings of it";
+                return RedirectToPage("./Delete", new { id, message });
             }
             else
             {
@@ -65,7 +66,7 @@ namespace BBMSRazorPages.Pages.Services
 
             
 
-            return RedirectToPage("./Index", new {message});
+            return RedirectToPage("./Index");
         }
     }
 }

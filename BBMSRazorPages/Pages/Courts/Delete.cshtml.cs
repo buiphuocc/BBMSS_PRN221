@@ -60,6 +60,7 @@ namespace BBMSRazorPages.Pages.Courts
                 if (!bookingService.GetBookingsByCourtId(id).IsNullOrEmpty())
                 {
                     message = "Cannot delete because there are bookings of the court";
+                    return RedirectToPage("./Delete", new {id, message });
                 }
                 else
                 {
@@ -68,7 +69,7 @@ namespace BBMSRazorPages.Pages.Courts
 
                 
 
-                return RedirectToPage("./Index", new {message});
+                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
