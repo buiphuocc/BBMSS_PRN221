@@ -24,7 +24,7 @@ namespace BBMSRazorPages.Pages.Authentication
             }
             else
             {
-                if (UserRole == null || _roles.Contains(UserRole))
+                if (UserRole == null || !_roles.Contains(UserRole))
                 {
                     context.Result = new RedirectToPageResult("/Error");
                 }
