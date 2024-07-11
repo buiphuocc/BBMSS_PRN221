@@ -1,0 +1,8 @@
+﻿@model BBMSRazorPages.Pages.ScheduleBookingModel
+
+@foreach (var dayOfWeek in Model.DaysOfWeek)
+{
+    bool isDisabled = !Model.AvailableDaysOfWeek.Contains(dayOfWeek);
+    <input type="checkbox" id="@("checkbox_" + dayOfWeek)" name="SelectedDaysOfWeek" value="@dayOfWeek" @(isDisabled ? "disabled" : "") />
+    <label for="@("checkbox_" + dayOfWeek)">@dayOfWeek</label>
+}
