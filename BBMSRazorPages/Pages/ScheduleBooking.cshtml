@@ -1,0 +1,334 @@
+﻿@page
+@model BBMSRazorPages.Pages.ScheduleBookingModel
+@{
+    ViewData["Title"] = "Schedule Booking";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Schedule</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BBMSRazorPages.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/styles.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1 style="text-align:center">Schedule Booking</h1>
+    <div class="container">
+        <form method="post">
+            <div class="month-year-picker">
+                <label for="month">Month:</label>
+                <select id="month" name="Month">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        bool isSelected = i == DateTime.Now.Month;
+                        @if (isSelected)
+                        {
+                            <option value="@i" selected>@(new DateTime(Model.Year, i, 1).Month)</option>
+                        }
+                        else
+                        {
+                            <option value="@i">@(new DateTime(Model.Year, i, 1).Month)</option>
+                        }
+
+                    }
+                </select>
+
+                <label for="year">Year:</label>
+                <select id="year" name="Year" onchange="updateMonthOptions()">
+                    @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 1; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+
+            </div>
+            <div style="margin-top: 10px">
+                Times list: <br>
+                @foreach (var time in Model.TimesList)
+                {
+                    <div class="bordered-rectangle" onclick="toggleBackgroundColor(this)">
+                        <div class="content">
+                            @time
+                        </div>
+                    </div>
+                }
+            </div>
+            <input type="hidden" name="FromTime" id="FromTimeInput">
+            <input type="hidden" name="ToTime" id="ToTimeInput">
+            <div style="margin-top: 10px">
+                Days of week: <br>
+                <div id="daysOfWeekContainer" class="checkbox-item">
+                    @* @foreach (var dayOfWeek in Model.DaysOfWeek)
+                    {
+
+                    <input type="checkbox" id="@("checkbox_" + dayOfWeek)" name="@("checkbox_" + dayOfWeek)" value="@dayOfWeek" />
+                    <label for="@("checkbox_" + dayOfWeek)">@dayOfWeek</label>
+                    } *@
+                    @await Html.PartialAsync("_DaysOfWeekPartial", Model)
+                </div>
+            </div>
+            <div>
+                Services: <br>
+                <button type="button" class="add-service-button" onclick="addService()">Add Service</button>
+                <div id="serviceContainer">
+                    <!-- Container for dynamically added service blocks -->
+                </div>
+            </div>
+            <button type="submit" class="booking-button">Booking</button>
+        </form>
+
+    </div>
+    <script>
+        var currentMonth = @Model.Month;
+        var currentYear = @Model.Year;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateMonthOptions();
+        });
+
+        function updateMonthOptions() {
+            var selectedYear = document.getElementById('year').value;
+            var monthSelect = document.getElementById('month');
+
+            for (var i = 0; i < monthSelect.options.length; i++) {
+                if (selectedYear == currentYear && i + 1 < currentMonth) {
+                    monthSelect.options[i].disabled = true;
+                } else if (selectedYear > currentYear) {
+                    monthSelect.options[i].disabled = false;
+                }
+            }
+        }
+
+        let lastClickedElement = null;
+        let firstClickedElement = null;
+        let secondClickedElement = null;
+        let clickCounter = 0;
+        let fromTime = new Date();
+        let toTime = new Date();
+        let rectangles = document.querySelectorAll('.bordered-rectangle');
+
+        function toggleBackgroundColor(element) {
+            if (firstClickedElement === null && secondClickedElement === null) {
+                element.classList.toggle('cyan-background');
+                firstClickedElement = element;
+                return;
+            }
+            if (firstClickedElement !== null && firstClickedElement === element && secondClickedElement === null) {
+                element.classList.remove('cyan-background');
+                firstClickedElement = null;
+                return;
+            }
+            if (firstClickedElement !== null && secondClickedElement === null) {
+                element.classList.toggle('cyan-background');
+
+                let secondContent = element.querySelector('.content').textContent.trim();
+                let secondTimeParts = secondContent.split(':');
+                fromTime.setHours(secondTimeParts[0]);
+                fromTime.setMinutes(secondTimeParts[1]);
+
+                let firstContent = firstClickedElement.querySelector('.content').textContent.trim();
+                let firstTimeParts = firstContent.split(':');
+                toTime.setHours(firstTimeParts[0]);
+                toTime.setMinutes(firstTimeParts[1]);
+
+                if (parseInt(secondTimeParts[0], 10) < parseInt(firstTimeParts[0], 10)) {
+                    secondClickedElement = firstClickedElement;
+                    firstClickedElement = element
+                }
+                else if ((parseInt(secondTimeParts[0], 10) == parseInt(firstTimeParts[0], 10)) && (parseInt(secondTimeParts[1], 10) < parseInt(firstTimeParts[1], 10))) {
+                    secondClickedElement = firstClickedElement;
+                    firstClickedElement = element
+                }
+                else {
+                    secondClickedElement = element;
+                }
+
+                let start = false;
+                rectangles.forEach(rectangle => {
+                    if (!start && rectangle !== firstClickedElement) {
+                        return;
+                    }
+                    if (!start && rectangle === firstClickedElement) {
+                        start = !start;
+                        return;
+                    }
+                    if (start && rectangle !== firstClickedElement && rectangle !== secondClickedElement) {
+                        rectangle.classList.add('cyan-background');
+                        return;
+                    }
+                    if (start && rectangle === secondClickedElement) {
+                        start = !start;
+                        return;
+                    }
+                    if (!start && rectangle !== secondClickedElement) {
+                        return;
+                    }
+
+                });
+                const month = $('#month').val();
+                const year = $('#year').val();
+                updateDaysOfWeek(month, year);
+                setTimesValue(firstClickedElement, secondClickedElement);
+                return;
+            }
+            if (firstClickedElement !== null && secondClickedElement !== null) {
+                firstClickedElement.classList.remove('cyan-background');
+                secondClickedElement.classList.remove('cyan-background');
+                rectangles.forEach(rectangle => {
+                    rectangle.classList.remove('cyan-background');
+
+                });
+
+                element.classList.toggle('cyan-background');
+                firstClickedElement = element;
+                secondClickedElement = null;
+                resetDaysOfWeek();
+                return;
+            }
+        }
+
+        function updateDaysOfWeek(month, year) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Page("/ScheduleBooking", "UpdateDaysOfWeek")&month=" + month + "&year=" + year,
+                success: function (result) {
+                    $('#daysOfWeekContainer').html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: " + error);
+                    console.error("Status: " + status);
+                    console.error(xhr);
+                }
+            });
+        }
+
+        function resetDaysOfWeek() {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Page("/ScheduleBooking", "ResetDaysOfWeek")",
+                success: function (result) {
+                    $('#daysOfWeekContainer').html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: " + error);
+                    console.error("Status: " + status);
+                    console.error(xhr);
+                }
+            });
+        }
+
+        function disableOnClick() {
+            document.getElementById('bordered-rectangle').onclick = null;
+        }
+
+        function setTimesValue(firstElement, secondElement) {
+            var firstTimeValue = firstElement.querySelector('.content').innerText;
+            var secondTimeValue = secondElement.querySelector('.content').innerText;
+
+            // Set the values of the hidden inputs
+            document.getElementById('FromTimeInput').value = firstTimeValue;
+            document.getElementById('ToTimeInput').value = secondTimeValue;
+
+            // Fetch request to update times on the server
+            fetch('@Url.Page("/ScheduleBooking", "SetTimes")&fromTime=' + encodeURIComponent(firstTimeValue) + "&toTime=" + encodeURIComponent(secondTimeValue), {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Time property updated successfully.');
+                    } else {
+                        console.error('Failed to update time property.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating time property:', error);
+                });
+        }
+
+        let serviceCounter = 0;
+
+        async function addService() {
+            serviceCounter++;
+
+            // Create a new service container
+            const serviceContainer = document.createElement('div');
+            serviceContainer.className = 'service-container';
+
+            // Create a new dropdown for the service
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown';
+            dropdown.id = `dropdown_${serviceCounter}`;
+
+            // Populate the dropdown with options fetched via AJAX
+            await fetchOptions(dropdown);
+
+            // Add the dropdown to the service container
+            serviceContainer.appendChild(dropdown);
+
+            // Create an amount block for the service
+            const amountBlock = document.createElement('div');
+            amountBlock.className = 'amount-block';
+            amountBlock.innerHTML = `
+                                        <div class="amount-controls">
+                        <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
+                    </div>
+                            `;
+
+            // Add the amount block to the service container
+            serviceContainer.appendChild(amountBlock);
+
+            // Append the new service container to the main container
+            document.getElementById('serviceContainer').appendChild(serviceContainer);
+        }
+
+        async function fetchOptions(dropdown) {
+            try {
+                const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
+                if (!response.ok) {
+                    throw new Error('Failed to fetch options');
+                }
+                const options = await response.json();
+
+                // Populate the dropdown with fetched options
+                dropdown.innerHTML = `
+                                            <select name="SelectedServices" ">
+                                        ${options.map(option => `<option value="${option.id}">${option.name}</option>`).join('')}
+                                    </select>
+                                `;
+            } catch (error) {
+                console.error('Error fetching options:', error);
+            }
+        }
+
+        function updateCounter(select) {
+            const selectedServiceId = select.value;
+            console.log('Selected Service ID:', selectedServiceId);
+            // You can now use selectedServiceId as needed (e.g., store it for further processing)
+        }
+
+        function incrementAmount(button) {
+            const input = button.previousElementSibling;
+            input.value = parseInt(input.value, 10) + 1;
+        }
+
+        function decrementAmount(button) {
+            const input = button.nextElementSibling;
+            if (parseInt(input.value, 10) > 1) {
+                input.value = parseInt(input.value, 10) - 1;
+            }
+        }
+
+        // $(document).ready(function () {
+        //     $('#updateDaysOfWeekBtn').click(function () {
+        //         updateDaysOfWeek();
+        //     });
+        // });
+    </script>
+</body>
+</html>
