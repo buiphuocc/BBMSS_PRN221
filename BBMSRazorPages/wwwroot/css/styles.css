@@ -1,0 +1,155 @@
+﻿.bordered-rectangle {
+    border: 2px solid #000;
+    padding: 10px; /* Adjust padding as needed */
+    width: fit-content; /* Adjust width to fit content */
+    display: inline-block; /* Make it inline to fit content */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px; /* Add border-radius for rounded corners */
+    margin: 5px;
+}
+
+.disabled-rectangle {
+    background-color: lightgray;
+}
+
+.bordered-rectangle:hover {
+    background-color: #f0f0f0;
+}
+
+.cyan-background {
+    background-color: cyan; /* Cyan background color */
+}
+
+.toggle {
+    background-color: lightgreen; /* Toggle background color */
+}
+
+.content {
+    text-align: center;
+}
+
+.dimmed-content {
+    color: #A9A9A9; /* Dark gray */
+    opacity: 0.6;
+}
+
+.checkbox-item {
+    margin: 10px; /* Adjust margin as needed */
+}
+
+    .checkbox-item input[type="checkbox"] {
+        transform: scale(1.5); /* Increase checkbox size */
+        margin: 10px; /* Adjust spacing between checkbox and label */
+    }
+
+.booking-button {
+    background-color: purple;
+    color: white; /* Text color */
+    border: none; /* Remove default border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 10px 20px; /* Padding for size */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease;
+}
+
+    .booking-button:hover {
+        background-color: darkviolet; /* Darker purple on hover */
+    }
+
+.service-container {
+    margin-bottom: 20px;
+    display: flex; /* Use flexbox to align items */
+    align-items: center; /* Align items vertically */
+}
+
+.dropdown {
+    flex: 1; /* Take remaining space */
+    width: fit-content;
+}
+
+.amount-block {
+    margin-left: 10px;
+}
+
+/*.amount-input {
+    width: fit-content;
+    text-align: center;
+}*/
+
+.amount-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+}
+
+    /* Button styling */
+    .amount-controls button {
+        padding: 5px 10px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .amount-controls button:hover {
+            background-color: #45a049;
+        }
+
+    /* Number input styling */
+    .amount-controls input[type="number"] {
+        padding: 8px;
+        width: 60px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+.add-service-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .add-service-button:hover {
+        background-color: #0056b3;
+    }
+
+select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    width: 200px; /* Adjust width as needed */
+    appearance: none; /* Remove default appearance */
+    outline: none; /* Remove focus outline */
+    cursor: pointer;
+}
+
+    select:hover,
+    select:focus {
+        border-color: #007bff; /* Change border color on hover/focus */
+    }
+
+/* Option styling */
+option {
+    padding: 5px 10px;
+    font-size: 16px;
+}
+
+    /* Optional: Style selected option differently */
+    option:checked {
+        background-color: #007bff;
+        color: #fff;
+    }
