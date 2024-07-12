@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,29 @@ namespace DataAccessLayer
             _context.SaveChanges();
         }
 
+        public static void AddBookingWithServices(Booking booking)
+        {
+            try
+            {
+                using var _context = new BadmintonBookingSystemContext();
+                var bookingServices = booking.BookingServices;
+                booking.BookingServices = new List<BookingService>();
+                _context.Bookings.Add(booking);
+                if(!bookingServices.IsNullOrEmpty())
+                {
+                    foreach(var bookingService in bookingServices)
+                    {
+                        _context.BookingServices.Add(bookingService);
+                    }
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public static void UpdateBooking(Booking booking)
         {
             using var _context = new BadmintonBookingSystemContext();
@@ -91,6 +115,31 @@ namespace DataAccessLayer
                 .ThenInclude(bs => bs.Service)
                 .Where(b => b.CourtId == courtId)
                 .ToList();
+        }
+
+        public static IList<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime)
+        {
+            var bookings = new List<Booking>();
+            try
+            {
+                using var _context = new BadmintonBookingSystemContext();
+                bookings = _context.Bookings
+                    .Include (b => b.Court)
+                    .Where(b 
+                        => (b.BookingDate == date) 
+                            && (b.StartTime == startTime 
+                            || b.EndTime == endTime 
+                            || (b.StartTime >= startTime && b.StartTime < endTime) 
+                            || (b.EndTime > startTime && b.EndTime <= endTime) 
+                            || (b.StartTime < startTime && b.EndTime > endTime)) 
+                            && (b.Status.Equals("Pending") || b.Status.Equals("Comfirmed")))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return bookings;
         }
     }
 }

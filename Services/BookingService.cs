@@ -56,5 +56,28 @@ namespace Services
         {
             return bookingReppository.GetBookingsByCourtId(courtId);
         }
+
+        public List<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime)
+        {
+            try
+            {
+                return bookingReppository.GetBookingsByDateAndStartTimeAndEndTime(date, startTime, endTime).ToList();
+            }catch
+            {
+                throw;
+            }
+        }
+
+        public void AddBookingWithServices(Booking booking)
+        {
+            try
+            {
+                bookingReppository.AddBookingWithServices(booking);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

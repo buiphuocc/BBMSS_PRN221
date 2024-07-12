@@ -17,5 +17,7 @@ namespace Repositories.Interfaces
         List<Booking> GetBookingsByBookingDate(DateTime bookingDate);
         IList<Booking> GetBookingsByUserId(int userId);
         IList<Booking> GetBookingsByCourtId(int? courtId);
+        IList<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime);
+        void AddBookingWithServices(Booking booking);
     }
 }
