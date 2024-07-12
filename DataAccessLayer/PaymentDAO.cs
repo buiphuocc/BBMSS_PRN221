@@ -24,7 +24,34 @@ namespace DataAccessLayer
                         _context.Bookings.Add(booking);
                     }
                 }
-                //_context.Pay
+                _context.Payments.Add(payment);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public static void SavePaymentWithBookingIds(Payment payment, List<int> bookingIds)
+        {
+            try
+            {
+                using var _context = new BadmintonBookingSystemContext();
+                var bookings = new List<Booking>();
+                foreach(var bookingId in bookingIds)
+                {
+                    var booking = _context.Bookings.Find(bookingId);
+                    if (booking == null)
+                        throw new Exception($"Booking with id {bookingId} not found.");
+                    bookings.Add(booking);
+                }
+                if (!bookings.IsNullOrEmpty())
+                {
+                    payment.Bookings = bookings;
+                }
+                _context.Payments.Add(payment);
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {

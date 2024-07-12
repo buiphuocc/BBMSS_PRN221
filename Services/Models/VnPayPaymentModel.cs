@@ -18,5 +18,6 @@ namespace Services.Models
         public long Amount { get; set; }
 
         public DateTime PayDate { get; set; }
+
     }
 }

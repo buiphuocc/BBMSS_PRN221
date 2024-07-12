@@ -19,6 +19,7 @@ namespace Services.Interfaces
         IList<Booking> GetBookingsByCourtId(int? courtId);
         List<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime);
         void AddBookingWithServices(Booking booking);
+        Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod);
     }
 }
  

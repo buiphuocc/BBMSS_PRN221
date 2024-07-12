@@ -1,0 +1,57 @@
+﻿@page
+@model BBMSRazorPages.Pages.SuccessfulPaymentModel
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<h1>Payment Successful!</h1>
+
+<p>Your payment has been processed successfully.</p>
+
+<div id="successNotification" class="success-notification">
+    <span class="notification-icon">&#10004;</span>
+    <span class="notification-text">Your payment has been processed successfully.</span>
+</div>
+
+<p><a asp-page="/Index">Go to home page</a></p>
+
+@section Scripts {
+    <script>
+        // Function to fade out the success notification after 3 seconds
+        setTimeout(function () {
+            var notification = document.getElementById('successNotification');
+            if (notification) {
+                notification.style.opacity = '0';
+                setTimeout(function () {
+                    notification.style.display = 'none';
+                }, 1000); // Fade out animation time
+            }
+        }, 3000); // Display time
+    </script>
+}
+
+<style>
+    .success-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: white;
+        FFF color: #4CAF50;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+        opacity: 1;
+        transition: opacity 1s ease-out;
+    }
+
+    .notification-icon {
+        font-size: 20px;
+        margin-right: 10px;
+        color: #4CAF50;
+    }
+
+    .notification-text {
+        font-size: 16px;
+    }
+</style>

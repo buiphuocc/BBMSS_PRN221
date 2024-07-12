@@ -13,10 +13,10 @@ namespace Services.Interfaces
     {
         string CreatePaymentUrl(Payment paymentModel, HttpContext context, string currentPath);
 
-        string CreatePaymentUrlForBooking(Booking bookingModel, HttpContext context, string currentPath);
+        string CreatePaymentUrlForBooking(List<Booking> bookings, HttpContext context);
 
         VnPayPaymentModel PaymentExecute(IQueryCollection collections);
 
-        Task<VnPayPaymentModel> BookingPaymentExecute(int id, IQueryCollection collections);
+        VnPayPaymentModel BookingPaymentExecute(IQueryCollection collections);
     }
 }

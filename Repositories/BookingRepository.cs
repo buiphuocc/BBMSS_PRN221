@@ -63,5 +63,8 @@ namespace Repositories
 
         public void AddBookingWithServices(Booking booking)
             => BookingDAO.AddBookingWithServices(booking);
+
+        public Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod)
+            => BookingDAO.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
     }
 }

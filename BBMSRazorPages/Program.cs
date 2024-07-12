@@ -46,6 +46,11 @@ namespace BBMSSolution
             builder.Services.AddScoped<IServiceService, ServiceService>();
             //Email sender
             builder.Services.AddScoped<IEmailSender, EmailSender>();
+            //VnPay
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+            //Payment
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             var app = builder.Build();
 

@@ -16,13 +16,16 @@ namespace BBMSRazorPages.Pages
 
         private readonly IBookingService bookingService;
 
+        private readonly IVnPayService vnPayService;
 
 
-        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService)
+
+        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService, IVnPayService vnPayService)
         {
             this.serviceService = serviceService;
             this.courtService = courtService;
             this.bookingService = bookingService;
+            this.vnPayService = vnPayService;
         }
 
         [BindProperty]
@@ -198,6 +201,12 @@ namespace BBMSRazorPages.Pages
             float totalHours = (float)difference.TotalHours;
 
             // Create booking for each day
+            var services = new List<Service>();
+            foreach(var id in SelectedServiceIds)
+            {
+                var service = serviceService.GetServiceById(id);
+                services.Add(service);
+            }
             var userId = UserId;
             foreach(var day in bookingDays)
             {
@@ -235,11 +244,31 @@ namespace BBMSRazorPages.Pages
                     };
                     bookingServices.Add(bookingService);
                 }
+                if (!bookingServices.IsNullOrEmpty())
+                {
+                    foreach(var bookingService in bookingServices)
+                    {
+                        var service = services.FirstOrDefault(s => s.ServiceId == bookingService.ServiceId);
+                        var price = service.ServicePrice;
+                        booking.TotalPrice += (price * bookingService.Quantity);
+                    }
+                }
                 booking.BookingServices = bookingServices;
                 bookingService.AddBookingWithServices(booking);
             }
+            // Get bookings for payment
+            var bookings = new List<BusinessObjects.Booking>();
+            foreach (var day in bookingDays)
+            {
+                var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(day, SelectedCourtId, startTime, endTime, "VnPay");
+                if(createdBooking != null)
+                {
+                    bookings.Add(createdBooking);
+                }
+            }
+            var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
 
-            return RedirectToPage();
+            return Redirect(paymentUrl);
         }
 
         public IActionResult OnGetSetTimes(string fromTime, string toTime)

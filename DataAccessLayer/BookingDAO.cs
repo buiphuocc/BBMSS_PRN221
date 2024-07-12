@@ -141,5 +141,19 @@ namespace DataAccessLayer
             }
             return bookings;
         }
+
+        public static Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            return _context.Bookings
+                .Include(b => b.Court)
+                .FirstOrDefault(b 
+                => (b.BookingDate == bookingDate) 
+                    && (b.CourtId == courtId) 
+                    && (b.StartTime == startTime) 
+                    && (b.EndTime == endTime) 
+                    && (b.PaymentMethod.Equals(paymentMethod))
+                    && (b.Status.Equals("Pending")));
+        }
     }
 }

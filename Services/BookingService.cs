@@ -79,5 +79,17 @@ namespace Services
                 throw;
             }
         }
+
+        public Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod)
+        {
+            try
+            {
+                return bookingReppository.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
