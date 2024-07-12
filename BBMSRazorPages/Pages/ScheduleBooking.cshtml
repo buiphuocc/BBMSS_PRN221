@@ -19,13 +19,14 @@
 <body>
     <h1 style="text-align:center">Schedule Booking</h1>
     <div class="container">
+        <p style="color: red">@TempData["PropertyRequired"]</p>
         <form method="post">
             <div class="month-year-picker">
                 <label for="month">Month:</label>
                 <select id="month" name="Month">
                     @for (int i = 1; i <= 12; i++)
                     {
-                        bool isSelected = i == DateTime.Now.Month;
+                        bool isSelected = i - 1 == DateTime.Now.Month;
                         @if (isSelected)
                         {
                             <option value="@i" selected>@(new DateTime(Model.Year, i, 1).Month)</option>
@@ -63,14 +64,15 @@
             <div style="margin-top: 10px">
                 Days of week: <br>
                 <div id="daysOfWeekContainer" class="checkbox-item">
-                    @* @foreach (var dayOfWeek in Model.DaysOfWeek)
+                    @foreach (var dayOfWeek in Model.DaysOfWeek)
                     {
-
-                    <input type="checkbox" id="@("checkbox_" + dayOfWeek)" name="@("checkbox_" + dayOfWeek)" value="@dayOfWeek" />
-                    <label for="@("checkbox_" + dayOfWeek)">@dayOfWeek</label>
-                    } *@
-                    @await Html.PartialAsync("_DaysOfWeekPartial", Model)
+                        <input type="checkbox" id="@("checkbox_" + dayOfWeek)" name="SelectedDaysOfWeek" value="@dayOfWeek" onclick="updateSelectedDays()" />
+                        <label for="@("checkbox_" + dayOfWeek)">@dayOfWeek</label>
+                    }
                 </div>
+            </div>
+            <div class="courts" id="availableCourtsContainer">
+                @await Html.PartialAsync("_AvailableCourtsPartial", Model)
             </div>
             <div>
                 Services: <br>
@@ -81,7 +83,7 @@
             </div>
             <button type="submit" class="booking-button">Booking</button>
         </form>
-
+        
     </div>
     <script>
         var currentMonth = @Model.Month;
@@ -94,9 +96,25 @@
         function updateMonthOptions() {
             var selectedYear = document.getElementById('year').value;
             var monthSelect = document.getElementById('month');
+            let currentDate = new Date();
+            let day = currentDate.getDate();
+            console.log('Day:', day);
+            const daysInMonth = @Model.DaysInCurrentMonth;
+            console.log('Days in month:', daysInMonth);
+            let lastDay = daysInMonth - 7;
+            console.log('Last day:', lastDay);
 
             for (var i = 0; i < monthSelect.options.length; i++) {
-                if (selectedYear == currentYear && i + 1 < currentMonth) {
+                if (selectedYear == currentYear && i + 1 <= currentMonth) {
+                    monthSelect.options[i].disabled = true;
+                } 
+                else if (selectedYear == currentYear && i + 1 > currentMonth) {
+                    if (day <= lastDay) {
+                        console.log('Current day <= last day');
+                        monthSelect.options[i].disabled = false;
+                        return;
+                    }
+                    console.log('Current day > last day');
                     monthSelect.options[i].disabled = true;
                 } else if (selectedYear > currentYear) {
                     monthSelect.options[i].disabled = false;
@@ -170,9 +188,8 @@
                     }
 
                 });
-                const month = $('#month').val();
-                const year = $('#year').val();
-                updateDaysOfWeek(month, year);
+                //updateDaysOfWeek(month, year, firstTimeValue, secondTimeValue);
+                updateSelectedDays();
                 setTimesValue(firstClickedElement, secondClickedElement);
                 return;
             }
@@ -187,15 +204,15 @@
                 element.classList.toggle('cyan-background');
                 firstClickedElement = element;
                 secondClickedElement = null;
-                resetDaysOfWeek();
+                updateSelectedDays();
                 return;
             }
         }
 
-        function updateDaysOfWeek(month, year) {
+        function updateDaysOfWeek(month, year, fromTime, toTime) {
             $.ajax({
                 type: "GET",
-                url: "@Url.Page("/ScheduleBooking", "UpdateDaysOfWeek")&month=" + month + "&year=" + year,
+                url: "@Url.Page("/ScheduleBooking", "UpdateDaysOfWeek")&month=" + month + "&year=" + year + "&fromTime=" + fromTime + "&toTime=" + toTime,
                 success: function (result) {
                     $('#daysOfWeekContainer').html(result);
                 },
@@ -235,76 +252,177 @@
             document.getElementById('ToTimeInput').value = secondTimeValue;
 
             // Fetch request to update times on the server
-            fetch('@Url.Page("/ScheduleBooking", "SetTimes")&fromTime=' + encodeURIComponent(firstTimeValue) + "&toTime=" + encodeURIComponent(secondTimeValue), {
-                method: 'GET'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Time property updated successfully.');
-                    } else {
-                        console.error('Failed to update time property.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating time property:', error);
-                });
+            // fetch('@Url.Page("/ScheduleBooking", "SetTimes")&fromTime=' + encodeURIComponent(firstTimeValue) + "&toTime=" + encodeURIComponent(secondTimeValue), {
+            //     method: 'GET'
+            // })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         if (data.success) {
+            //             console.log('Time property updated successfully.');
+            //         } else {
+            //             console.error('Failed to update time property.');
+            //         }
+            //     })
+            //     .catch(error => {
+            //         console.error('Error updating time property:', error);
+            //     });
         }
 
-        let serviceCounter = 0;
+        // let serviceCounter = 0;
 
-        async function addService() {
-            serviceCounter++;
+        // async function addService() {
+        //     serviceCounter++;
 
-            // Create a new service container
-            const serviceContainer = document.createElement('div');
-            serviceContainer.className = 'service-container';
+        //     // Create a new service container
+        //     const serviceContainer = document.createElement('div');
+        //     serviceContainer.className = 'service-container';
 
-            // Create a new dropdown for the service
-            const dropdown = document.createElement('div');
-            dropdown.className = 'dropdown';
-            dropdown.id = `dropdown_${serviceCounter}`;
+        //     // Create a new dropdown for the service
+        //     const dropdown = document.createElement('div');
+        //     dropdown.className = 'dropdown';
+        //     dropdown.id = `dropdown_${serviceCounter}`;
 
-            // Populate the dropdown with options fetched via AJAX
-            await fetchOptions(dropdown);
+        //     // Populate the dropdown with options fetched via AJAX
+        //     await fetchOptions(dropdown);
 
-            // Add the dropdown to the service container
-            serviceContainer.appendChild(dropdown);
+        //     // Add the dropdown to the service container
+        //     serviceContainer.appendChild(dropdown);
 
-            // Create an amount block for the service
-            const amountBlock = document.createElement('div');
-            amountBlock.className = 'amount-block';
-            amountBlock.innerHTML = `
-                                        <div class="amount-controls">
+        //     // Create an amount block for the service
+        //     const amountBlock = document.createElement('div');
+        //     amountBlock.className = 'amount-block';
+        //     amountBlock.innerHTML = `
+        //                                 <div class="amount-controls">
+        //                 <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
+        //             </div>
+        //                     `;
+
+        //     // Add the amount block to the service container
+        //     serviceContainer.appendChild(amountBlock);
+
+        //     // Create a remove button
+        //     const removeButton = document.createElement('button');
+        //     removeButton.type = 'button';
+        //     removeButton.className = 'remove-service-button';
+        //     removeButton.innerText = 'Remove';
+        //     removeButton.onclick = function () {
+        //         removeService(serviceContainer.id);
+        //     };
+
+        //     // Add the remove button to the service container
+        //     serviceContainer.appendChild(removeButton);
+
+        //     // Append the new service container to the main container
+        //     document.getElementById('serviceContainer').appendChild(serviceContainer);
+        // }
+
+        // async function fetchOptions(dropdown) {
+        //     try {
+        //         const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
+        //         if (!response.ok) {
+        //             throw new Error('Failed to fetch options');
+        //         }
+        //         const options = await response.json();
+
+        //         // Populate the dropdown with fetched options
+        //         dropdown.innerHTML = `
+        //                                     <select class="service-select" name="SelectedServices" ">
+        //                                 ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
+        //                             </select>
+        //                         `;
+        //     } catch (error) {
+        //         console.error('Error fetching options:', error);
+        //     }
+        // }
+
+        // function removeService(containerId) {
+        //     const serviceContainer = document.getElementById(containerId);
+        //     if (serviceContainer) {
+        //         serviceContainer.remove();
+        //     }
+        // }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let serviceCounter = 0;
+
+            async function addService() {
+                serviceCounter++;
+
+                // Create a new service container
+                const serviceContainer = document.createElement('div');
+                serviceContainer.className = 'service-container';
+                serviceContainer.id = `serviceContainer_${serviceCounter}`;
+
+                // Create a new dropdown for the service
+                const dropdown = document.createElement('div');
+                dropdown.className = 'dropdown';
+                dropdown.id = `dropdown_${serviceCounter}`;
+
+                // Populate the dropdown with options fetched via AJAX
+                await fetchOptions(dropdown);
+
+                // Add the dropdown to the service container
+                serviceContainer.appendChild(dropdown);
+
+                // Create an amount block for the service
+                const amountBlock = document.createElement('div');
+                amountBlock.className = 'amount-block';
+                amountBlock.innerHTML = `
+                    <div class="amount-controls">
                         <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
                     </div>
-                            `;
+                `;
 
-            // Add the amount block to the service container
-            serviceContainer.appendChild(amountBlock);
+                // Add the amount block to the service container
+                serviceContainer.appendChild(amountBlock);
 
-            // Append the new service container to the main container
-            document.getElementById('serviceContainer').appendChild(serviceContainer);
-        }
+                // Create a remove button
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'remove-service-button';
+                removeButton.innerText = 'Remove';
+                removeButton.onclick = function () {
+                    console.log('Remove button clicked');
+                    removeService(serviceContainer.id);
+                };
 
-        async function fetchOptions(dropdown) {
-            try {
-                const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
-                if (!response.ok) {
-                    throw new Error('Failed to fetch options');
-                }
-                const options = await response.json();
+                // Add the remove button to the service container
+                console.log('Appending remove button to service container:', serviceContainer);
+                serviceContainer.appendChild(removeButton);
 
-                // Populate the dropdown with fetched options
-                dropdown.innerHTML = `
-                                            <select name="SelectedServices" ">
-                                        ${options.map(option => `<option value="${option.id}">${option.name}</option>`).join('')}
-                                    </select>
-                                `;
-            } catch (error) {
-                console.error('Error fetching options:', error);
+                // Append the new service container to the main container
+                document.getElementById('serviceContainer').appendChild(serviceContainer);
             }
-        }
+
+            async function fetchOptions(dropdown) {
+                try {
+                    const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch options');
+                    }
+                    const options = await response.json();
+
+                    // Populate the dropdown with fetched options
+                    dropdown.innerHTML = `
+                                <select class="service-select" name="SelectedServiceIds">
+                            ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
+                        </select>
+                    `;
+                } catch (error) {
+                    console.error('Error fetching options:', error);
+                }
+            }
+
+            function removeService(containerId) {
+                const serviceContainer = document.getElementById(containerId);
+                if (serviceContainer) {
+                    serviceContainer.remove();
+                }
+            }
+
+            // Add initial event listener for addService button
+            document.querySelector('.add-service-button').addEventListener('click', addService);
+        });
 
         function updateCounter(select) {
             const selectedServiceId = select.value;
@@ -312,23 +430,65 @@
             // You can now use selectedServiceId as needed (e.g., store it for further processing)
         }
 
-        function incrementAmount(button) {
-            const input = button.previousElementSibling;
-            input.value = parseInt(input.value, 10) + 1;
-        }
-
-        function decrementAmount(button) {
-            const input = button.nextElementSibling;
-            if (parseInt(input.value, 10) > 1) {
-                input.value = parseInt(input.value, 10) - 1;
+        function updateSelectedDays() {
+            const month = $('#month').val();
+            const year = $('#year').val();
+            if (firstClickedElement === null || secondClickedElement === null){
+                console.log('No time selected');
+                resetAvailableCourts();
+                return;
             }
+            var firstTimeValue = firstClickedElement.querySelector('.content').innerText;
+            if (secondClickedElement === null) {
+                console.log('No time selected');
+                resetAvailableCourts();
+                return;
+            }
+            var secondTimeValue = secondClickedElement.querySelector('.content').innerText;
+            const checkboxes = document.querySelectorAll('input[name="SelectedDaysOfWeek"]:checked');
+            if (checkboxes.length === 0) {
+                console.log('No days selected');
+                resetAvailableCourts();
+                return; // Terminate the function early if no checkboxes are selected
+            }
+            const selectedDays = Array.from(checkboxes).map(cb => cb.value);
+            console.log('Selected days:', selectedDays);
+
+            // Send the selectedDays array as a parameter in a GET request
+            const params = new URLSearchParams({ days: selectedDays.join(',') }).toString();
+            //const url = `/your-endpoint?${params}`;
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Page("/ScheduleBooking", "UpdateAvailableCourts")&month=" + month + "&year=" + year + "&fromTime=" + firstTimeValue + "&toTime=" + secondTimeValue + "&daysOfWeek=" + params,
+                success: function (result) {
+                    $('#availableCourtsContainer').html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: " + error);
+                    console.error("Status: " + status);
+                    console.error(xhr);
+                }
+            });
         }
 
-        // $(document).ready(function () {
-        //     $('#updateDaysOfWeekBtn').click(function () {
-        //         updateDaysOfWeek();
-        //     });
-        // });
+        function resetAvailableCourts() {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Page("/ScheduleBooking", "ResetAvailableCourts")",
+                success: function (result) {
+                    $('#availableCourtsContainer').html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: " + error);
+                    console.error("Status: " + status);
+                    console.error(xhr);
+                }
+            });
+        }
     </script>
 </body>
 </html>
+@{
+    TempData.Clear();
+}

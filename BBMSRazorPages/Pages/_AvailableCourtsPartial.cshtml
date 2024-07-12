@@ -1,0 +1,13 @@
+﻿@model BBMSRazorPages.Pages.ScheduleBookingModel
+<label for="courtSelect">Court:</label>
+@* @if (!Model.AvailableCourts.Any())
+{
+    <p>There is no court available with this time frame and days of week.</p>
+} *@
+<select id="courtSelect" name="SelectedCourtId" class="select-court">
+    <option value="" disabled selected>Select a court</option>
+    @foreach (var court in Model.AvailableCourts)
+    {
+        <option value="@court.CourtId">@court.CourtName</option>
+    }
+</select>

@@ -57,5 +57,14 @@ namespace Repositories
         {
             return BookingDAO.GetBookingsByCourtId(courtId);
         }
+
+        public IList<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime)
+            => BookingDAO.GetBookingsByDateAndStartTimeAndEndTime(date, startTime, endTime);
+
+        public void AddBookingWithServices(Booking booking)
+            => BookingDAO.AddBookingWithServices(booking);
+
+        public Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod)
+            => BookingDAO.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
     }
 }
