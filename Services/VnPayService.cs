@@ -68,6 +68,10 @@ namespace Services
             var tick = DateTime.Now.Ticks.ToString();
             var pay = new VnPayLibrary();
             var urlCallBack = _configuration["PaymentCallBack:ReturnUrl"];
+            if (bookings[0].UserId != null)
+            {
+                urlCallBack += "&userId=" + bookings[0].UserId;
+            }
             var totalPrice = (decimal)0;
             var bookingIdsString = "";
             for(int i = 0; i < bookings.Count; i++)

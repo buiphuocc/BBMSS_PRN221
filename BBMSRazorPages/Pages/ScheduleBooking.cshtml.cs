@@ -78,6 +78,7 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public int SelectedCourtId { get; set; } = 0;
 
+        [BindProperty]
         public int? UserId { get; set; }
 
         public void OnGet()
@@ -207,7 +208,7 @@ namespace BBMSRazorPages.Pages
                 var service = serviceService.GetServiceById(id);
                 services.Add(service);
             }
-            var userId = UserId;
+            var userId = HttpContext.Session.GetInt32("UserId");
             foreach(var day in bookingDays)
             {
                 var booking = new BusinessObjects.Booking
