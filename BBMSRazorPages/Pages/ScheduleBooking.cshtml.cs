@@ -80,7 +80,6 @@ namespace BBMSRazorPages.Pages
 
         [BindProperty]
         public int? UserId { get; set; }
-
         public void OnGet()
         {
             var currentDate = DateTime.Now;
@@ -203,7 +202,7 @@ namespace BBMSRazorPages.Pages
 
             // Create booking for each day
             var services = new List<Service>();
-            foreach(var id in SelectedServiceIds)
+            foreach (var id in SelectedServiceIds)
             {
                 var service = serviceService.GetServiceById(id);
                 services.Add(service);
@@ -213,7 +212,7 @@ namespace BBMSRazorPages.Pages
             {
                 var booking = new BusinessObjects.Booking
                 {
-                    UserId = userId,
+                    UserId = HttpContext.Session.GetInt32("UserId"),
                     CourtId = SelectedCourtId,
                     BookingDate = day,
                     StartTime = startTime,
@@ -247,7 +246,7 @@ namespace BBMSRazorPages.Pages
                 }
                 if (!bookingServices.IsNullOrEmpty())
                 {
-                    foreach(var bookingService in bookingServices)
+                    foreach (var bookingService in bookingServices)
                     {
                         var service = services.FirstOrDefault(s => s.ServiceId == bookingService.ServiceId);
                         var price = service.ServicePrice;
@@ -262,7 +261,7 @@ namespace BBMSRazorPages.Pages
             foreach (var day in bookingDays)
             {
                 var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(day, SelectedCourtId, startTime, endTime, "VnPay");
-                if(createdBooking != null)
+                if (createdBooking != null)
                 {
                     bookings.Add(createdBooking);
                 }
@@ -318,14 +317,14 @@ namespace BBMSRazorPages.Pages
             foreach (var day in bookingWeekDays)
             {
                 var bookings = bookingService.GetBookingsByDateAndStartTimeAndEndTime(day, startTime, endTime);
-                
-                foreach(var booking in bookings)
+
+                foreach (var booking in bookings)
                 {
                     occupiedCourtIds.Add(booking.Court.CourtId);
                 }
             }
             var availableCourt = new List<Court>();
-            foreach(var court in courts)
+            foreach (var court in courts)
             {
                 if (occupiedCourtIds.Contains(court.CourtId))
                 {
