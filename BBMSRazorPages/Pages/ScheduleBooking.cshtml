@@ -83,7 +83,7 @@
             </div>
             <button type="submit" class="booking-button">Booking</button>
         </form>
-        
+
     </div>
     <script>
         var currentMonth = @Model.Month;
@@ -107,7 +107,7 @@
             for (var i = 0; i < monthSelect.options.length; i++) {
                 if (selectedYear == currentYear && i + 1 <= currentMonth) {
                     monthSelect.options[i].disabled = true;
-                } 
+                }
                 else if (selectedYear == currentYear && i + 1 > currentMonth) {
                     if (day <= lastDay) {
                         console.log('Current day <= last day');
@@ -368,10 +368,10 @@
                 const amountBlock = document.createElement('div');
                 amountBlock.className = 'amount-block';
                 amountBlock.innerHTML = `
-                    <div class="amount-controls">
-                        <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
-                    </div>
-                `;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="amount-controls">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `;
 
                 // Add the amount block to the service container
                 serviceContainer.appendChild(amountBlock);
@@ -404,10 +404,10 @@
 
                     // Populate the dropdown with fetched options
                     dropdown.innerHTML = `
-                                <select class="service-select" name="SelectedServiceIds">
-                            ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
-                        </select>
-                    `;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <select class="service-select" name="SelectedServiceIds">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </select>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `;
                 } catch (error) {
                     console.error('Error fetching options:', error);
                 }
@@ -433,7 +433,7 @@
         function updateSelectedDays() {
             const month = $('#month').val();
             const year = $('#year').val();
-            if (firstClickedElement === null || secondClickedElement === null){
+            if (firstClickedElement === null || secondClickedElement === null) {
                 console.log('No time selected');
                 resetAvailableCourts();
                 return;
