@@ -1,6 +1,7 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Repositories;
 using Repositories.Interfaces;
 using Services.Interfaces;
 using Services.Libraries;
@@ -19,10 +20,13 @@ namespace Services
 
         private readonly IPaymentRepository paymentRepository;
 
-        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository)
+        private readonly IBookingReppository bookingReppository;
+
+        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository, IBookingReppository bookingReppository)
         {
             _configuration = configuration;
             this.paymentRepository = paymentRepository;
+            this.bookingReppository = bookingReppository;
         }
 
         public VnPayPaymentModel BookingPaymentExecute(IQueryCollection collections)
@@ -48,6 +52,13 @@ namespace Services
                     bookingIdsInt.Add(int.Parse(bookingIds[i]));
                 }
                 paymentRepository.SavePaymentWithBookingIds(payment, bookingIdsInt);
+                foreach (var bookingId in bookingIdsInt)
+                {
+                    var booking = bookingReppository.GetBookingById(bookingId);
+                    booking.Status = "Confirm";
+                    bookingReppository.UpdateBooking(booking);
+                }
+                
                 return response;
             }
             catch
@@ -66,6 +77,7 @@ namespace Services
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var tick = DateTime.Now.Ticks.ToString();
+            var guid = Guid.NewGuid().ToString();
             var pay = new VnPayLibrary();
             var urlCallBack = _configuration["PaymentCallBack:ReturnUrl"];
             if (bookings[0].UserId != null)
@@ -94,9 +106,9 @@ namespace Services
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
             pay.AddRequestData("vnp_OrderInfo", $"Payment for schedule booking:" + bookingIdsString);
-            pay.AddRequestData("vnp_OrderType", bookings[0].PaymentMethod);
+            pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-            pay.AddRequestData("vnp_TxnRef", tick);
+            pay.AddRequestData("vnp_TxnRef", guid);
 
             var paymentUrl =
                 pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);

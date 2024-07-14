@@ -5,7 +5,7 @@ namespace BusinessObjects;
 
 public partial class Payment
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
 
     public DateTime Date { get; set; }
 

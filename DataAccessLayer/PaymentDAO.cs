@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -58,5 +59,23 @@ namespace DataAccessLayer
                 throw new Exception(ex.Message);
             }
         }
+
+        //public static async Task<int> GetIdForNewPayment()
+        //{
+        //    try
+        //    {
+        //        using var _context = new BadmintonBookingSystemContext();
+        //        if (!await _context.Payments.AnyAsync())
+        //        {
+        //            return 1;
+        //        }
+        //        var payment = await _context.Payments.OrderByDescending(x => x.Id).FirstAsync();
+        //        return payment.Id + 1;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
     }
 }

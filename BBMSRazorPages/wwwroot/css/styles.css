@@ -172,3 +172,28 @@ option {
     .remove-service-button:hover {
         background-color: #c0392b;
     }
+
+.success-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: white;
+    color: #4CAF50;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    opacity: 1;
+    transition: opacity 1s ease-out;
+}
+
+.notification-icon {
+    font-size: 20px;
+    margin-right: 10px;
+    color: #4CAF50;
+}
+
+.notification-text {
+    font-size: 16px;
+    color: #4CAF50;
+}

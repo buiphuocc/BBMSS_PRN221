@@ -11,6 +11,9 @@ namespace Repositories
 {
     public class PaymentRepository : IPaymentRepository
     {
+        //public Task<int> GetIdForNewPayment()
+        //    => PaymentDAO.GetIdForNewPayment();
+
         public void SavePayment(Payment payment)
             => PaymentDAO.SavePayment(payment);
 

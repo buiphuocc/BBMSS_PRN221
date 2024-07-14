@@ -12,5 +12,7 @@ namespace Repositories.Interfaces
         void SavePayment(Payment payment);
 
         void SavePaymentWithBookingIds(Payment payment, List<int> bookingIds);
+
+        //Task<int> GetIdForNewPayment();
     }
 }

@@ -16,16 +16,36 @@ namespace BBMSRazorPages.Pages
 
         private readonly IUserService userService;
 
-        public SuccessfulPaymentModel(IVnPayService vnPayService, IPaymentService paymentService, IBookingService bookingService, IUserService userService)
+        private readonly IMomoService momoService;
+
+        public SuccessfulPaymentModel(IVnPayService vnPayService, IPaymentService paymentService, IBookingService bookingService, IUserService userService, IMomoService momoService)
         {
             this.vnPayService = vnPayService;
             this.paymentService = paymentService;
             this.bookingService = bookingService;
             this.userService = userService;
+            this.momoService = momoService;
         }
 
         public void OnGet()
         {
+            try
+            {
+                var id = HttpContext.Session.GetInt32("UserId");
+                if (id == null || id <= 0)
+                {
+                    RedirectToPage("/Authentication/Login");
+                }
+                var parameters = Request.Query;
+                if (parameters != null)
+                {
+                    var response = momoService.PaymentExecuteAsync(parameters);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public IActionResult OnGetSavePaymentForBooking()

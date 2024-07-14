@@ -6,6 +6,7 @@ using DataAccessLayer;
 using BusinessObjects;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using BBMSRazorPages.Pages.Authentication;
+using Services.Models;
 
 
 namespace BBMSSolution
@@ -51,6 +52,10 @@ namespace BBMSSolution
             //Payment
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+            //Momo
+            builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+            builder.Services.AddScoped<IMomoService, MomoService>();
 
             var app = builder.Build();
 
