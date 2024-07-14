@@ -100,7 +100,7 @@
                     User u = Model.GetUserByBookingId(booking.BookingId);
                     <tr>
                         <td>@booking.BookingId</td>
-                        <td><a href="/Users/Details?id=@u.UserId">@u.Username</a></td>
+                        <td><a href="/Users/Details/@u.UserId">@u.Username</a></td>
                         <td>@booking.Court.CourtName</td>
                         <td>@booking.BookingDate.ToShortDateString()</td>
                         <td>@booking.StartTime</td>

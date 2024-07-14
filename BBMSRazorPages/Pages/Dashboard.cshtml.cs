@@ -38,7 +38,7 @@ namespace BBMSRazorPages.Pages
             const int pageSize = 10;
             PageNumber = pageNumber ?? 1;
 
-            var bookings = _bookingService.GetAllBookings();
+            var bookings = _bookingService.GetAllBookings().OrderByDescending(b => b.BookingDate).ToList();
             AllBookings = bookings;
             TotalPages = (int)Math.Ceiling(bookings.Count() / (double)pageSize);
 

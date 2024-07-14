@@ -15,7 +15,6 @@ else
     <table class="table">
         <thead>
             <tr>
-                @* <th>Booking ID</th> *@
                 <th>Court Name</th>
                 <th>Booking Date</th>
                 <th>Start Time</th>
@@ -30,7 +29,6 @@ else
             @foreach (var booking in Model.Bookings)
             {
                 <tr>
-                    @* <td>@booking.BookingId</td> *@
                     <td>@booking.Court.CourtName</td>
                     <td>@booking.BookingDate.ToShortDateString()</td>
                     <td>@booking.StartTime</td>
@@ -51,3 +49,24 @@ else
         </tbody>
     </table>
 }
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+            <a class="page-link" asp-page="MyBooking" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                <a class="page-link" asp-page="MyBooking" asp-route-pageNumber="@i">@i</a>
+            </li>
+        }
+        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+            <a class="page-link" asp-page="MyBooking" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
