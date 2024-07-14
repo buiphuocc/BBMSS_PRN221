@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Services.Models;
 
 namespace BBMSRazorPages.Pages
 {
@@ -18,14 +19,17 @@ namespace BBMSRazorPages.Pages
 
         private readonly IVnPayService vnPayService;
 
+        private readonly IMomoService momoService;
 
 
-        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService, IVnPayService vnPayService)
+
+        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService, IVnPayService vnPayService, IMomoService momoService)
         {
             this.serviceService = serviceService;
             this.courtService = courtService;
             this.bookingService = bookingService;
             this.vnPayService = vnPayService;
+            this.momoService = momoService;
         }
 
         [BindProperty]
@@ -80,6 +84,13 @@ namespace BBMSRazorPages.Pages
 
         [BindProperty]
         public int? UserId { get; set; }
+
+        [BindProperty]
+        public List<PaymentOption> PaymentOptions { get; set; } = new List<PaymentOption>();
+
+        [BindProperty]
+        public int? SelectedPaymentOptionId { get; set; } = 0;
+
         public void OnGet()
         {
             var currentDate = DateTime.Now;
@@ -98,7 +109,14 @@ namespace BBMSRazorPages.Pages
                 timesList.Add(halfTime.ToString("HH:mm"));
             }
             TimesList = timesList;
-            UserId = HttpContext.Session.GetInt32("UserId");
+            
+            var id = HttpContext.Session.GetInt32("UserId");
+            UserId = id;
+            PaymentOptions = new List<PaymentOption>
+            {
+                new PaymentOption { Id = 1, Name = "Online payment"},
+                new PaymentOption { Id = 2, Name = "Pay at place"}
+            };
         }
 
         public IActionResult OnGetUpdateDaysOfWeek(int month, int year, string fromTime, string toTime)
@@ -138,8 +156,13 @@ namespace BBMSRazorPages.Pages
             return Partial("_DaysOfWeekPartial", this);
         }
 
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPost()
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null || userId <= 0)
+            {
+                return RedirectToPage("/Authentication/Login");
+            }
             // Get month, year and take the number of days in month
             if (Year == 0)
             {
@@ -195,6 +218,14 @@ namespace BBMSRazorPages.Pages
                 return RedirectToPage();
             }
 
+            // Check selected payment option
+            if(SelectedPaymentOptionId == 0)
+            {
+                TempData["PropertyRequired"] = $"Payment option is required, please choose your suitable payment option.";
+                return RedirectToPage();
+            }
+            var paymentOption = SelectedPaymentOptionId == 1 ? "Online payment" : "Pay at place";
+
             // Get price per hour of court
             var pricePerHour = court.PricePerHour;
             var difference = endTime - startTime;
@@ -207,7 +238,6 @@ namespace BBMSRazorPages.Pages
                 var service = serviceService.GetServiceById(id);
                 services.Add(service);
             }
-            var userId = HttpContext.Session.GetInt32("UserId");
             foreach(var day in bookingDays)
             {
                 var booking = new BusinessObjects.Booking
@@ -218,7 +248,7 @@ namespace BBMSRazorPages.Pages
                     StartTime = startTime,
                     EndTime = endTime,
                     TotalPrice = (decimal)((float)pricePerHour * totalHours),
-                    PaymentMethod = "VnPay",
+                    PaymentMethod = paymentOption,
                     Status = "Pending"
                 };
 
@@ -256,19 +286,48 @@ namespace BBMSRazorPages.Pages
                 booking.BookingServices = bookingServices;
                 bookingService.AddBookingWithServices(booking);
             }
-            // Get bookings for payment
-            var bookings = new List<BusinessObjects.Booking>();
-            foreach (var day in bookingDays)
-            {
-                var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(day, SelectedCourtId, startTime, endTime, "VnPay");
-                if (createdBooking != null)
-                {
-                    bookings.Add(createdBooking);
-                }
-            }
-            var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
 
-            return Redirect(paymentUrl);
+            if(paymentOption.Equals("Online payment"))
+            {
+                // Get bookings for payment
+                var bookings = new List<BusinessObjects.Booking>();
+                foreach (var day in bookingDays)
+                {
+                    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(day, SelectedCourtId, startTime, endTime, "Online payment");
+                    if (createdBooking != null)
+                    {
+                        bookings.Add(createdBooking);
+                    }
+                }
+                // VnPay
+                //var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
+
+                //return Redirect(paymentUrl);
+
+                // Momo
+                var bookingIdsString = "";
+                decimal amount = 0;
+                for (int i = 0; i < bookings.Count; i++)
+                {
+                    amount += bookings[i].TotalPrice;
+                    if (i == bookings.Count - 1)
+                    {
+                        bookingIdsString += bookings[i].BookingId;
+                        continue;
+                    }
+                    bookingIdsString += bookings[i].BookingId + ",";
+                }
+                var orderInfo = new OrderInfoModel
+                {
+                    OrderInfo = bookingIdsString,
+                    Amount = (double)amount,
+                    UserId = (int)userId
+                };
+                var response = await momoService.CreatePaymentAsync(orderInfo, null);
+                return Redirect(response.PayUrl);
+            }
+            TempData["BookingSuccess"] = "Schedule booking successfully.";
+            return RedirectToPage();
         }
 
         public IActionResult OnGetSetTimes(string fromTime, string toTime)

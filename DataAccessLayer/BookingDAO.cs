@@ -132,7 +132,7 @@ namespace DataAccessLayer
                             || (b.StartTime >= startTime && b.StartTime < endTime) 
                             || (b.EndTime > startTime && b.EndTime <= endTime) 
                             || (b.StartTime < startTime && b.EndTime > endTime)) 
-                            && (b.Status.Equals("Pending") || b.Status.Equals("Comfirmed")))
+                            && (b.Status.Equals("Pending") || b.Status.Equals("Comfirm")))
                     .ToList();
             }
             catch (Exception ex)

@@ -23,7 +23,7 @@ public partial class Booking
 
     public string? Status { get; set; }
 
-    public int? PaymentId { get; set; }
+    public string? PaymentId { get; set; }
 
     public virtual ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
 

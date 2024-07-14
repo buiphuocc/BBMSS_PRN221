@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Services;
 using Services.Interfaces;
+using Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace BBMSRazorPages.Pages
         private readonly IBookingServiceService bookingServiceService;
         private readonly IUserService userService;
         private readonly IEmailSender emailSender;
+        private readonly IMomoService momoService;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
@@ -48,7 +50,7 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender)
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
@@ -56,6 +58,7 @@ namespace BBMSRazorPages.Pages
             this.bookingServiceService = bookingServiceService;
             this.userService = userService;
             this.emailSender = emailSender;
+            this.momoService = momoService;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -274,8 +277,22 @@ namespace BBMSRazorPages.Pages
 
                         Console.WriteLine("Sent email to " + user.Email);
                     }
+                    if(PaymentMethod.Equals("Pay at Place"))
+                    {
+                        return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
+                    } 
 
-                    return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
+                    // Create payment
+                    var orderInfo = new OrderInfoModel
+                    {
+                        Amount = (double)newBooking.TotalPrice,
+                        OrderInfo = newBooking.BookingId.ToString(),
+                        UserId = user.UserId
+                    };
+
+                    var response = await momoService.CreatePaymentAsync(orderInfo, null);
+                    return Redirect(response.PayUrl);
+
                 }
                 // If we got this far, something failed; redisplay form
                 Bookings = bookingService.GetAllBookings();

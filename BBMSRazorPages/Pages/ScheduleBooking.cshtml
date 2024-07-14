@@ -19,6 +19,13 @@
 <body>
     <h1 style="text-align:center">Schedule Booking</h1>
     <div class="container">
+        @if (TempData["BookingSuccess"] != null)
+        {
+            <div id="successNotification" class="success-notification">
+                <span class="notification-icon">&#10004;</span>
+                <span class="notification-text">@TempData["BookingSuccess"]</span>
+            </div>
+        }
         <p style="color: red">@TempData["PropertyRequired"]</p>
         <form method="post">
             <div class="month-year-picker">
@@ -80,6 +87,16 @@
                 <div id="serviceContainer">
                     <!-- Container for dynamically added service blocks -->
                 </div>
+            </div>
+            <div style="margin: 10px">
+                <label for="paymentOption">Payment:</label>
+                <select id="paymentOption" name="SelectedPaymentOptionId">
+                    <option value="" disabled selected>Select a payment option</option>
+                    @foreach(var paymentOption in Model.PaymentOptions)
+                    {
+                        <option value="@paymentOption.Id">@paymentOption.Name</option>
+                    }
+                </select>
             </div>
             <button type="submit" class="booking-button">Booking</button>
         </form>
@@ -486,6 +503,16 @@
                 }
             });
         }
+
+        setTimeout(function () {
+            var notification = document.getElementById('successNotification');
+            if (notification) {
+                notification.style.opacity = '0';
+                setTimeout(function () {
+                    notification.style.display = 'none';
+                }, 1000); // Fade out animation time
+            }
+        }, 3000);
     </script>
 </body>
 </html>
