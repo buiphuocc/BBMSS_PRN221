@@ -1,3 +1,4 @@
+using BBMSRazorPages.Pages.Authentication;
 using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -6,6 +7,7 @@ using System.Linq;
 
 namespace BBMSRazorPages.Pages
 {
+    [SessionRoleAuthorize("Admin")]
     public class DashboardModel : PageModel
     {
         private readonly IBookingService _bookingService;
