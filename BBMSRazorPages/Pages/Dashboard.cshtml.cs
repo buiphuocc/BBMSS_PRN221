@@ -2,6 +2,7 @@ using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Services.Interfaces;
+using System.Linq;
 
 namespace BBMSRazorPages.Pages
 {
@@ -21,17 +22,33 @@ namespace BBMSRazorPages.Pages
         }
 
         public IList<BusinessObjects.Booking> Bookings { get; set; } = new List<BusinessObjects.Booking>();
+        public IList<BusinessObjects.Booking> AllBookings { get; set; } = new List<BusinessObjects.Booking>();
+
         public IList<BusinessObjects.BookingService> BookingServices { get; set; } = new List<BusinessObjects.BookingService>();
         public IList<BusinessObjects.Court> Courts { get; set; } = new List<BusinessObjects.Court>();
         public IList<User> Users { get; set; } = new List<User>();
+        public int PageNumber { get; set; }
+        public int TotalPages { get; set; }
 
 
-        public IActionResult OnGet()
+        public IActionResult OnGet(int? pageNumber)
         {
-            Bookings = _bookingService.GetAllBookings();
+            const int pageSize = 10;
+            PageNumber = pageNumber ?? 1;
+
+            var bookings = _bookingService.GetAllBookings();
+            AllBookings = bookings;
+            TotalPages = (int)Math.Ceiling(bookings.Count() / (double)pageSize);
+
+            Bookings = bookings
+                        .Skip((PageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
             Courts = _courtService.GetAllCourts();
             BookingServices = bookingServiceService.GetAllBookingServices();
             Users = _userService.GetAllUsers();
+
             return Page();
         }
 
@@ -42,7 +59,7 @@ namespace BBMSRazorPages.Pages
 
         public User GetUserByBookingId(int? id)
         {
-            return _userService.GetUserById((int) _bookingService.GetBookingById((int) id).UserId);
+            return _userService.GetUserById((int)_bookingService.GetBookingById((int)id).UserId);
         }
     }
 }
