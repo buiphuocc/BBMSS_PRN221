@@ -1,49 +1,101 @@
-﻿@page
+﻿@page "{id}"
 @model BBMSRazorPages.Pages.Users.DetailsModel
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "User Details";
 }
 
-<h1>Details</h1>
+<h1>User Details</h1>
 
 <div>
-    <h4>User</h4>
+    <h4>User Information</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Username)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Username)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Password)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Password)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Phone)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Phone)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Role)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Role)
-        </dd>
+        <dt class="col-sm-2">Username</dt>
+        <dd class="col-sm-10">@Model.User.Username</dd>
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.User.Email</dd>
+        <dt class="col-sm-2">Phone</dt>
+        <dd class="col-sm-10">@Model.User.Phone</dd>
+        <!-- Add other user details here -->
     </dl>
 </div>
+
 <div>
-    <a asp-page="./Edit" asp-route-id="@Model.User?.UserId">Edit</a> |
+    <h4>User Bookings</h4>
+    <hr />
+    @if (Model.Bookings.Count == 0)
+    {
+        <p>No bookings found for this user.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Court Name</th>
+                    <th>Booking Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Services</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in Model.Bookings)
+                {
+                    <tr>
+                        <td>@booking.Court.CourtName</td>
+                        <td>@booking.BookingDate.ToShortDateString()</td>
+                        <td>@booking.StartTime</td>
+                        <td>@booking.EndTime</td>
+                        <td>
+                            <ul>
+                                @foreach (var service in Model.GetBookingServicesByBookingId(booking.BookingId))
+                                {
+                                    <li>@service.Service.ServiceName - Quantity: @service.Quantity</li>
+                                }
+                            </ul>
+                        </td>
+                        <td>@booking.Status</td>
+                        <td>@booking.PaymentMethod</td>
+                        <td>@booking.TotalPrice</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                @if (Model.TotalPages > 1)
+                {
+                    <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-page="./Details" asp-route-id="@Model.User.UserId" asp-route-pageIndex="1">First</a>
+                    </li>
+                    <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-page="./Details" asp-route-id="@Model.User.UserId" asp-route-pageIndex="@(Model.PageIndex - 1)">Previous</a>
+                    </li>
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                            <a class="page-link" asp-page="./Details" asp-route-id="@Model.User.UserId" asp-route-pageIndex="@i">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-page="./Details" asp-route-id="@Model.User.UserId" asp-route-pageIndex="@(Model.PageIndex + 1)">Next</a>
+                    </li>
+                    <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-page="./Details" asp-route-id="@Model.User.UserId" asp-route-pageIndex="@Model.TotalPages">Last</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit User</a> |
     <a asp-page="./Index">Back to List</a>
 </div>
