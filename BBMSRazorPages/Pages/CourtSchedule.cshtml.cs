@@ -151,10 +151,10 @@ namespace BBMSRazorPages.Pages
                     }
 
 
-                    bool inTimeRange = bookingsNotCancelled.Any(b => ((b.StartTime <= StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime <= b.EndTime)));
+                    bool inTimeRange = bookingsNotCancelled.Any(b => ((b.StartTime <= StartTime && StartTime < b.EndTime) || (b.StartTime < EndTime && EndTime <= b.EndTime)) && b.Court.CourtId == CourtId);
                     Court court = courtService.GetCourtById(CourtId);
-                    bool isBooked = bookingsNotCancelled.Any(b => inTimeRange && b.Court.CourtId == CourtId);
-                    if (isBooked)
+                    //bool isBooked = bookingsNotCancelled.Any(b => inTimeRange && b.Court.CourtId == CourtId);
+                    if (inTimeRange)
                     {
                         ModelState.AddModelError(string.Empty, "This time range is booked");
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This time range and court is booked" });
