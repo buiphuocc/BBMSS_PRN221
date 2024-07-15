@@ -35,8 +35,10 @@ namespace Services
             {
                 var pay = new VnPayLibrary();
                 var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
+                
                 var payment = new Payment
                 {
+                    Id = response.OrderId,
                     Amount = response.Amount,
                     TransactionId = response.TransactionId,
                     Date = response.PayDate,
@@ -50,6 +52,10 @@ namespace Services
                 for(int i = 0; i < bookingIds.Length; i++)
                 {
                     bookingIdsInt.Add(int.Parse(bookingIds[i]));
+                }
+                if (!response.Success)
+                {
+                    throw new Exception("Your payment executed unsuccessfully.:" + bookingIdsString);
                 }
                 paymentRepository.SavePaymentWithBookingIds(payment, bookingIdsInt);
                 foreach (var bookingId in bookingIdsInt)
@@ -105,7 +111,7 @@ namespace Services
             pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-            pay.AddRequestData("vnp_OrderInfo", $"Payment for schedule booking:" + bookingIdsString);
+            pay.AddRequestData("vnp_OrderInfo", $"Payment for booking:" + bookingIdsString);
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
             pay.AddRequestData("vnp_TxnRef", guid);

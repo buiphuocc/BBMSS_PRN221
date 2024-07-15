@@ -8,6 +8,7 @@ namespace Services.Models
 {
     public class VnPayPaymentModel
     {
+        public string OrderId { get; set; }
         public string Description { get; set; }
         public string TransactionId { get; set; }
         public string PaymentMethodName { get; set; }

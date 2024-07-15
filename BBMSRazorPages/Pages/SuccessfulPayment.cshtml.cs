@@ -27,7 +27,7 @@ namespace BBMSRazorPages.Pages
             this.momoService = momoService;
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
             try
             {
@@ -36,34 +36,72 @@ namespace BBMSRazorPages.Pages
                 {
                     RedirectToPage("/Authentication/Login");
                 }
-                var parameters = Request.Query;
+                var parameters = Request.Query;                  
                 if (parameters != null)
                 {
                     var response = momoService.PaymentExecuteAsync(parameters);
                 }
+                return Page();
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                TempData["PaymentUnsuccessful"] = ex.Message;
+                var idsString = ex.Message.Trim().Split(':')[1];
+                var idStrings = idsString.Trim().Split(',');
+                if(idStrings.Length == 1)
+                {
+                    var routeValue = new
+                    {
+                        id = int.Parse(idStrings[0])
+                    };
+                    return RedirectToPage("/BookingSuccessful", routeValue);
+                }
+                var routesValue = new
+                {
+                    ids = idsString
+                };
+                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
             }
         }
 
         public IActionResult OnGetSavePaymentForBooking()
         {
-            var parameters = Request.Query;
-            if (parameters != null)
+            try
             {
-                var response = vnPayService.BookingPaymentExecute(parameters);
-                parameters.TryGetValue("userId", out var userIdString);
-                if(!string.IsNullOrEmpty(userIdString))
+                var parameters = Request.Query;
+                if (parameters != null)
                 {
-                    var userId = int.Parse(userIdString);
-                    var user = userService.GetUserById(userId);
-                    HttpContext.Session.SetInt32("UserId", user.UserId);
-                    HttpContext.Session.SetString("UserRole", user.Role);
+                    var response = vnPayService.BookingPaymentExecute(parameters);
+                    parameters.TryGetValue("userId", out var userIdString);
+                    if (!string.IsNullOrEmpty(userIdString))
+                    {
+                        var userId = int.Parse(userIdString);
+                        var user = userService.GetUserById(userId);
+                        HttpContext.Session.SetInt32("UserId", user.UserId);
+                        HttpContext.Session.SetString("UserRole", user.Role);
+                    }
                 }
+                return Page();
             }
-            return RedirectToPage();
+            catch(Exception ex)
+            {
+                TempData["PaymentUnsuccessful"] = ex.Message;
+                var idsString = ex.Message.Trim().Split(':')[1];
+                var idStrings = idsString.Trim().Split(',');
+                if (idStrings.Length == 1)
+                {
+                    var routeValue = new
+                    {
+                        id = int.Parse(idStrings[0])
+                    };
+                    return RedirectToPage("/BookingSuccessful", routeValue);
+                }
+                var routesValue = new
+                {
+                    ids = idsString
+                };
+                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
+            }
         }
     }
 }

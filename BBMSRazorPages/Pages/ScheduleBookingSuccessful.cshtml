@@ -1,0 +1,152 @@
+﻿@page
+@model BBMSRazorPages.Pages.ScheduleBookingSuccessfulModel
+@{
+}
+
+
+<h2>Schedule Booking Information</h2>
+
+<div>
+    @if (TempData["BookingSuccessful"] != null)
+    {
+        <div id="successNotification" class="success-notification">
+            <span class="notification-icon">&#10004;</span>
+            <span class="notification-text">@TempData["BookingSuccessful"]</span>
+        </div>
+    }
+    @if (TempData["BookingUnsuccessful"] != null)
+    {
+        <div id="errorNotification" class="error-notification">
+            <span class="notification-icon">&#10006;</span>
+            <span class="notification-text">@TempData["BookingUnsuccessful"]</span>
+        </div>
+    }
+
+    <div>
+        <label for="bookingDates"> Booking dates: </label>
+        <p id="bookingDates">@Model.ScheduleBookingModel.BookingDates</p>
+
+        <label for="daysOfWeek"> Days of week: </label>
+        <p id="daysOfWeek">@Model.ScheduleBookingModel.DaysOfWeek</p>
+
+        <label for="startTime"> Start time: </label>
+        <p id="startTime">@Model.ScheduleBookingModel.StartTime</p>
+
+        <label for="endTime"> End time: </label>
+        <p id="endTime">@Model.ScheduleBookingModel.EndTime</p>
+
+        <label for="court"> Court: </label>
+        <p id="court">@Model.ScheduleBookingModel.Court.CourtName</p>
+
+        <label for="totalPrice"> Total price: </label>
+        <p id="totalPrice">@Model.ScheduleBookingModel.TotalPrice VND</p>
+
+        <label for="user"> User: </label>
+        <p id="user">@Model.ScheduleBookingModel.User.Email</p>
+    </div>
+
+    @* <h4>Please pay 50% of the booking total price as deposit.</h4>
+    <p style="color: blue">Your deposit is: @(Model.Deposit * 1000) VND</p> *@
+    <div class="button-container">
+        <form method="post">
+            <input type="hidden" name="BookingIds" value="@Model.BookingIds" />
+            <input type="hidden" name="TotalPrice" value="@Model.ScheduleBookingModel.TotalPrice" />
+            <button type="submit" asp-page-handler="VnPayPayment">Payment with VnPay</button>
+            <button type="submit" asp-page-handler="MomoPayment">Payment with Momo Wallet</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Function to fade out the success notification after 3 seconds
+        setTimeout(function () {
+            var notification = document.getElementById('successNotification');
+            if (notification) {
+                notification.style.opacity = '0';
+                setTimeout(function () {
+                    notification.style.display = 'none';
+                }, 1000); // Fade out animation time
+            }
+        }, 3000); // Display time
+    </script>
+}
+
+<style>
+    .success-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: white;
+        FFF color: #4CAF50;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+        opacity: 1;
+        transition: opacity 1s ease-out;
+    }
+
+    .notification-icon {
+        font-size: 20px;
+        margin-right: 10px;
+        color: #4CAF50;
+    }
+
+    .notification-text {
+        font-size: 16px;
+    }
+
+    .button-container {
+        text-align: center;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn.vnpay {
+            background-color: #007bff; /* Blue color for VnPay */
+        }
+
+            .btn.vnpay:hover {
+                background-color: #0056b3; /* Darker blue on hover */
+            }
+
+        .btn.momo {
+            background-color: #800080; /* Wine purple color for Momo */
+        }
+
+            .btn.momo:hover {
+                background-color: #4b004b; /* Darker wine purple on hover */
+            }
+
+    .error-notification {
+        display: flex;
+        align-items: center;
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+        margin: 20px;
+        font-size: 16px;
+    }
+
+    .notification-icon {
+        margin-right: 10px;
+        color: red; /* Red color for the error icon */
+        font-size: 20px;
+    }
+</style>
+
+@{
+    TempData.Clear();
+}
