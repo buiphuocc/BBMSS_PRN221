@@ -29,7 +29,7 @@ namespace Services.Libraries
                 }
             }
 
-            var orderId = Convert.ToInt64(vnPay.GetResponseData("vnp_TxnRef"));
+            var orderId = vnPay.GetResponseData("vnp_TxnRef");
             var vnPayTranId = Convert.ToInt64(vnPay.GetResponseData("vnp_TransactionNo"));
             var vnpResponseCode = vnPay.GetResponseData("vnp_ResponseCode");
             var vnpSecureHash =
@@ -42,17 +42,19 @@ namespace Services.Libraries
             var amount = Convert.ToInt64(vnPay.GetResponseData("vnp_Amount"));
             //var payDate = DateTime.Parse(vnPay.GetResponseData("vnp_PayDate"));
             var transactionId = vnPay.GetResponseData("vnp_TransactionNo");
-            var transactionStatus = Convert.ToInt32(vnPay.GetResponseData("vnp_TransactionStatus"));
+            var transactionStatus = vnPay.GetResponseData("vnp_TransactionStatus");
 
             if (!checkSignature)
                 return new VnPayPaymentModel()
                 {
                     Success = false
                 };
+            var success = (!vnpResponseCode.Equals("00") || !transactionStatus.Equals("00")) ? false : true;
 
             return new VnPayPaymentModel()
             {
-                Success = transactionStatus == 0 ? true : false,
+                OrderId = orderId,
+                Success = success,
                 PaymentMethodName = "VnPay",
                 Description = orderInfo,
                 TransactionId = vnPayTranId.ToString(),

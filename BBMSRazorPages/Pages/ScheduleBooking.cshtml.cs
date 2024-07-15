@@ -291,40 +291,53 @@ namespace BBMSRazorPages.Pages
             {
                 // Get bookings for payment
                 var bookings = new List<BusinessObjects.Booking>();
-                foreach (var day in bookingDays)
+                var bookingIdsString = "";
+                for(int i = 0; i < bookingDays.Count; i++)
                 {
-                    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(day, SelectedCourtId, startTime, endTime, "Online payment");
+                    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDays[i], SelectedCourtId, startTime, endTime, "Online payment");
                     if (createdBooking != null)
                     {
                         bookings.Add(createdBooking);
+                        if(i == bookingDays.Count - 1)
+                        {
+                            bookingIdsString += createdBooking.BookingId;
+                            continue;
+                        }
+                        bookingIdsString += createdBooking.BookingId + ",";
                     }
                 }
-                // VnPay
-                //var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
+                var routesValue = new
+                {
+                    ids = bookingIdsString
+                };
+                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
 
-                //return Redirect(paymentUrl);
+                // VnPay
+                var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
+
+                return Redirect(paymentUrl);
 
                 // Momo
-                var bookingIdsString = "";
-                decimal amount = 0;
-                for (int i = 0; i < bookings.Count; i++)
-                {
-                    amount += bookings[i].TotalPrice;
-                    if (i == bookings.Count - 1)
-                    {
-                        bookingIdsString += bookings[i].BookingId;
-                        continue;
-                    }
-                    bookingIdsString += bookings[i].BookingId + ",";
-                }
-                var orderInfo = new OrderInfoModel
-                {
-                    OrderInfo = bookingIdsString,
-                    Amount = (double)amount,
-                    UserId = (int)userId
-                };
-                var response = await momoService.CreatePaymentAsync(orderInfo, null);
-                return Redirect(response.PayUrl);
+                //var bookingIdsString = "";
+                //decimal amount = 0;
+                //for (int i = 0; i < bookings.Count; i++)
+                //{
+                //    amount += bookings[i].TotalPrice;
+                //    if (i == bookings.Count - 1)
+                //    {
+                //        bookingIdsString += bookings[i].BookingId;
+                //        continue;
+                //    }
+                //    bookingIdsString += bookings[i].BookingId + ",";
+                //}
+                //var orderInfo = new OrderInfoModel
+                //{
+                //    OrderInfo = bookingIdsString,
+                //    Amount = (double)amount,
+                //    UserId = (int)userId
+                //};
+                //var response = await momoService.CreatePaymentAsync(orderInfo, null);
+                //return Redirect(response.PayUrl);
             }
             TempData["BookingSuccess"] = "Schedule booking successfully.";
             return RedirectToPage();

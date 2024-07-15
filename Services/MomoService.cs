@@ -83,16 +83,16 @@ namespace Services
             var payType = collection.First(s => s.Key == "payType").Value;
 
             // Save payment for booking
-            if(int.Parse(errorCode) != 0)
-            {
-                throw new Exception("Your payment executed unsuccessfully.");
-            }
             var bookingIdsStrings = orderInfo.ToString().Split(": ");
             var bookingIdsString = bookingIdsStrings[1].Split(',');
             var bookingIds = new List<int>();
             for(int i = 0; i < bookingIdsString.Length; i++)
             {
                 bookingIds.Add(int.Parse(bookingIdsString[i]));
+            }
+            if (int.Parse(errorCode) != 0)
+            {
+                throw new Exception("Your payment executed unsuccessfully.:" + bookingIdsStrings[1]);
             }
             var payment = new Payment
             {

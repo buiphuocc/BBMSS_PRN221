@@ -22,6 +22,7 @@ namespace BBMSRazorPages.Pages
         private readonly IUserService userService;
         private readonly IEmailSender emailSender;
         private readonly IMomoService momoService;
+        private readonly IVnPayService vnPayService;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
@@ -50,7 +51,7 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService)
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
@@ -59,6 +60,7 @@ namespace BBMSRazorPages.Pages
             this.userService = userService;
             this.emailSender = emailSender;
             this.momoService = momoService;
+            this.vnPayService = vnPayService;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -280,18 +282,31 @@ namespace BBMSRazorPages.Pages
                     if(PaymentMethod.Equals("Pay at Place"))
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
-                    } 
+                    }
+
+                    // Send to booking information for payment
+                    var routeValue = new
+                    {
+                        id = newBooking.BookingId
+                    };
+                    TempData["BookingSuccessful"] = "Your booking has executed successfully.";
+                    return RedirectToPage("/BookingSuccessful", routeValue);
 
                     // Create payment
-                    var orderInfo = new OrderInfoModel
-                    {
-                        Amount = (double)newBooking.TotalPrice,
-                        OrderInfo = newBooking.BookingId.ToString(),
-                        UserId = user.UserId
-                    };
+                    //var orderInfo = new OrderInfoModel
+                    //{
+                    //    Amount = (double)newBooking.TotalPrice,
+                    //    OrderInfo = newBooking.BookingId.ToString(),
+                    //    UserId = user.UserId
+                    //};
 
-                    var response = await momoService.CreatePaymentAsync(orderInfo, null);
-                    return Redirect(response.PayUrl);
+                    // Momo
+                    //var response = await momoService.CreatePaymentAsync(orderInfo, null);
+                    //return Redirect(response.PayUrl);
+
+                    // VnPay
+                    //var response = vnPayService.CreatePaymentUrlForBooking(new List<BusinessObjects.Booking> { newBooking }, HttpContext);
+                    //return Redirect(response);
 
                 }
                 // If we got this far, something failed; redisplay form
