@@ -53,7 +53,7 @@ namespace BBMSRazorPages.Pages
         public DateTime DateForm { get; set; }
 
         [BindProperty]
-        public string Note { get; set; }
+        public string ?Note { get; set; }
 
         public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService, IPaymentService paymentService)
         {
@@ -299,7 +299,7 @@ namespace BBMSRazorPages.Pages
                         PaymentMethod = forPayment.PaymentMethod,
                         Description = forPayment.User.Username + "Paid" + forPayment.TotalPrice,
                         Success = false,
-                        TransactionId = ""
+                        TransactionId = "P" + forPayment.BookingId
                     };
                     paymentService.SavePaymentWithBookingIds(payment,bookings);
 
