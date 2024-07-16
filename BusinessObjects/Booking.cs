@@ -21,6 +21,8 @@ public partial class Booking
 
     public string PaymentMethod { get; set; } = null!;
 
+    //public string PaymentStatus { get; set; } = null!;
+
     public string? Status { get; set; }
 
     public string? PaymentId { get; set; }

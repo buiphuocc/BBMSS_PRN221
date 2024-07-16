@@ -73,7 +73,20 @@ namespace Services
             var bookings = bookingRepository.GetAllBookings();
             foreach (var booking in bookings)
             {
-                if (booking.Status != null && !booking.Status.Equals("Completed") && TimeSpan.Compare(booking.EndTime, DateTime.Now.TimeOfDay) >= 1)
+                /*
+                string res = "Booking with ID " + booking.BookingId + " on date " + booking.BookingDate.Date + ", until " + booking.EndTime + " is ";
+                res += 
+                    (booking.BookingDate.Date <= DateTime.Now.Date && booking.EndTime <= DateTime.Now.TimeOfDay) 
+                    ? "completed" 
+                    : "not yet";
+
+                Console.WriteLine(res);
+                */
+
+                if (booking.Status != null && !booking.Status.Equals("Completed") 
+                    && booking.BookingDate.Date <= DateTime.Now.Date 
+                    && booking.EndTime <= DateTime.Now.TimeOfDay
+                    )
                 {
                     bookingRepository.UpdateBookingStatusBasedOnRealTime(booking);
                     Console.WriteLine($"Booking with ID {booking.BookingId} status has changed to {booking.Status}");
