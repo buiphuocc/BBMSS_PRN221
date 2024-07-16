@@ -300,7 +300,7 @@ namespace BBMSRazorPages.Pages
                         PaymentMethod = forPayment.PaymentMethod,
                         Description = forPayment.User.Username + "Paid" + forPayment.TotalPrice,
                         Success = false,
-                        TransactionId = "P" + forPayment.BookingId
+                        TransactionId = null
                     };
                     paymentService.SavePaymentWithBookingIds(payment,bookings);
 
