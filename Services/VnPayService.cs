@@ -61,7 +61,7 @@ namespace Services
                 foreach (var bookingId in bookingIdsInt)
                 {
                     var booking = bookingReppository.GetBookingById(bookingId);
-                    booking.Status = "Confirm";
+                    booking.Status = "Confirmed";
                     bookingReppository.UpdateBooking(booking);
                 }
                 

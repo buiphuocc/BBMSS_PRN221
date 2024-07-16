@@ -135,7 +135,7 @@ namespace BBMSRazorPages.Pages
             UserId = HttpContext.Session.GetInt32("UserId");
             Services = serviceService.GetAllServices();
 
-            return Page();
+            return RedirectToPage("/CourtSchedule", new { bookingDate = DateTime.UtcNow, message = "" });
         }
         public async Task<IActionResult> OnPostAsync()
         {

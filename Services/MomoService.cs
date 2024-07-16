@@ -108,7 +108,7 @@ namespace Services
             foreach(var bookingId in bookingIds)
             {
                 var booking = bookingReppository.GetBookingById(bookingId);
-                booking.Status = "Confirm";
+                booking.Status = "Confirmed";
                 bookingReppository.UpdateBooking(booking);
             }
             return new MomoExecuteResponseModel()

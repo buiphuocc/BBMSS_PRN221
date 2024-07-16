@@ -179,7 +179,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var booking in Model.Bookings)
+                                @foreach (var booking in Model.Bookings.Where(b => !b.Status.Equals("Cancelled")))
                                 {
                                     <tr>
                                         <td>@booking.BookingId</td>

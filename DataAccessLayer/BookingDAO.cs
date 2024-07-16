@@ -101,6 +101,7 @@ namespace DataAccessLayer
 
             return _context.Bookings
                 .Include(b => b.Court)
+                .Include(b => b.Payment)
                 .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.Service)
                 .Where(b => b.UserId == userId)
