@@ -73,17 +73,7 @@ namespace Services
             var bookings = bookingRepository.GetAllBookings();
             foreach (var booking in bookings)
             {
-
-                string res = "Booking with ID " + booking.BookingId + " on date " + booking.BookingDate.Date + ", until " + booking.EndTime + " is ";
-                res += 
-                    (booking.BookingDate.Date < DateTime.Now.Date || (booking.BookingDate.Date == DateTime.Now.Date && booking.EndTime <= DateTime.Now.TimeOfDay)) 
-                    ? "completed" 
-                    : "not yet";
-
-                Console.WriteLine(res);
-
-
-                if (booking.Status != null && !booking.Status.Equals("Completed")
+                if ((booking.Status == null || !booking.Status.Equals("Completed"))
                     && (
                         booking.BookingDate.Date < DateTime.Now.Date 
                         || (booking.BookingDate.Date == DateTime.Now.Date && booking.EndTime <= DateTime.Now.TimeOfDay)

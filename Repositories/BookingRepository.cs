@@ -69,11 +69,8 @@ namespace Repositories
     
         public void UpdateBookingStatusBasedOnRealTime(Booking booking)
         {
-            if (booking != null && !booking.Status.Equals("Completed"))
-            {
-                booking.Status = "Completed";
-                BookingDAO.UpdateBooking(booking);
-            }
+            booking.Status = "Completed";
+            BookingDAO.UpdateBooking(booking);
         }
     }
 }

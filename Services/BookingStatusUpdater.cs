@@ -21,7 +21,7 @@ namespace Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Booking Status Updater starting.");
-            _timer = new Timer(UpdateBookingStatuses, null, TimeSpan.Zero, TimeSpan.FromMinutes(1)); // Check every minute
+            _timer = new Timer(UpdateBookingStatuses, null, TimeSpan.Zero, TimeSpan.FromMinutes(5)); // Check every minute
             return Task.CompletedTask;
         }
 
