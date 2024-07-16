@@ -9,6 +9,11 @@ namespace Repositories.Interfaces
 {
     public interface IPaymentRepository
     {
+
+        Payment GetPaymentByBookingId(int bookingId);
+        void UpdatePayment(Payment payment);
+
+
         void SavePayment(Payment payment);
 
         void SavePaymentWithBookingIds(Payment payment, List<int> bookingIds);

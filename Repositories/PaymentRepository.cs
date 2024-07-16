@@ -13,6 +13,8 @@ namespace Repositories
     {
         //public Task<int> GetIdForNewPayment()
         //    => PaymentDAO.GetIdForNewPayment();
+        public void UpdatePayment(Payment payment)=> PaymentDAO.UpdatePayment(payment);
+        public Payment GetPaymentByBookingId(int bookingId)=> PaymentDAO.GetPaymentByBookingId(bookingId);
 
         public void SavePayment(Payment payment)
             => PaymentDAO.SavePayment(payment);

@@ -30,16 +30,20 @@
             text-align: center;
         }
 
-        .booked {
+/*         .booked {
             background-color: #d9534f;
-        }
+        } */
 
         .Pending {
             background-color: yellow !important; /* Màu vàng cho trạng thái Pending hoặc null */
         }
 
-        .Confirm {
-            background-color: #d9534f; /* Màu đỏ cho trạng thái Confirm */
+        .Confirmed {
+            background-color: #d9534f; /* Màu đỏ cho trạng thái Confirmed*/
+        }
+
+        .Completed {
+            background-color: #AFE1AF; /* Màu đỏ cho trạng thái Completed */
         }
 
         /* Remove default spinner and adjust time picker appearance */
@@ -62,8 +66,10 @@
     <!-- Note Section -->
     <div class="alert alert-info text-center">
         <strong>Note:</strong>
-        <span style="color: #d9534f; font-weight: bold;">Red squares</span> indicate Confirmed bookings,
-        and <span style="color: yellow; font-weight: bold;">Yellow squares</span> indicate Pending bookings.
+        <span style="color: #d9534f; font-weight: bold;">Red </span>squares indicate Confirmed bookings,<br />
+        <span style="color: yellow; font-weight: bold;">Yellow </span>squares indicate Pending bookings.<br />
+        <span style="color: #AFE1AF; font-weight: bold;">Celadon </span>squares indicate Completed bookings.<br />
+
     </div>
     @if(Model.UserId != null)
     {
@@ -120,12 +126,12 @@
 
                         <td class="@(isBookedSlot1 ? "booked" : "") @(bookingStatusClass1)">
 
-                                <span>@bookingStatusClass1</span>
+                                <span></span>
                             
                         </td>
                         <td class="@(isBookedSlot2 ? "booked" : "") @(bookingStatusClass2)">
 
-                                <span>@bookingStatusClass2</span>
+                                <span></span>
                             
                         </td>
                     }
@@ -168,6 +174,7 @@
                                     <th>Start Time</th>
                                     <th>End Time</th>
                                     <th>Status</th>
+                                    <th>Payment Note</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -180,6 +187,8 @@
                                         <td>@booking.StartTime</td>
                                         <td>@booking.EndTime</td>
                                         <td>@booking.Status</td>
+                                        <td>@(booking.Payment?.TransactionId ?? "Unpaid")</td>
+
                                         <td>
                                             <form method="post" asp-page-handler="ChangeStatus">
                                                 <input type="hidden" name="BookingId" value="@booking.BookingId" />
@@ -189,6 +198,7 @@
                                                     <option value="Confirmed">Confirmed</option>
                                                     <option value="Cancelled">Cancelled</option>
                                                 </select>
+                                                <input type="text" asp-for="Note" placeholder="Transaction ID or Cash" class="form-control" />
                                                 <button type="submit" class="btn btn-primary btn-sm">Change Status</button>
                                             </form>
                                         </td>
