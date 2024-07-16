@@ -11,60 +11,73 @@ namespace Services
 {
     public class BookingService : IBookingService
     {
-        private readonly IBookingReppository bookingReppository;
+        private readonly IBookingReppository bookingRepository;
 
         public BookingService(IBookingReppository bookingReppository)
         {
-            this.bookingReppository = bookingReppository;
+            this.bookingRepository = bookingReppository;
         }
 
         public void AddBooking(Booking booking)
         {
-            bookingReppository.AddBooking(booking);
+            bookingRepository.AddBooking(booking);
         }
 
         public void DeleteBooking(int id)
         {
-            bookingReppository.DeleteBooking(id);
+            bookingRepository.DeleteBooking(id);
         }
 
         public List<Booking> GetAllBookings()
         {
-            return bookingReppository.GetAllBookings();
+            return bookingRepository.GetAllBookings();
         }
 
         public Booking GetBookingById(int id)
         {
-            return bookingReppository.GetBookingById(id);
+            return bookingRepository.GetBookingById(id);
         }
 
         public List<Booking> GetBookingsByBookingDate(DateTime bookingDate)
         {
-            return bookingReppository.GetBookingsByBookingDate(bookingDate);
+            return bookingRepository.GetBookingsByBookingDate(bookingDate);
         }
 
         public void UpdateBooking(Booking booking)
         {
-            bookingReppository.UpdateBooking(booking);
+            bookingRepository.UpdateBooking(booking);
         }
         public IList<Booking> GetBookingsByUserId(int userId)
         {
-            return bookingReppository.GetBookingsByUserId(userId);
+            return bookingRepository.GetBookingsByUserId(userId);
         }
 
         public IList<Booking> GetBookingsByCourtId(int? courtId)
         {
-            return bookingReppository.GetBookingsByCourtId(courtId);
+            return bookingRepository.GetBookingsByCourtId(courtId);
         }
 
         public List<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime)
         {
             try
             {
-                return bookingReppository.GetBookingsByDateAndStartTimeAndEndTime(date, startTime, endTime).ToList();
+                return bookingRepository.GetBookingsByDateAndStartTimeAndEndTime(date, startTime, endTime).ToList();
             }catch
             {
                 throw;
+            }
+        }
+
+        public void UpdateBookingsStatusBasedOnCurrentTime()
+        {
+            var bookings = bookingRepository.GetAllBookings();
+            foreach (var booking in bookings)
+            {
+                if (booking.Status != null && !booking.Status.Equals("Completed") && TimeSpan.Compare(booking.EndTime, DateTime.Now.TimeOfDay) >= 1)
+                {
+                    bookingRepository.UpdateBookingStatusBasedOnRealTime(booking);
+                    Console.WriteLine($"Booking with ID {booking.BookingId} status has changed to {booking.Status}");
+                }
             }
         }
 
@@ -72,7 +85,7 @@ namespace Services
         {
             try
             {
-                bookingReppository.AddBookingWithServices(booking);
+                bookingRepository.AddBookingWithServices(booking);
             }
             catch
             {
@@ -84,7 +97,7 @@ namespace Services
         {
             try
             {
-                return bookingReppository.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
+                return bookingRepository.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
             }
             catch
             {

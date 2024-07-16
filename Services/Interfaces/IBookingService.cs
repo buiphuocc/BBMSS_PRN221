@@ -20,6 +20,7 @@ namespace Services.Interfaces
         List<Booking> GetBookingsByDateAndStartTimeAndEndTime(DateTime date, TimeSpan startTime, TimeSpan endTime);
         void AddBookingWithServices(Booking booking);
         Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod);
+        void UpdateBookingsStatusBasedOnCurrentTime();
     }
 }
  

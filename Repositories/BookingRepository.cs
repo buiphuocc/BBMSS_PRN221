@@ -66,5 +66,14 @@ namespace Repositories
 
         public Booking? GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(DateTime bookingDate, int courtId, TimeSpan startTime, TimeSpan endTime, string paymentMethod)
             => BookingDAO.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDate, courtId, startTime, endTime, paymentMethod);
+    
+        public void UpdateBookingStatusBasedOnRealTime(Booking booking)
+        {
+            if (booking != null && !booking.Status.Equals("Completed"))
+            {
+                booking.Status = "Completed";
+                BookingDAO.UpdateBooking(booking);
+            }
+        }
     }
 }

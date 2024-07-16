@@ -45,10 +45,16 @@ namespace BBMSSolution
             //Service
             builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
+
+            //Background task
+            builder.Services.AddHostedService<BookingStatusUpdater>();
+
             //Email sender
             builder.Services.AddScoped<IEmailSender, EmailSender>();
+            
             //VnPay
             builder.Services.AddScoped<IVnPayService, VnPayService>();
+            
             //Payment
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
@@ -68,6 +74,7 @@ namespace BBMSSolution
             }
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseSession();
