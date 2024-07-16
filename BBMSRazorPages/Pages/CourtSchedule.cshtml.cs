@@ -53,7 +53,7 @@ namespace BBMSRazorPages.Pages
         public DateTime DateForm { get; set; }
 
         [BindProperty]
-        public string ?Note { get; set; }
+        public string? Note { get; set; }
 
         public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService, IPaymentService paymentService)
         {
@@ -97,7 +97,8 @@ namespace BBMSRazorPages.Pages
                 else if (booking.Status == "Confirmed")
                 {
                     return "Confirmed";
-                }else if(booking.Status == "Completed")
+                }
+                else if (booking.Status == "Completed")
                 {
                     return "Completed";
                 }
@@ -379,11 +380,12 @@ namespace BBMSRazorPages.Pages
             return RedirectToPage("/Authentication/Login");
         }
 
-        public bool isSessionUserAdmin()
+        public bool isUserRoleAllowed()
         {
+            string[] AllowedRoles = { "Admin", "Staff", "Manager" };
             string userRole = HttpContext.Session.GetString("UserRole");
 
-            return userRole != null && userRole.Equals("Admin");
+            return userRole != null && AllowedRoles.Contains(userRole);
         }
     }
 }
