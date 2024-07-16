@@ -342,6 +342,7 @@ namespace BBMSRazorPages.Pages
 
                         Console.WriteLine("Sent email to " + user.Email);
                     }
+
                     if(PaymentMethod.Equals("Pay at Place"))
                     {
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });

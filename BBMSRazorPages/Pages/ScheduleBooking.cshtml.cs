@@ -6,11 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Services.Models;
+using Services;
+using System.Linq;
 
 namespace BBMSRazorPages.Pages
 {
     public class ScheduleBookingModel : PageModel
     {
+        private readonly IUserService userService;
+        
         private readonly IServiceService serviceService;
 
         private readonly ICourtService courtService;
@@ -21,15 +25,18 @@ namespace BBMSRazorPages.Pages
 
         private readonly IMomoService momoService;
 
+        private readonly IEmailSender emailSender;
 
 
-        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService, IVnPayService vnPayService, IMomoService momoService)
+        public ScheduleBookingModel(IServiceService serviceService, ICourtService courtService, IBookingService bookingService, IVnPayService vnPayService, IMomoService momoService, IUserService userService, IEmailSender emailSender)
         {
             this.serviceService = serviceService;
             this.courtService = courtService;
             this.bookingService = bookingService;
             this.vnPayService = vnPayService;
             this.momoService = momoService;
+            this.userService = userService;
+            this.emailSender = emailSender;
         }
 
         [BindProperty]
@@ -200,6 +207,8 @@ namespace BBMSRazorPages.Pages
                 TempData["PropertyRequired"] = $"Days of week is required, please choose at least 1.";
                 return RedirectToPage();
             }
+
+            // Handle booking
             var bookingDays = new List<DateTime>();
             for (int i = 1; i <= daysInMonth; i++)
             {
@@ -219,12 +228,12 @@ namespace BBMSRazorPages.Pages
             }
 
             // Check selected payment option
-            if(SelectedPaymentOptionId == 0)
+            if (SelectedPaymentOptionId == 0)
             {
                 TempData["PropertyRequired"] = $"Payment option is required, please choose your suitable payment option.";
                 return RedirectToPage();
             }
-            var paymentOption = SelectedPaymentOptionId == 1 ? "Online payment" : "Pay at place";
+            string paymentOption = SelectedPaymentOptionId == 1 ? "Online payment" : "Pay at place";
 
             // Get price per hour of court
             var pricePerHour = court.PricePerHour;
@@ -233,13 +242,51 @@ namespace BBMSRazorPages.Pages
 
             // Create booking for each day
             var services = new List<Service>();
+
             foreach (var id in SelectedServiceIds)
             {
                 var service = serviceService.GetServiceById(id);
                 services.Add(service);
             }
-            foreach(var day in bookingDays)
+
+            // Variables for email sending
+            string dates = "<ul>";
+            decimal emailTotalPrice = 0;
+            Dictionary<string, int> EmailServiceQuantities = new();
+            //
+
+            var bookingServices = new List<BusinessObjects.BookingService>();
+            for (int i = 0; i < SelectedServiceIds.Count; i++)
             {
+                if (!bookingServices.IsNullOrEmpty())
+                {
+                    var bookingServiceIds = bookingServices.Select(bs => bs.ServiceId).ToList();
+                    if (bookingServiceIds.Contains(SelectedServiceIds[i]))
+                    {
+                        var existedBookingService = bookingServices.FirstOrDefault(bs => bs.ServiceId == SelectedServiceIds[i]);
+                        existedBookingService.Quantity += ServicesAmount[i];
+                        continue;
+                    }
+                }
+                var bookingService = new BusinessObjects.BookingService
+                {
+                    ServiceId = SelectedServiceIds[i],
+                    Quantity = ServicesAmount[i]
+                };
+                bookingServices.Add(bookingService);
+            }
+
+            foreach (var bookingService in bookingServices)
+            {
+                var service = services.FirstOrDefault(s => s.ServiceId == bookingService.ServiceId);
+                EmailServiceQuantities.Add(service.ServiceName, bookingService.Quantity);
+            }
+
+            /////
+            foreach (var day in bookingDays)
+            {
+                dates += $"<li>{DateOnly.FromDateTime(day)}</li>";
+
                 var booking = new BusinessObjects.Booking
                 {
                     UserId = HttpContext.Session.GetInt32("UserId"),
@@ -251,43 +298,70 @@ namespace BBMSRazorPages.Pages
                     PaymentMethod = paymentOption,
                     Status = "Pending"
                 };
-
+                var newBookingServices = new List<BusinessObjects.BookingService>();
                 // Get services by selected service id
-                var bookingServices = new List<BookingService>();
-                for (int i = 0; i < SelectedServiceIds.Count; i++)
-                {
-                    if (!bookingServices.IsNullOrEmpty())
-                    {
-                        var bookingServiceIds = bookingServices.Select(bs => bs.ServiceId).ToList();
-                        if (bookingServiceIds.Contains(SelectedServiceIds[i]))
-                        {
-                            var existedBookingService = bookingServices.FirstOrDefault(bs => bs.ServiceId == SelectedServiceIds[i]);
-                            existedBookingService.Quantity += ServicesAmount[i];
-                            continue;
-                        }
-                    }
-                    var bookingService = new BookingService
-                    {
-                        ServiceId = SelectedServiceIds[i],
-                        Quantity = ServicesAmount[i],
-                        Booking = booking
-                    };
-                    bookingServices.Add(bookingService);
-                }
                 if (!bookingServices.IsNullOrEmpty())
                 {
                     foreach (var bookingService in bookingServices)
                     {
+                        var newBookingService = new BusinessObjects.BookingService
+                        {
+                            ServiceId = bookingService.ServiceId,
+                            Quantity = bookingService.Quantity,
+                            Booking = booking
+                        };
+                        newBookingServices.Add(newBookingService);
                         var service = services.FirstOrDefault(s => s.ServiceId == bookingService.ServiceId);
                         var price = service.ServicePrice;
                         booking.TotalPrice += (price * bookingService.Quantity);
                     }
                 }
-                booking.BookingServices = bookingServices;
+
+                emailTotalPrice += booking.TotalPrice;
+                booking.BookingServices = newBookingServices;
                 bookingService.AddBookingWithServices(booking);
             }
 
-            if(paymentOption.Equals("Online payment"))
+            // Send email to user
+
+            dates += "</ul>";
+            User user = userService.GetUserById((int) HttpContext.Session.GetInt32("UserId"));
+
+            if (user != null)
+            {
+                var bookedCourt = court;
+
+                string subject = "Badminton Court Booking Confirmation";
+                string message =
+                    $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                    $"<strong>Booking Details:</strong><br>" +
+                    $"Court name: {bookedCourt.CourtName}<br>" +
+                    $"On dates: {dates}, from {startTime} to {endTime}<br>";
+
+                if (services != null && EmailServiceQuantities.Count > 0)
+                {
+                    message += "<br><strong>Additional Services:</strong><br>";
+                    foreach (var service in EmailServiceQuantities)
+                    {
+                        message += $"- {service.Key}, quantity: {service.Value}.<br>";
+                    }
+                }
+                else
+                {
+                    message += "<br><strong>Additional Services:</strong> None.<br>";
+                }
+
+                message +=
+                    $"<br>Total booking price: {emailTotalPrice}<br>" +
+                    $"Payment method: {paymentOption}<br><br>" +
+                    "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+
+                await emailSender.SendEmailAsync(user.Email, subject, message);
+
+                Console.WriteLine("Sent email to " + user.Email);
+            }
+
+            if (paymentOption.Equals("Online payment"))
             {
                 // Get bookings for payment
                 var bookings = new List<BusinessObjects.Booking>();
@@ -310,6 +384,7 @@ namespace BBMSRazorPages.Pages
                 {
                     ids = bookingIdsString
                 };
+
                 return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
 
                 // VnPay
