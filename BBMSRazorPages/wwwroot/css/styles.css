@@ -197,3 +197,44 @@ option {
     font-size: 16px;
     color: #4CAF50;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+    text-align: center;
+}
+
+.booked {
+    background-color: #d9534f;
+}
+
+.Pending {
+    background-color: yellow !important; /* Màu vàng cho trạng thái Pending hoặc null */
+}
+
+.Confirm {
+    background-color: #d9534f; /* Màu đỏ cho trạng thái Confirm */
+}
+
+/* Remove default spinner and adjust time picker appearance */
+input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0.5em; /* Adjust padding as needed */
+    border: 1px solid #ccc; /* Add border for clarity */
+    width: 150px; /* Adjust width as needed */
+}
+
+    /* Ensure the time picker popup is accessible */
+    input[type="time"]:focus {
+        outline: none; /* Optional: Remove focus outline */
+    }

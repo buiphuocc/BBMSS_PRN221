@@ -81,12 +81,29 @@
             <div class="courts" id="availableCourtsContainer">
                 @await Html.PartialAsync("_AvailableCourtsPartial", Model)
             </div>
-            <div>
+            @* <div>
                 Services: <br>
                 <button type="button" class="add-service-button" onclick="addService()">Add Service</button>
                 <div id="serviceContainer">
                     <!-- Container for dynamically added service blocks -->
                 </div>
+            </div> *@
+
+            <div class="form-group align-items-center">
+                <label class="control-label mr-2">Services</label>
+                <div class="d-flex">
+                    <select id="serviceSelector" class="form-control mr-2">
+                        <option value="">-- Select Service --</option>
+                        @foreach (var service in Model.Services)
+                        {
+                            <option value="@service.ServiceId">@service.ServiceName</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addService()">Add Service</button>
+                </div>
+            </div>
+            <div id="servicesContainer" class="form-group">
+                <!-- Services will be added here dynamically -->
             </div>
             <div style="margin: 10px">
                 <label for="paymentOption">Payment:</label>
@@ -359,87 +376,128 @@
         //     }
         // }
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            let serviceCounter = 0;
+        // document.addEventListener('DOMContentLoaded', (event) => {
+        //     let serviceCounter = 0;
 
-            async function addService() {
-                serviceCounter++;
+        //     async function addService() {
+        //         serviceCounter++;
 
-                // Create a new service container
-                const serviceContainer = document.createElement('div');
-                serviceContainer.className = 'service-container';
-                serviceContainer.id = `serviceContainer_${serviceCounter}`;
+        //         // Create a new service container
+        //         const serviceContainer = document.createElement('div');
+        //         serviceContainer.className = 'service-container';
+        //         serviceContainer.id = `serviceContainer_${serviceCounter}`;
 
-                // Create a new dropdown for the service
-                const dropdown = document.createElement('div');
-                dropdown.className = 'dropdown';
-                dropdown.id = `dropdown_${serviceCounter}`;
+        //         // Create a new dropdown for the service
+        //         const dropdown = document.createElement('div');
+        //         dropdown.className = 'dropdown';
+        //         dropdown.id = `dropdown_${serviceCounter}`;
 
-                // Populate the dropdown with options fetched via AJAX
-                await fetchOptions(dropdown);
+        //         // Populate the dropdown with options fetched via AJAX
+        //         await fetchOptions(dropdown);
 
-                // Add the dropdown to the service container
-                serviceContainer.appendChild(dropdown);
+        //         // Add the dropdown to the service container
+        //         serviceContainer.appendChild(dropdown);
 
-                // Create an amount block for the service
-                const amountBlock = document.createElement('div');
-                amountBlock.className = 'amount-block';
-                amountBlock.innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="amount-controls">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `;
+        //         // Create an amount block for the service
+        //         const amountBlock = document.createElement('div');
+        //         amountBlock.className = 'amount-block';
+        //         amountBlock.innerHTML = `
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     <div class="amount-controls">
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <input type="number" id="amountInput" name="ServicesAmount" value="1" min="1">
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </div>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 `;
 
-                // Add the amount block to the service container
-                serviceContainer.appendChild(amountBlock);
+        //         // Add the amount block to the service container
+        //         serviceContainer.appendChild(amountBlock);
 
-                // Create a remove button
-                const removeButton = document.createElement('button');
-                removeButton.type = 'button';
-                removeButton.className = 'remove-service-button';
-                removeButton.innerText = 'Remove';
-                removeButton.onclick = function () {
-                    console.log('Remove button clicked');
-                    removeService(serviceContainer.id);
-                };
+        //         // Create a remove button
+        //         const removeButton = document.createElement('button');
+        //         removeButton.type = 'button';
+        //         removeButton.className = 'remove-service-button';
+        //         removeButton.innerText = 'Remove';
+        //         removeButton.onclick = function () {
+        //             console.log('Remove button clicked');
+        //             removeService(serviceContainer.id);
+        //         };
 
-                // Add the remove button to the service container
-                console.log('Appending remove button to service container:', serviceContainer);
-                serviceContainer.appendChild(removeButton);
+        //         // Add the remove button to the service container
+        //         console.log('Appending remove button to service container:', serviceContainer);
+        //         serviceContainer.appendChild(removeButton);
 
-                // Append the new service container to the main container
-                document.getElementById('serviceContainer').appendChild(serviceContainer);
+        //         // Append the new service container to the main container
+        //         document.getElementById('serviceContainer').appendChild(serviceContainer);
+        //     }
+
+        //     async function fetchOptions(dropdown) {
+        //         try {
+        //             const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
+        //             if (!response.ok) {
+        //                 throw new Error('Failed to fetch options');
+        //             }
+        //             const options = await response.json();
+
+        //             // Populate the dropdown with fetched options
+        //             dropdown.innerHTML = `
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <select class="service-select" name="SelectedServiceIds">
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </select>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     `;
+        //         } catch (error) {
+        //             console.error('Error fetching options:', error);
+        //         }
+        //     }
+
+        //     function removeService(containerId) {
+        //         const serviceContainer = document.getElementById(containerId);
+        //         if (serviceContainer) {
+        //             serviceContainer.remove();
+        //         }
+        //     }
+
+        //     // Add initial event listener for addService button
+        //     document.querySelector('.add-service-button').addEventListener('click', addService);
+        // });
+
+        ////////////////////
+
+        function addService() {
+            const serviceSelector = document.getElementById('serviceSelector');
+            const selectedServiceId = serviceSelector.value;
+            const selectedServiceText = serviceSelector.options[serviceSelector.selectedIndex].text;
+
+            if (selectedServiceId === "") return;
+
+            const servicesContainer = document.getElementById('servicesContainer');
+            const serviceDiv = document.createElement('div');
+            serviceDiv.className = 'form-group';
+
+            serviceDiv.innerHTML = `
+                        <label>${selectedServiceText}</label>
+                        <input type="hidden" name="SelectedServices" value="${selectedServiceId}" />
+                        <input class="form-control" type="number" min="1" value="1" name="ServiceQuantities[${selectedServiceId}]" style="display: inline-block; width: auto; margin-left: 10px;" />
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeService(this, '${selectedServiceId}')">Remove</button>
+                    `;
+
+            servicesContainer.appendChild(serviceDiv);
+
+            // Disable the selected option
+            serviceSelector.options[serviceSelector.selectedIndex].disabled = true;
+            serviceSelector.value = ""; // Reset the selector
+        }
+
+        function removeService(button, serviceId) {
+            const serviceDiv = button.parentElement;
+            serviceDiv.remove();
+
+            // Enable the previously selected option in the dropdown
+            const serviceSelector = document.getElementById('serviceSelector');
+            const option = serviceSelector.querySelector(`option[value='${serviceId}']`);
+            if (option) {
+                option.disabled = false;
             }
+        }
 
-            async function fetchOptions(dropdown) {
-                try {
-                    const response = await fetch('/ScheduleBooking?handler=ServiceOptions'); // Adjust URL as per your routing
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch options');
-                    }
-                    const options = await response.json();
-
-                    // Populate the dropdown with fetched options
-                    dropdown.innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <select class="service-select" name="SelectedServiceIds">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ${options.map(option => `<option value="${option.serviceId}">${option.serviceName}</option>`).join('')}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </select>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `;
-                } catch (error) {
-                    console.error('Error fetching options:', error);
-                }
-            }
-
-            function removeService(containerId) {
-                const serviceContainer = document.getElementById(containerId);
-                if (serviceContainer) {
-                    serviceContainer.remove();
-                }
-            }
-
-            // Add initial event listener for addService button
-            document.querySelector('.add-service-button').addEventListener('click', addService);
-        });
+        /////////////
 
         function updateCounter(select) {
             const selectedServiceId = select.value;

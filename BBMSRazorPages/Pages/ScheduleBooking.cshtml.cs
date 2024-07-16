@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Services.Models;
+using Services;
 
 namespace BBMSRazorPages.Pages
 {
@@ -77,6 +78,9 @@ namespace BBMSRazorPages.Pages
         public List<int> ServicesAmount { get; set; } = new List<int>();
 
         [BindProperty]
+        public List<Service> Services { get; set; }
+
+        [BindProperty]
         public List<Court> AvailableCourts { get; set; } = new List<Court>();
 
         [BindProperty]
@@ -117,6 +121,7 @@ namespace BBMSRazorPages.Pages
                 new PaymentOption { Id = 1, Name = "Online payment"},
                 new PaymentOption { Id = 2, Name = "Pay at place"}
             };
+            Services = serviceService.GetAllServices();
         }
 
         public IActionResult OnGetUpdateDaysOfWeek(int month, int year, string fromTime, string toTime)
@@ -238,7 +243,43 @@ namespace BBMSRazorPages.Pages
                 var service = serviceService.GetServiceById(id);
                 services.Add(service);
             }
-            foreach(var day in bookingDays)
+
+            // Handle selected services
+            var selectedServicesString = Request.Form["SelectedServices"];
+            var selectServices = new List<int>();
+            var selectServiceQuantities = new Dictionary<int, int>();
+
+            if (!selectedServicesString.IsNullOrEmpty())
+            {
+                // Convert the selected services to a list of integers
+                var selectedServices = selectedServicesString
+                        .ToString()
+                        .Split(',')
+                        .Select(int.Parse)
+                        .ToList();
+
+                // Convert the service quantities to a dictionary<int, int>
+                var serviceQuantities = new Dictionary<int, int>();
+
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("ServiceQuantities["))
+                    {
+                        var serviceIdStr = key.Substring(18, key.Length - 19);
+                        if (int.TryParse(serviceIdStr, out int serviceId))
+                        {
+                            var quantityStr = Request.Form[key];
+                            if (int.TryParse(quantityStr, out int quantity))
+                            {
+                                serviceQuantities[serviceId] = quantity;
+                            }
+                        }
+                    }
+                }
+                selectServices = selectedServices;
+                selectServiceQuantities = serviceQuantities;
+            }
+            foreach (var day in bookingDays)
             {
                 var booking = new BusinessObjects.Booking
                 {
@@ -251,37 +292,28 @@ namespace BBMSRazorPages.Pages
                     PaymentMethod = paymentOption,
                     Status = "Pending"
                 };
-
-                // Get services by selected service id
-                var bookingServices = new List<BookingService>();
-                for (int i = 0; i < SelectedServiceIds.Count; i++)
+                var bookingServices = new List<BusinessObjects.BookingService>();
+                if (!selectServices.IsNullOrEmpty())
                 {
-                    if (!bookingServices.IsNullOrEmpty())
+                    decimal totalServicePrice = 0;
+                    
+                    foreach (var serviceId in selectServices)
                     {
-                        var bookingServiceIds = bookingServices.Select(bs => bs.ServiceId).ToList();
-                        if (bookingServiceIds.Contains(SelectedServiceIds[i]))
+                        if (selectServiceQuantities.TryGetValue(serviceId, out int quantity))
                         {
-                            var existedBookingService = bookingServices.FirstOrDefault(bs => bs.ServiceId == SelectedServiceIds[i]);
-                            existedBookingService.Quantity += ServicesAmount[i];
-                            continue;
+                            var bookingService = new BusinessObjects.BookingService
+                            {
+                                Booking = booking,
+                                ServiceId = serviceId,
+                                Quantity = quantity
+                            };
+                            totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
+                            bookingServices.Add(bookingService);
                         }
+
                     }
-                    var bookingService = new BookingService
-                    {
-                        ServiceId = SelectedServiceIds[i],
-                        Quantity = ServicesAmount[i],
-                        Booking = booking
-                    };
-                    bookingServices.Add(bookingService);
-                }
-                if (!bookingServices.IsNullOrEmpty())
-                {
-                    foreach (var bookingService in bookingServices)
-                    {
-                        var service = services.FirstOrDefault(s => s.ServiceId == bookingService.ServiceId);
-                        var price = service.ServicePrice;
-                        booking.TotalPrice += (price * bookingService.Quantity);
-                    }
+                    booking.TotalPrice += totalServicePrice;
+                    
                 }
                 booking.BookingServices = bookingServices;
                 bookingService.AddBookingWithServices(booking);
