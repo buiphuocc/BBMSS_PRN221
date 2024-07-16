@@ -11,6 +11,22 @@ namespace DataAccessLayer
 {
     public class PaymentDAO
     {
+        public static Payment GetPaymentByBookingId(int bookingId)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            // Since Payment has a one-to-many relationship with Booking,
+            // we need to find the Payment associated with the given BookingId.
+            return _context.Payments
+                .Include(p => p.Bookings) // Assuming Payment has a collection of Bookings
+                .FirstOrDefault(p => p.Bookings.Any(b => b.BookingId == bookingId));
+        }
+
+        public static void UpdatePayment(Payment payment)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            _context.Payments.Update(payment);
+            _context.SaveChanges();
+        }
         public static void SavePayment(Payment payment)
         {
             try

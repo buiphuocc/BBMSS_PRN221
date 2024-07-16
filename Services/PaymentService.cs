@@ -18,6 +18,18 @@ namespace Services
             this.paymentRepository = paymentRepository;
         }
 
+        public Payment GetPaymentByBookingId(int bookingId)
+        {
+            try
+            {
+                return paymentRepository.GetPaymentByBookingId(bookingId);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public void SavePayment(Payment payment)
         {
             try
@@ -35,6 +47,18 @@ namespace Services
             try
             {
                 paymentRepository.SavePaymentWithBookingIds(payment, bookingIds);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public void UpdatePayment(Payment payment)
+        {
+            try
+            {
+                paymentRepository.UpdatePayment(payment);
             }
             catch
             {

@@ -52,6 +52,9 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
+        [BindProperty]
+        public string Note { get; set; }
+
         public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService, IPaymentService paymentService)
         {
             this.bookingService = bookingService;
@@ -91,9 +94,12 @@ namespace BBMSRazorPages.Pages
                 {
                     return "Pending";
                 }
-                else if (booking.Status == "Confirm")
+                else if (booking.Status == "Confirmed")
                 {
-                    return "Confirm";
+                    return "Confirmed";
+                }else if(booking.Status == "Completed")
+                {
+                    return "Completed";
                 }
             }
 
@@ -107,6 +113,17 @@ namespace BBMSRazorPages.Pages
             {
                 booking.Status = NewStatus;
                 bookingService.UpdateBooking(booking);
+                // Update the payment with the note
+                var payment = paymentService.GetPaymentByBookingId(BookingId);
+                if (payment != null)
+                {
+                    if (Note != null)
+                    {
+                    payment.Success = true;
+                    }
+                    payment.TransactionId = Note;
+                    paymentService.UpdatePayment(payment);
+                }
             }
 
             // Reload the bookings
