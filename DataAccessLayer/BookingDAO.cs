@@ -33,6 +33,7 @@ namespace DataAccessLayer
             return _context.Bookings
                 .Include(b => b.User)
                 .Include(b => b.Court)
+                .Include(b => b.Payment)
                 .FirstOrDefault(b => b.BookingId == id);
         }
 

@@ -23,6 +23,7 @@ namespace BBMSRazorPages.Pages
         private readonly IEmailSender emailSender;
         private readonly IMomoService momoService;
         private readonly IVnPayService vnPayService;
+        private readonly IPaymentService paymentService;
 
         public List<BusinessObjects.Booking> Bookings { get; set; }
         public List<Court> Courts { get; set; }
@@ -51,7 +52,7 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public DateTime DateForm { get; set; }
 
-        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
+        public CourtScheduleModel(IBookingService bookingService, ICourtService courtService, IServiceService serviceService, IBookingServiceService bookingServiceService, IUserService userService, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService, IPaymentService paymentService)
         {
             this.bookingService = bookingService;
             this.courtService = courtService;
@@ -61,6 +62,7 @@ namespace BBMSRazorPages.Pages
             this.emailSender = emailSender;
             this.momoService = momoService;
             this.vnPayService = vnPayService;
+            this.paymentService = paymentService;
         }
 
         public void OnGet(DateTime bookingDate, string message)
@@ -162,6 +164,7 @@ namespace BBMSRazorPages.Pages
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This time range and court is booked" });
                     }
 
+                    List<int> bookings = new List<int>();
                     TimeSpan slotDuration = new TimeSpan(0, 30, 0); // 30 minutes
                     int totalSlots = (int)Math.Ceiling((EndTime - StartTime).TotalMinutes / slotDuration.TotalMinutes);
                     var newBooking = new BusinessObjects.Booking
@@ -177,6 +180,9 @@ namespace BBMSRazorPages.Pages
                     };
 
                     bookingService.AddBooking(newBooking);
+                    bookings.Add(newBooking.BookingId);
+
+                    
 
                     // Handle selected services
                     var selectedServicesString = Request.Form["SelectedServices"];
@@ -240,6 +246,45 @@ namespace BBMSRazorPages.Pages
                         }
 
                     }
+
+
+                    BusinessObjects.Booking forPayment = bookingService.GetBookingById(newBooking.BookingId);
+                    // Check newBooking
+                    if (forPayment == null)
+                    {
+                        throw new NullReferenceException("newBooking is null");
+                    }
+
+                    // Check newBooking.User
+                    if (forPayment.User == null)
+                    {
+                        throw new NullReferenceException("newBooking.User is null");
+                    }
+
+                    // Check newBooking.User.Username
+                    if (forPayment.User.Username == null)
+                    {
+                        throw new NullReferenceException("newBooking.User.Username is null");
+                    }
+
+                    // Check newBooking.PaymentMethod
+                    if (forPayment.PaymentMethod == null)
+                    {
+                        throw new NullReferenceException("newBooking.PaymentMethod is null");
+                    }
+
+                    //Add payment for booking
+                    var payment = new Payment()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Date = DateTime.UtcNow,
+                        Amount = (long)forPayment.TotalPrice,
+                        PaymentMethod = forPayment.PaymentMethod,
+                        Description = forPayment.User.Username + "Paid" + forPayment.TotalPrice,
+                        Success = false,
+                        TransactionId = ""
+                    };
+                    paymentService.SavePaymentWithBookingIds(payment,bookings);
 
                     // Send email to user
                     User user = userService.GetUserById((int) UserId);
