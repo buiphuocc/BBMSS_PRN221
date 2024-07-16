@@ -78,14 +78,22 @@ namespace BBMSRazorPages.Pages
                 };
 
                 var response = await momoService.CreatePaymentAsync(orderInfo, null);
+                if(response.Message.Equals("The upstream server is timing out"))
+                {
+                    throw new Exception("Momo: " + response.Message + ". Please choose other payment gateways.");
+                }
                 return Redirect(response.PayUrl);
 
             }
             catch (Exception ex)
             {
                 TempData["PaymentUnsuccess"] = ex.Message;
-                string currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
-                return LocalRedirect(currentUrl);
+                string currentUrl = HttpContext.Request.Path;
+                var routeValue = new
+                {
+                    id = BookingId
+                };
+                return RedirectToPage(currentUrl, routeValue);
             }
         }
     }
