@@ -75,7 +75,7 @@
     {
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal">Book a Court</button>
     }
-    @if (Model.isSessionUserAdmin())
+    @if (Model.isUserRoleAllowed())
     {
         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#statusModal">Change Booking Status</button>
     }
@@ -157,7 +157,7 @@
 
 
     <!-- Status Modal -->
-    @if (Model.isSessionUserAdmin()) {
+    @if (Model.isUserRoleAllowed()) {
         <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">

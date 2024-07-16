@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BBMSRazorPages.Pages
 {
-    [SessionRoleAuthorize("Admin")]
+    [SessionRoleAuthorize("Admin", "Staff")]
     public class DashboardModel : PageModel
     {
         private readonly IBookingService _bookingService;
