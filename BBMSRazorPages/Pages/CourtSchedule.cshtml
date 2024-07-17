@@ -110,7 +110,7 @@
             @foreach (var court in Model.Courts)
             {
                 <tr>
-                    <td>@court.CourtName</td>
+                    <td>@court.CourtName @(court.PricePerHour+" VND")</td>
                     @for (int hour = 5; hour <= 22; hour++)
                     {
                         var slot1 = new TimeSpan(hour, 0, 0);

@@ -37,7 +37,7 @@ namespace Services
             model.OrderInfo = 
                 //"Khách hàng: " + model.FullName + 
                 "Payment for schedule booking: " + model.OrderInfo;
-            model.Amount = model.Amount * 1000;
+            
             returnUrl = returnUrl == null ? _options.Value.ReturnUrl : returnUrl;
             var rawData =
                 $"partnerCode={_options.Value.PartnerCode}&accessKey={_options.Value.AccessKey}&requestId={model.OrderId}&amount={model.Amount}&orderId={model.OrderId}&orderInfo={model.OrderInfo}&returnUrl={returnUrl}&notifyUrl={_options.Value.NotifyUrl}&extraData=";
