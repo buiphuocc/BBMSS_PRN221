@@ -39,7 +39,7 @@
         <p id="court">@Model.ScheduleBookingModel.Court.CourtName</p>
 
         <label for="totalPrice"> Total price: </label>
-        <p id="totalPrice">@Model.ScheduleBookingModel.TotalPrice VND</p>
+        <p id="totalPrice">@(Model.ScheduleBookingModel.TotalPrice * 1000) VND</p>
 
         <label for="user"> User: </label>
         <p id="user">@Model.ScheduleBookingModel.User.Email</p>
