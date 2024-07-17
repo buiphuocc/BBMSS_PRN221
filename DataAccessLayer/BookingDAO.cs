@@ -22,6 +22,7 @@ namespace DataAccessLayer
         {
             using var _context = new BadmintonBookingSystemContext();
             return _context.Bookings
+                .Include(b=>b.Payment)
                 .Include(b => b.User)
                 .Include(b => b.Court)
                 .ToList();

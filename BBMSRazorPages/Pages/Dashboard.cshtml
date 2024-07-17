@@ -70,6 +70,7 @@
                     <th>End Time</th>
                     <th>Services</th>
                     <th>Payment Method</th>
+                    <th>Payment Status</th>
                     <th>Total Price</th>
                     <th>Status</th>
                 </tr>
@@ -114,6 +115,7 @@
                             }
                         </td>
                         <td>@booking.PaymentMethod</td>
+                        <td>@(booking.Payment?.Success == true ? "Paid" : "Unpaid")</td>
                         <td>@booking.TotalPrice</td>
                         <td>
                             @{
