@@ -31,6 +31,12 @@ namespace BBMSRazorPages.Pages
         public int? UserId { get; set; }
         public List<Service> Services { get; set; }
 
+        public class PricingViewModel
+        {
+            public List<Service> ?Services { get; set; }
+            public List<Court> ?Courts { get; set; }
+        }
+        public PricingViewModel Pricing { get; set; }
 
         [BindProperty]
         public DateTime SelectedDate { get; set; }
@@ -77,6 +83,14 @@ namespace BBMSRazorPages.Pages
             Courts = courtService.GetAllCourts();
             UserId = HttpContext.Session.GetInt32("UserId");
             Services = serviceService.GetAllServices();
+            //dataa for menu
+            var services = serviceService.GetAllServices();
+            var courts = courtService.GetAllCourts();
+            Pricing = new PricingViewModel
+            {
+                Services = services,
+                Courts = courts
+            };
         }
 
         public bool IsTimeSlotBooked(Court court, TimeSpan slot1, TimeSpan slot2)

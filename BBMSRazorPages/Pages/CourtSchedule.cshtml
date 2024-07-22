@@ -62,7 +62,7 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align:center">Court Schedule</h1>
+    <h1 style="text-align:center;font-family:'Yu Gothic UI' ">Court Schedule</h1>
     <!-- Note Section -->
     <div class="alert alert-info text-center">
         <strong>Note:</strong>
@@ -329,6 +329,63 @@
     @* <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script> *@
+
+    <h1 style="background-color:#FFDFD6; text-align:center; margin:30px auto; font-family:'Yu Gothic UI'">Price list</h1>
+
+    <h2>Services</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var service in Model.Pricing.Services)
+            {
+                <tr>
+                    <td>@service.ServiceName</td>
+                    <td>@service.ServicePrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h2>Courts</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price Per Hour</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var court in Model.Pricing.Courts)
+            {
+                <tr>
+                    <td>@court.CourtName</td>
+                    <td>@court.PricePerHour</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+    </style>
 </body>
 </html>
 
