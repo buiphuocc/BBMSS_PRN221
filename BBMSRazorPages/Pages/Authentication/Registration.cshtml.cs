@@ -34,7 +34,17 @@ namespace BBMSRazorPages.Pages.Authentication
                 }
                 return Page();
             }
-            _userService.AddUser(User);
+
+			if (_userService.IsUserExist(User.Email, User.Username))
+			{
+				TempData["InvalidData"] = "This username/email already exists";
+                ModelState.AddModelError(string.Empty, "This username/email already exists");
+                User.Email = "";
+                User.Username = "";
+                return Page();
+			}
+
+			_userService.AddUser(User);
 
             return RedirectToPage("/Authentication/Login");
         }

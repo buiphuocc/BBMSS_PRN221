@@ -46,5 +46,10 @@ namespace Services
         {
             userRepository.UpdateUser(user);
         }
+
+        public bool IsUserExist(string email, string username)
+        {
+            return userRepository.IsUserExist(email, username);
+        }
     }
 }

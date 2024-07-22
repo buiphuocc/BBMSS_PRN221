@@ -34,5 +34,8 @@ namespace Repositories
 
         public void UpdateUser(User user)
             => UserDAO.UpdateUser(user);
+
+        public bool IsUserExist(string email, string username)
+            => UserDAO.IsUserExist(email, username);
     }
 }

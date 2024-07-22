@@ -20,5 +20,7 @@ namespace Services.Interfaces
         void UpdateUser(User user);
 
         void DeleteUser(int id);
+
+        bool IsUserExist(string email, string username);
     }
 }
