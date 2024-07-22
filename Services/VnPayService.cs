@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class VnPayService : IVnPayService 
+    public class VnPayService : IVnPayService
     {
         private readonly IConfiguration _configuration;
 
@@ -35,7 +35,7 @@ namespace Services
             {
                 var pay = new VnPayLibrary();
                 var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
-                
+
                 var payment = new Payment
                 {
                     Id = response.OrderId,
@@ -49,7 +49,7 @@ namespace Services
                 var bookingIdsString = response.Description.Split(':')[1];
                 var bookingIds = bookingIdsString.Split(',');
                 var bookingIdsInt = new List<int>();
-                for(int i = 0; i < bookingIds.Length; i++)
+                for (int i = 0; i < bookingIds.Length; i++)
                 {
                     bookingIdsInt.Add(int.Parse(bookingIds[i]));
                 }
@@ -64,7 +64,7 @@ namespace Services
                     booking.Status = "Confirmed";
                     bookingReppository.UpdateBooking(booking);
                 }
-                
+
                 return response;
             }
             catch
@@ -92,10 +92,10 @@ namespace Services
             }
             var totalPrice = (decimal)0;
             var bookingIdsString = "";
-            for(int i = 0; i < bookings.Count; i++)
+            for (int i = 0; i < bookings.Count; i++)
             {
                 totalPrice += bookings[i].TotalPrice;
-                if(i == bookings.Count - 1)
+                if (i == bookings.Count - 1)
                 {
                     bookingIdsString += bookings[i].BookingId;
                     continue;

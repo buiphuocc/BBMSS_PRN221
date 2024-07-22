@@ -46,9 +46,9 @@ namespace BBMSRazorPages.Pages
             var bookings = new List<BusinessObjects.Booking>();
             var daysOfWeek = new HashSet<DayOfWeek>();
             decimal totalPrice = 0;
-            foreach(var idString in idStrings)
+            foreach (var idString in idStrings)
             {
-                if(int.TryParse(idString, out var id))
+                if (int.TryParse(idString, out var id))
                 {
                     var booking = bookingService.GetBookingById(id);
                     bookings.Add(booking);
@@ -62,12 +62,12 @@ namespace BBMSRazorPages.Pages
             }
             var bookingDates = bookings.Select(b => DateOnly.FromDateTime(b.BookingDate)).ToList();
             var bookingDatesString = "";
-            foreach(var bookingDate in bookingDates)
+            foreach (var bookingDate in bookingDates)
             {
                 bookingDatesString += bookingDate.ToString() + ", ";
             }
             var daysOfWeekString = "";
-            foreach(var dayOfWeek in daysOfWeek)
+            foreach (var dayOfWeek in daysOfWeek)
             {
                 daysOfWeekString += dayOfWeek.ToString() + ", ";
             }

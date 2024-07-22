@@ -14,11 +14,15 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BBMSRazorPages.styles.css" asp-append-version="true" />
     <link rel="icon" href="/images/shuttlecock.png" type="image/png">
-
+    <style>
+        body {
+            padding-top: 56px; /* Điều chỉnh chiều cao nếu cần */
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3 fixed-top " style="background-color: #e3f2fd;">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">
                     <img src="/images/shuttlecock.png" alt="BBMSRazorPages Logo" width="30" height="30" class="d-inline-block align-top">
