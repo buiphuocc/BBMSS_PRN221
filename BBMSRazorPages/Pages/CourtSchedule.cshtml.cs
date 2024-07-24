@@ -213,7 +213,8 @@ namespace BBMSRazorPages.Pages
                         PaymentMethod = PaymentMethod,
                         UserId = UserId,
                         TotalPrice = totalSlots * (court.PricePerHour/2),
-                        Status = "Pending" // Set the default status as Pending
+                        Status = "Pending", // Set the default status as Pending
+                        BookingType = "Normal booking"
                     };
 
                     bookingService.AddBooking(newBooking);

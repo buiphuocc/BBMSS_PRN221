@@ -296,7 +296,8 @@ namespace BBMSRazorPages.Pages
                     EndTime = endTime,
                     TotalPrice = (decimal)((float)pricePerHour * totalHours),
                     PaymentMethod = paymentOption,
-                    Status = "Pending"
+                    Status = "Pending",
+                    BookingType = "Schedule Booking"
                 };
                 var newBookingServices = new List<BusinessObjects.BookingService>();
                 // Get services by selected service id
