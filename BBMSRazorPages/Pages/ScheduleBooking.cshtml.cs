@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Services.Models;
 using Services;
 using System.Linq;
+using System.Text.Json;
 
 namespace BBMSRazorPages.Pages
 {
@@ -98,6 +99,13 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public int? SelectedPaymentOptionId { get; set; } = 0;
 
+        public class PricingViewModel
+        {
+            public List<Service>? Services { get; set; }
+            public List<Court>? Courts { get; set; }
+        }
+        public PricingViewModel Pricing { get; set; }
+
         public void OnGet()
         {
             var currentDate = DateTime.Now;
@@ -123,6 +131,15 @@ namespace BBMSRazorPages.Pages
             {
                 new PaymentOption { Id = 1, Name = "Online payment"},
                 new PaymentOption { Id = 2, Name = "Pay at place"}
+            };
+
+            //dataa for menu
+            var services = serviceService.GetAllServices();
+            var courts = courtService.GetAllCourts();
+            Pricing = new PricingViewModel
+            {
+                Services = services,
+                Courts = courts
             };
         }
 
@@ -271,6 +288,7 @@ namespace BBMSRazorPages.Pages
                 var bookingService = new BusinessObjects.BookingService
                 {
                     ServiceId = SelectedServiceIds[i],
+                    Service = services.FirstOrDefault(s => s.ServiceId == SelectedServiceIds[i]),
                     Quantity = ServicesAmount[i]
                 };
                 bookingServices.Add(bookingService);
@@ -283,6 +301,7 @@ namespace BBMSRazorPages.Pages
             }
 
             /////
+            var newBookings = new List<BusinessObjects.Booking>();
             foreach (var day in bookingDays)
             {
                 dates += $"<li>{DateOnly.FromDateTime(day)}</li>";
@@ -319,78 +338,116 @@ namespace BBMSRazorPages.Pages
 
                 emailTotalPrice += booking.TotalPrice;
                 booking.BookingServices = newBookingServices;
-                bookingService.AddBookingWithServices(booking);
+                if(paymentOption.Equals("Pay at place"))
+                {
+                    bookingService.AddBookingWithServices(booking);
+                }
+                newBookings.Add(booking);
             }
 
             // Send email to user
 
-            dates += "</ul>";
-            User user = userService.GetUserById((int) HttpContext.Session.GetInt32("UserId"));
+            //dates += "</ul>";
+            //User user = userService.GetUserById((int) HttpContext.Session.GetInt32("UserId"));
 
-            if (user != null)
-            {
-                var bookedCourt = court;
+            //if (user != null)
+            //{
+            //    var bookedCourt = court;
 
-                string subject = "Badminton Court Booking Confirmation";
-                string message =
-                    $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
-                    $"<strong>Booking Details:</strong><br>" +
-                    $"Court name: {bookedCourt.CourtName}<br>" +
-                    $"On dates: {dates}, from {startTime} to {endTime}<br>";
+            //    string subject = "Badminton Court Booking Confirmation";
+            //    string message =
+            //        $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+            //        $"<strong>Booking Details:</strong><br>" +
+            //        $"Court name: {bookedCourt.CourtName}<br>" +
+            //        $"On dates: {dates}, from {startTime} to {endTime}<br>";
 
-                if (services != null && EmailServiceQuantities.Count > 0)
-                {
-                    message += "<br><strong>Additional Services:</strong><br>";
-                    foreach (var service in EmailServiceQuantities)
-                    {
-                        message += $"- {service.Key}, quantity: {service.Value}.<br>";
-                    }
-                }
-                else
-                {
-                    message += "<br><strong>Additional Services:</strong> None.<br>";
-                }
+            //    if (services != null && EmailServiceQuantities.Count > 0)
+            //    {
+            //        message += "<br><strong>Additional Services:</strong><br>";
+            //        foreach (var service in EmailServiceQuantities)
+            //        {
+            //            message += $"- {service.Key}, quantity: {service.Value}.<br>";
+            //        }
+            //    }
+            //    else
+            //    {
+            //        message += "<br><strong>Additional Services:</strong> None.<br>";
+            //    }
 
-                message +=
-                    $"<br>Total booking price: {emailTotalPrice}<br>" +
-                    $"Payment method: {paymentOption}<br><br>" +
-                    "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+            //    message +=
+            //        $"<br>Total booking price: {emailTotalPrice}<br>" +
+            //        $"Payment method: {paymentOption}<br><br>" +
+            //        "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
 
-                await emailSender.SendEmailAsync(user.Email, subject, message);
+            //    await emailSender.SendEmailAsync(user.Email, subject, message);
 
-                Console.WriteLine("Sent email to " + user.Email);
-            }
+            //    Console.WriteLine("Sent email to " + user.Email);
+            //}
 
             if (paymentOption.Equals("Online payment"))
             {
                 // Get bookings for payment
-                var bookings = new List<BusinessObjects.Booking>();
-                var bookingIdsString = "";
-                for(int i = 0; i < bookingDays.Count; i++)
+                //var bookings = new List<BusinessObjects.Booking>();
+                //var bookingIdsString = "";
+                //for(int i = 0; i < bookingDays.Count; i++)
+                //{
+                //    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDays[i], SelectedCourtId, startTime, endTime, "Online payment");
+                //    if (createdBooking != null)
+                //    {
+                //        bookings.Add(createdBooking);
+                //        if(i == bookingDays.Count - 1)
+                //        {
+                //            bookingIdsString += createdBooking.BookingId;
+                //            continue;
+                //        }
+                //        bookingIdsString += createdBooking.BookingId + ",";
+                //    }
+                //}
+                //var routesValue = new
+                //{
+                //    ids = bookingIdsString
+                //};
+                var daysOfWeekString = "";
+                for(int i = 0; i < SelectedDaysOfWeek.Count; i++)
                 {
-                    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDays[i], SelectedCourtId, startTime, endTime, "Online payment");
-                    if (createdBooking != null)
+                    if(i == SelectedDaysOfWeek.Count - 1)
                     {
-                        bookings.Add(createdBooking);
-                        if(i == bookingDays.Count - 1)
-                        {
-                            bookingIdsString += createdBooking.BookingId;
-                            continue;
-                        }
-                        bookingIdsString += createdBooking.BookingId + ",";
+                        daysOfWeekString += SelectedDaysOfWeek[i];
+                        continue;
                     }
+                    daysOfWeekString += SelectedDaysOfWeek[i] + ", ";
                 }
-                var routesValue = new
+                var selectedCourt = courtService.GetCourtById(SelectedCourtId);
+                var userBook = userService.GetUserById((int)HttpContext.Session.GetInt32("UserId"));
+                var bookingDatesString = "";
+                for (int i = 0; i < bookingDays.Count; i++)
                 {
-                    ids = bookingIdsString
+                    if (i == bookingDays.Count - 1)
+                    {
+                        bookingDatesString += bookingDays[i].ToString("MM/dd/yyyy");
+                        continue;
+                    }
+                    bookingDatesString += bookingDays[i].ToString("MM/dd/yyyy") + ", ";
+                }
+                var scheduleBookingModel = new ScheduleBookingsModel
+                {
+                    DaysOfWeek = daysOfWeekString,
+                    Court = selectedCourt,
+                    User = userBook,
+                    BookingDates = bookingDatesString,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    TotalPrice = emailTotalPrice,
+                    BookingServices = bookingServices
                 };
+                var scheduleBookingModelJsonString = JsonSerializer.Serialize(scheduleBookingModel);
 
-                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
+                return RedirectToPage("/ScheduleBookingSuccessful", new { scheduleBookingModelJsonString});
 
                 // VnPay
-                var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
+                //var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
 
-                return Redirect(paymentUrl);
+                //return Redirect(paymentUrl);
 
                 // Momo
                 //var bookingIdsString = "";

@@ -6,6 +6,7 @@ using BBMSRazorPages.Models;
 using Services.Models;
 using NuGet.Packaging.Signing;
 using System;
+using System.Text.Json;
 
 namespace BBMSRazorPages.Pages
 {
@@ -19,13 +20,19 @@ namespace BBMSRazorPages.Pages
         public decimal Deposit { get; set; } = 0;
 
         [BindProperty]
-        public BBMSRazorPages.Models.ScheduleBookingModel ScheduleBookingModel { get; set; }
+        public ScheduleBookingsModel ScheduleBookingModel { get; set; }
 
         [BindProperty]
         public string BookingIds { get; set; }
 
         [BindProperty]
         public decimal TotalPrice { get; set; }
+
+        [BindProperty]
+        public string ScheduleBookingModelJsonString { get; set; }
+
+        [BindProperty]
+        public int NumberOfDates { get; set; }
 
         public ScheduleBookingSuccessfulModel(IBookingService bookingService, IVnPayService vnPayService, IMomoService momoService)
         {
@@ -34,54 +41,64 @@ namespace BBMSRazorPages.Pages
             this.momoService = momoService;
         }
 
-        public void OnGet(string ids)
+        public void OnGet(string scheduleBookingModelJsonString)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null || userId <= 0)
             {
                 RedirectToPage("/Authentication/Login");
             }
-            var idStrings = ids.Trim().Split(',');
-            BookingIds = ids.Trim();
-            var bookings = new List<BusinessObjects.Booking>();
-            var daysOfWeek = new HashSet<DayOfWeek>();
-            decimal totalPrice = 0;
-            foreach(var idString in idStrings)
+            if (string.IsNullOrEmpty(scheduleBookingModelJsonString))
             {
-                if(int.TryParse(idString, out var id))
-                {
-                    var booking = bookingService.GetBookingById(id);
-                    bookings.Add(booking);
-                    daysOfWeek.Add(booking.BookingDate.DayOfWeek);
-                    totalPrice += booking.TotalPrice;
-                }
-                else
-                {
+                RedirectToPage("/ScheduleBooking");
+            }
+            //var idStrings = ids.Trim().Split(',');
+            //BookingIds = ids.Trim();
+            //var bookings = new List<BusinessObjects.Booking>();
+            //var daysOfWeek = new HashSet<DayOfWeek>();
+            //decimal totalPrice = 0;
+            //foreach(var idString in idStrings)
+            //{
+            //    if(int.TryParse(idString, out var id))
+            //    {
+            //        var booking = bookingService.GetBookingById(id);
+            //        bookings.Add(booking);
+            //        daysOfWeek.Add(booking.BookingDate.DayOfWeek);
+            //        totalPrice += booking.TotalPrice;
+            //    }
+            //    else
+            //    {
 
-                }
-            }
-            var bookingDates = bookings.Select(b => DateOnly.FromDateTime(b.BookingDate)).ToList();
-            var bookingDatesString = "";
-            foreach(var bookingDate in bookingDates)
-            {
-                bookingDatesString += bookingDate.ToString() + ", ";
-            }
-            var daysOfWeekString = "";
-            foreach(var dayOfWeek in daysOfWeek)
-            {
-                daysOfWeekString += dayOfWeek.ToString() + ", ";
-            }
-            var scheduleBooking = new BBMSRazorPages.Models.ScheduleBookingModel
-            {
-                BookingDates = bookingDatesString,
-                DaysOfWeek = daysOfWeekString,
-                Court = bookings[0].Court,
-                User = bookings[0].User,
-                StartTime = bookings[0].StartTime,
-                EndTime = bookings[0].EndTime,
-                TotalPrice = totalPrice
-            };
-            ScheduleBookingModel = scheduleBooking;
+            //    }
+            //}
+            //var bookingDates = bookings.Select(b => DateOnly.FromDateTime(b.BookingDate)).ToList();
+            //var bookingDatesString = "";
+            //foreach(var bookingDate in bookingDates)
+            //{
+            //    bookingDatesString += bookingDate.ToString() + ", ";
+            //}
+            //var daysOfWeekString = "";
+            //foreach(var dayOfWeek in daysOfWeek)
+            //{
+            //    daysOfWeekString += dayOfWeek.ToString() + ", ";
+            //}
+            //var scheduleBooking = new BBMSRazorPages.Models.ScheduleBookingModel
+            //{
+            //    BookingDates = bookingDatesString,
+            //    DaysOfWeek = daysOfWeekString,
+            //    Court = bookings[0].Court,
+            //    User = bookings[0].User,
+            //    StartTime = bookings[0].StartTime,
+            //    EndTime = bookings[0].EndTime,
+            //    TotalPrice = totalPrice
+            //};
+            //ScheduleBookingModel = scheduleBooking;
+
+            ScheduleBookingsModel scheduleBookingModel = JsonSerializer.Deserialize<ScheduleBookingsModel>(scheduleBookingModelJsonString);
+            ScheduleBookingModel = scheduleBookingModel;
+            ScheduleBookingModelJsonString = scheduleBookingModelJsonString;
+            var bookingDates = scheduleBookingModel.BookingDates.Trim().Split(", ");
+            NumberOfDates = bookingDates.Length;
         }
 
         public IActionResult OnPostVnPayPayment()
@@ -89,21 +106,8 @@ namespace BBMSRazorPages.Pages
             try
             {
                 // Code for VnPay payment execution
-                var idStrings = BookingIds.Trim().Split(',');
-                var bookings = new List<BusinessObjects.Booking>();
-                foreach (var idString in idStrings)
-                {
-                    if (int.TryParse(idString.Trim(), out var id))
-                    {
-                        var booking = bookingService.GetBookingById(id);
-                        bookings.Add(booking);
-                    }
-                    else
-                    {
-
-                    }
-                }
-                var response = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
+                ScheduleBookingsModel scheduleBookingModel = JsonSerializer.Deserialize<ScheduleBookingsModel>(ScheduleBookingModelJsonString);
+                var response = vnPayService.CreatePaymentUrl(scheduleBookingModel.User.UserId, scheduleBookingModel, HttpContext);
                 return Redirect(response);
             }
             catch (Exception ex)

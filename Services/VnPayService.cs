@@ -8,8 +8,10 @@ using Services.Libraries;
 using Services.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Services
@@ -22,11 +24,14 @@ namespace Services
 
         private readonly IBookingReppository bookingReppository;
 
-        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository, IBookingReppository bookingReppository)
+        private readonly IServiceRepository serviceRepository;
+
+        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository, IBookingReppository bookingReppository, IServiceRepository serviceRepository)
         {
             _configuration = configuration;
             this.paymentRepository = paymentRepository;
             this.bookingReppository = bookingReppository;
+            this.serviceRepository = serviceRepository;
         }
 
         public VnPayPaymentModel BookingPaymentExecute(IQueryCollection collections)
@@ -73,9 +78,49 @@ namespace Services
             }
         }
 
-        public string CreatePaymentUrl(Payment paymentModel, HttpContext context, string currentPath)
+        public string CreatePaymentUrl(int userId, ScheduleBookingsModel scheduleBookingModel, HttpContext context)
         {
-            throw new NotImplementedException();
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+            var tick = DateTime.Now.Ticks.ToString();
+            var guid = Guid.NewGuid().ToString();
+            var pay = new VnPayLibrary();
+            var urlCallBack = _configuration["PaymentCallBack:ReturnUrl"] + "&userId=" + userId + "&bookingDatesString=" + scheduleBookingModel.BookingDates
+                + "&daysOfWeekString=" + scheduleBookingModel.DaysOfWeek + "&courtId=" + scheduleBookingModel.Court.CourtId + "&startTime=" + scheduleBookingModel.StartTime.ToString()
+                + "&endTime=" + scheduleBookingModel.EndTime.ToString();
+
+            ulong price = (ulong)scheduleBookingModel.TotalPrice * 100;
+
+            
+
+            var bookingServicesJsonString = JsonSerializer.Serialize(scheduleBookingModel.BookingServices);
+            var bookingServicesString = "";
+            for(int i = 0; i < scheduleBookingModel.BookingServices.Count; i++)
+            {
+                if(i == scheduleBookingModel.BookingServices.Count - 1)
+                {
+                    bookingServicesString += scheduleBookingModel.BookingServices[i].Service.ServiceId + ":" + scheduleBookingModel.BookingServices[i].Quantity;
+                    continue;
+                }
+                bookingServicesString += scheduleBookingModel.BookingServices[i].Service.ServiceId + ":" + scheduleBookingModel.BookingServices[i].Quantity + "; ";
+            }
+            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
+            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
+            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_Amount", (price).ToString());
+            pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
+            pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
+            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
+            pay.AddRequestData("vnp_OrderInfo", $"{bookingServicesString}");
+            pay.AddRequestData("vnp_OrderType", "other");
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+            pay.AddRequestData("vnp_TxnRef", guid);
+
+            var paymentUrl =
+                pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+
+            return paymentUrl;
         }
 
         public string CreatePaymentUrlForBooking(List<Booking> bookings, HttpContext context)
@@ -125,7 +170,101 @@ namespace Services
 
         public VnPayPaymentModel PaymentExecute(IQueryCollection collections)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var pay = new VnPayLibrary();
+                var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
+                collections.TryGetValue("userId", out var userIdString);
+                var userId = int.Parse(userIdString);
+                collections.TryGetValue("courtId", out var courtIdString);
+                var courtId = int.Parse(courtIdString);
+                collections.TryGetValue("bookingDatesString", out var bookingDatesString);
+                var bookingDateStrings = bookingDatesString.ToString().Trim().Split(", ");
+                var bookingDates = new List<DateTime>();
+                for (int i = 0; i < bookingDateStrings.Length; i++)
+                {
+                    var date = DateTime.ParseExact(bookingDateStrings[i], "MM/dd/yyyy", CultureInfo.InvariantCulture,
+                        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal);
+                    bookingDates.Add(date);
+                }
+                collections.TryGetValue("daysOfWeekString", out var daysOfWeekString);
+                var dayOfWeekStrings = daysOfWeekString.ToString().Trim().Split(", ");
+                collections.TryGetValue("startTime", out var startTimeString);
+                var startTime = TimeSpan.Parse(startTimeString);
+                collections.TryGetValue("endTime", out var endTimeString);
+                var endTime = TimeSpan.Parse(endTimeString);
+
+                var payment = new Payment
+                {
+                    Id = response.OrderId,
+                    Amount = response.Amount,
+                    TransactionId = response.TransactionId,
+                    Date = response.PayDate,
+                    Success = response.Success,
+                    PaymentMethod = "VnPay",
+                    Description = "Payment for schedule booking."
+                };
+                
+                if (!response.Success)
+                {
+                    throw new Exception("Your payment executed unsuccessfully.");
+                }
+                paymentRepository.SavePayment(payment);
+
+                //List<BusinessObjects.BookingService> bookingServices = JsonSerializer.Deserialize<List<BusinessObjects.BookingService>>(response.Description);
+                var bookingServicesString = response.Description;
+                var bookingServiceStrings = bookingServicesString.Trim().Split("; ");
+                var bookingServices = new List<BusinessObjects.BookingService>();
+                for(int i = 0; i < bookingServiceStrings.Length; i++)
+                {
+                    var serviceQuantity = bookingServiceStrings[i].Trim().Split(':');
+                    var serviceId = int.Parse(serviceQuantity[0]);
+                    var service = serviceRepository.GetServiceById(serviceId);
+                    bookingServices.Add(new BusinessObjects.BookingService
+                    {
+                        Service = service,
+                        ServiceId = serviceId,
+                        Quantity = int.Parse(serviceQuantity[1])
+                    });
+                }
+
+                foreach(var bookingDate in bookingDates)
+                {
+                    var booking = new BusinessObjects.Booking
+                    {
+                        UserId = userId,
+                        CourtId = courtId,
+                        BookingDate = bookingDate,
+                        StartTime = startTime,
+                        EndTime = endTime,
+                        TotalPrice = (decimal) response.Amount,
+                        PaymentMethod = "Online payment",
+                        Status = "Confirmed",
+                        PaymentId = payment.Id
+                    };
+                    var newBookingServices = new List<BusinessObjects.BookingService>();
+                    foreach (var bookingService in bookingServices)
+                    {
+                        var newBookingService = new BusinessObjects.BookingService
+                        {
+                            ServiceId = bookingService.ServiceId,
+                            Quantity = bookingService.Quantity,
+                            Booking = booking
+                        };
+                        newBookingServices.Add(newBookingService);
+                        var price = bookingService.Service.ServicePrice;
+                        booking.TotalPrice += (price * bookingService.Quantity);
+                    }
+                    booking.BookingServices = newBookingServices;
+                    bookingReppository.AddBookingWithServices(booking);
+                }
+
+                return response;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

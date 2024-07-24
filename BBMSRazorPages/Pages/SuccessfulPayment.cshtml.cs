@@ -71,7 +71,7 @@ namespace BBMSRazorPages.Pages
                 var parameters = Request.Query;
                 if (parameters != null)
                 {
-                    var response = vnPayService.BookingPaymentExecute(parameters);
+                    var response = vnPayService.PaymentExecute(parameters);
                     parameters.TryGetValue("userId", out var userIdString);
                     if (!string.IsNullOrEmpty(userIdString))
                     {
@@ -80,6 +80,7 @@ namespace BBMSRazorPages.Pages
                         HttpContext.Session.SetInt32("UserId", user.UserId);
                         HttpContext.Session.SetString("UserRole", user.Role);
                     }
+
                 }
                 return Page();
             }

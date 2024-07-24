@@ -11,7 +11,7 @@ namespace Services.Interfaces
 {
     public interface IVnPayService
     {
-        string CreatePaymentUrl(Payment paymentModel, HttpContext context, string currentPath);
+        string CreatePaymentUrl(int userId, ScheduleBookingsModel scheduleBookingModel, HttpContext context);
 
         string CreatePaymentUrlForBooking(List<Booking> bookings, HttpContext context);
 

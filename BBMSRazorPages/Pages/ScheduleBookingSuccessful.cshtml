@@ -23,38 +23,61 @@
     }
 
     <div>
-        <label for="bookingDates"> Booking dates: </label>
-        <p id="bookingDates">@Model.ScheduleBookingModel.BookingDates</p>
+        <form method="post">
+            <label for="bookingDates" style="font-weight: bold"> Booking dates: </label>
+            <p id="bookingDates">@Model.ScheduleBookingModel.BookingDates</p>
+            <input asp-for="ScheduleBookingModel.BookingDates" value="@Model.ScheduleBookingModel.BookingDates" class="form-control" type="hidden"/>
 
-        <label for="daysOfWeek"> Days of week: </label>
-        <p id="daysOfWeek">@Model.ScheduleBookingModel.DaysOfWeek</p>
+            <label for="daysOfWeek" style="font-weight: bold"> Days of week: </label>
+            <p id="daysOfWeek">@Model.ScheduleBookingModel.DaysOfWeek</p>
+            <input asp-for="ScheduleBookingModel.DaysOfWeek" value="@Model.ScheduleBookingModel.DaysOfWeek" class="form-control" type="hidden"/>
 
-        <label for="startTime"> Start time: </label>
-        <p id="startTime">@Model.ScheduleBookingModel.StartTime</p>
+            <label for="startTime" style="font-weight: bold"> Start time: </label>
+            <p id="startTime">@Model.ScheduleBookingModel.StartTime</p>
+            <input asp-for="ScheduleBookingModel.StartTime" value="@Model.ScheduleBookingModel.StartTime" class="form-control" type="hidden" />
 
-        <label for="endTime"> End time: </label>
-        <p id="endTime">@Model.ScheduleBookingModel.EndTime</p>
+            <label for="endTime" style="font-weight: bold"> End time: </label>
+            <p id="endTime">@Model.ScheduleBookingModel.EndTime</p>
+            <input asp-for="ScheduleBookingModel.EndTime" value="@Model.ScheduleBookingModel.EndTime" class="form-control" type="hidden" />
 
-        <label for="court"> Court: </label>
-        <p id="court">@Model.ScheduleBookingModel.Court.CourtName</p>
+            <label for="court" style="font-weight: bold"> Court: </label>
+            <p id="court">@Model.ScheduleBookingModel.Court.CourtName</p>
+            <input asp-for="ScheduleBookingModel.Court" value="@Model.ScheduleBookingModel.Court" class="form-control" type="hidden" />
 
-        <label for="totalPrice"> Total price: </label>
-        <p id="totalPrice">@Model.ScheduleBookingModel.TotalPrice VND</p>
+            @if (Model.ScheduleBookingModel.BookingServices.Any())
+            {
+                <label for="services" style="font-weight: bold">Services: </label>
+                <ul id="services">
+                    @foreach (var bookingService in Model.ScheduleBookingModel.BookingServices)
+                    {
+                        <li>@bookingService.Service.ServiceName: @((double)bookingService.Quantity * (double)Model.NumberOfDates)</li>
+                    }
+                </ul>
+            }
 
-        <label for="user"> User: </label>
-        <p id="user">@Model.ScheduleBookingModel.User.Email</p>
+            <label for="totalPrice" style="font-weight: bold"> Total price: </label>
+            <p id="totalPrice">@Model.ScheduleBookingModel.TotalPrice VND</p>
+            <input asp-for="ScheduleBookingModel.TotalPrice" value="@Model.ScheduleBookingModel.TotalPrice" class="form-control" type="hidden" />
+
+            <label for="user" style="font-weight: bold"> User: </label>
+            <p id="user">@Model.ScheduleBookingModel.User.Email</p>
+            <input asp-for="ScheduleBookingModel.User" value="@Model.ScheduleBookingModel.User" class="form-control" type="hidden" />
+
+            <input asp-for="ScheduleBookingModelJsonString" value="@Model.ScheduleBookingModelJsonString" class="form-control" type="hidden" />
+
+            <button type="submit" asp-page-handler="VnPayPayment" style="font-weight: bold">Payment with VnPay</button>
+        </form>
+        
     </div>
 
-    @* <h4>Please pay 50% of the booking total price as deposit.</h4>
-    <p style="color: blue">Your deposit is: @(Model.Deposit * 1000) VND</p> *@
-    <div class="button-container">
+    @* <div class="button-container">
         <form method="post">
             <input type="hidden" name="BookingIds" value="@Model.BookingIds" />
             <input type="hidden" name="TotalPrice" value="@Model.ScheduleBookingModel.TotalPrice" />
             <button type="submit" asp-page-handler="VnPayPayment">Payment with VnPay</button>
             <button type="submit" asp-page-handler="MomoPayment">Payment with Momo Wallet</button>
         </form>
-    </div>
+    </div> *@
 </div>
 
 @section Scripts {
