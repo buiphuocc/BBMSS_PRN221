@@ -275,8 +275,12 @@
                     <form method="post" id="bookingForm">
                         <div class="form-group">
                             <label asp-for="CourtId" class="control-label">Court</label>
-                            <select asp-for="CourtId" class="form-control" asp-items="@(new SelectList(Model.Courts, "CourtId", "CourtName"))" required>
-                                <option value="">-- Select Court --</option>
+                            <select asp-for="CourtId" class="form-control"  required onchange="fetchCourtPrice()">
+                                <option value="" >-- Select Court --</option>
+                                @foreach (var court in Model.Courts)
+                                {
+                                    <option value="@court.CourtId" data-price="@court.PricePerHour">@court.CourtName</option>
+                                }
                             </select>
                         </div>
                         <div class="form-group">
@@ -310,14 +314,28 @@
                                     <option value="">-- Select Service --</option>
                                     @foreach (var service in Model.Services)
                                     {
-                                        <option value="@service.ServiceId">@service.ServiceName</option>
+                                        <option value="@service.ServiceId" data-price="@service.ServicePrice">@service.ServiceName</option>
                                     }
                                 </select>
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="addService()">Add Service</button>
                             </div>
                         </div>
-                        <div id="servicesContainer" class="form-group">
+                        <div id="servicesContainer" class="form-group" style="margin-top: 10px">
                             <!-- Services will be added here dynamically -->
+                        </div>
+
+                        <!-- Total Price Display -->
+                        <div class="form-group" style="margin-top: 10px">
+                            <label>Court Playtime Price: </label>
+                            <span id="courtPlaytimePrice">0</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Service Price: </label>
+                            <span id="servicePrice">0</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px">
+                            <label>Total Price: </label>
+                            <span id="totalPrice">0</span>
                         </div>
                         <button type="submit" class="btn btn-primary">Book</button>
                     </form>
@@ -520,10 +538,29 @@
             
         // }
 
+        document.getElementById('StartTime').addEventListener('change', calculateTotalPrice);
+        document.getElementById('EndTime').addEventListener('change', calculateTotalPrice);
+        document.getElementById('CourtId').addEventListener('change', fetchCourtPrice);
+
+        let courtPrice = 0;
+
+        function fetchCourtPrice() {
+            const courtSelector = document.getElementById('CourtId');
+            const selectedCourtId = courtSelector.value;
+
+            if (selectedCourtId === "") return;
+
+            const selectedCourt = courtSelector.options[courtSelector.selectedIndex];
+            courtPrice = parseFloat(selectedCourt.getAttribute('data-price')) || 0;
+
+            calculateTotalPrice();
+        }
+
         function addService() {
             const serviceSelector = document.getElementById('serviceSelector');
             const selectedServiceId = serviceSelector.value;
             const selectedServiceText = serviceSelector.options[serviceSelector.selectedIndex].text;
+            const servicePrice = parseFloat(serviceSelector.options[serviceSelector.selectedIndex].getAttribute('data-price'));
 
             if (selectedServiceId === "") return;
 
@@ -533,8 +570,8 @@
 
             serviceDiv.innerHTML = `
                 <label>${selectedServiceText}</label>
-                <input type="hidden" name="SelectedServices" value="${selectedServiceId}" />
-                <input class="form-control" type="number" min="1" value="1" name="ServiceQuantities[${selectedServiceId}]" style="display: inline-block; width: auto; margin-left: 10px;" />
+                <input type="hidden" name="SelectedServices" value="${selectedServiceId}" data-price="${servicePrice}" />
+                <input class="form-control" type="number" min="1" value="1" name="ServiceQuantities[${selectedServiceId}]" style="display: inline-block; width: auto; margin-left: 10px;" onchange="calculateTotalPrice()" />
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeService(this, '${selectedServiceId}')">Remove</button>
             `;
 
@@ -543,6 +580,8 @@
             // Disable the selected option
             serviceSelector.options[serviceSelector.selectedIndex].disabled = true;
             serviceSelector.value = ""; // Reset the selector
+
+            calculateTotalPrice();
         }
 
         function removeService(button, serviceId) {
@@ -555,7 +594,47 @@
             if (option) {
                 option.disabled = false;
             }
+
+            calculateTotalPrice();
         }
+
+        function calculateTotalPrice() {
+            // Calculate duration in hours
+            const startTime = document.getElementById('StartTime').value;
+            const endTime = document.getElementById('EndTime').value;
+
+            if (startTime && endTime) {
+                const start = new Date(`1970-01-01T${startTime}:00`);
+                const end = new Date(`1970-01-01T${endTime}:00`);
+                const duration = (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
+
+                // Calculate court cost
+                const courtCost = courtPrice * duration;
+
+                // Calculate services cost
+                let servicesCost = 0;
+                document.querySelectorAll('#servicesContainer input[name^="ServiceQuantities"]').forEach(input => {
+                    const servicePrice = parseFloat(input.previousElementSibling.getAttribute('data-price')) || 0;
+                    const quantity = parseInt(input.value) || 0;
+                    servicesCost += servicePrice * quantity;
+                });
+
+                // Calculate total price
+                const totalPrice = courtCost + servicesCost;
+
+                // Update the displayed prices
+                document.getElementById('courtPlaytimePrice').innerText = courtCost.toFixed(2);
+                document.getElementById('servicePrice').innerText = servicesCost.toFixed(2);
+                document.getElementById('totalPrice').innerText = totalPrice.toFixed(2);
+            } else {
+                document.getElementById('courtPlaytimePrice').innerText = '0';
+                document.getElementById('servicePrice').innerText = '0';
+                document.getElementById('totalPrice').innerText = '0';
+            }
+        }
+
+        // Initial price fetch for the selected court and services
+        fetchCourtPrice();
 
     </script>
 }
