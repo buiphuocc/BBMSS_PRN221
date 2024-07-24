@@ -10,6 +10,7 @@ namespace Repositories.Interfaces
     public interface IServiceRepository
     {
         List<Service> GetAllServices();
+        List<Service> GetAllActiveServices();
         Service GetServiceById(int id);
         void AddService(Service service);
         void UpdateService(Service service);

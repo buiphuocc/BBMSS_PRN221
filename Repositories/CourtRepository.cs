@@ -28,6 +28,11 @@ namespace Repositories
             CourtDAO.DeleteCourt(id);
         }
 
+        public List<Court> GetAllActiveCourts()
+        {
+            return CourtDAO.GetAllActiveCourts();
+        }
+
         public List<Court> GetAllCourts()
         {
             return CourtDAO.GetAllCourts();

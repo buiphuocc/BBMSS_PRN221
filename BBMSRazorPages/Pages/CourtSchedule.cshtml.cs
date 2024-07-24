@@ -80,9 +80,9 @@ namespace BBMSRazorPages.Pages
             BookingDate = bookingDate.ToString("yyyy-MM-dd");
             SelectedDate = bookingDate;
             Bookings = bookingService.GetBookingsByBookingDate(SelectedDate);
-            Courts = courtService.GetAllCourts();
+            Courts = courtService.GetAllActiveCourts();
             UserId = HttpContext.Session.GetInt32("UserId");
-            Services = serviceService.GetAllServices();
+            Services = serviceService.GetAllActiveServices();
             //dataa for menu
             var services = serviceService.GetAllServices();
             var courts = courtService.GetAllCourts();
@@ -195,6 +195,11 @@ namespace BBMSRazorPages.Pages
                         ModelState.AddModelError(string.Empty, "This time range is booked");
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This time range and court is booked" });
                     }
+                    if(courtService.GetCourtById(CourtId).IsActive == false)
+                    {
+                        ModelState.AddModelError(string.Empty, "This court is currently inactive");
+                        return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This court is currently inactive" });
+                    }
 
                     List<int> bookings = new List<int>();
                     TimeSpan slotDuration = new TimeSpan(0, 30, 0); // 30 minutes
@@ -262,6 +267,11 @@ namespace BBMSRazorPages.Pages
                             {
                                 if (serviceQuantities.TryGetValue(serviceId, out int quantity))
                                 {
+                                    if(serviceService.GetServiceById(serviceId).IsActive == false)
+                                    {
+                                        ModelState.AddModelError(string.Empty, "This service is currently inactive");
+                                        return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "This service is currently inactive" });
+                                    }
                                     var bookingService = new BusinessObjects.BookingService
                                     {
                                         BookingId = newBooking.BookingId,

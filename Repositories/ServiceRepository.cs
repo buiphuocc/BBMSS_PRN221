@@ -23,6 +23,9 @@ namespace Repositories
         public void DeleteService(int id)
             => ServiceDAO.DeleteService(id);
 
+        public List<Service> GetAllActiveServices()
+            => ServiceDAO.GetAllActiveServices();
+
         public List<Service> GetAllServices()
             =>ServiceDAO.GetAllServices();
 

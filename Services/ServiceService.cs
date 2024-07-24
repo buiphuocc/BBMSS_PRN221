@@ -27,6 +27,11 @@ namespace Services
             serviceRepository.DeleteService(id);
         }
 
+        public List<Service> GetAllActiveServices()
+        {
+            return serviceRepository.GetAllActiveServices();
+        }
+
         public List<Service> GetAllServices()
         {
             return serviceRepository.GetAllServices();

@@ -28,6 +28,11 @@ namespace Services
             courtRepository.DeleteCourt(id);
         }
 
+        public List<Court> GetAllActiveCourts()
+        {
+            return courtRepository.GetAllActiveCourts();
+        }
+
         public List<Court> GetAllCourts()
         {
             return courtRepository.GetAllCourts();
