@@ -38,6 +38,8 @@ namespace BBMSRazorPages.Pages.Services
                 return Page();
             }
 
+            Service.IsActive = true;
+
             _serviceService.AddService(Service);
 
             return RedirectToPage("./Index");
