@@ -21,11 +21,11 @@ public partial class Booking
 
     public string PaymentMethod { get; set; } = null!;
 
-    //public string PaymentStatus { get; set; } = null!;
-
     public string? Status { get; set; }
 
     public string? PaymentId { get; set; }
+
+    public string? BookingType { get; set; }
 
     public virtual ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
 

@@ -5,9 +5,9 @@
     ViewData["Title"] = "Manage services";
 }
 
-<h1>Manage services</h1>
+<h1 style="text-align:center; margin:20px auto">Manage services</h1>
 
-<p>
+<p style="text-align:center">
     <a asp-page="Create">Create New</a>
 </p>
 <table class="table">
@@ -18,6 +18,9 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Service[0].ServicePrice)
+            </th>
+            <th>
+                Status
             </th>
             <th></th>
         </tr>
@@ -31,6 +34,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.ServicePrice)
             </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsActive)
+                    </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.ServiceId">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.ServiceId">Details</a> |
@@ -40,3 +46,4 @@
 }
     </tbody>
 </table>
+</div>

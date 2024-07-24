@@ -38,6 +38,8 @@ namespace BBMSRazorPages.Pages.Courts
                 return Page();
             }
 
+            Court.IsActive = true;
+
             _courtService.AddCourt(Court);
 
             return RedirectToPage("./Index");

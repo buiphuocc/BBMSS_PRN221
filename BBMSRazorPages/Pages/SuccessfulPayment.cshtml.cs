@@ -36,7 +36,7 @@ namespace BBMSRazorPages.Pages
                 {
                     RedirectToPage("/Authentication/Login");
                 }
-                var parameters = Request.Query;                  
+                var parameters = Request.Query;
                 if (parameters != null)
                 {
                     var response = momoService.PaymentExecuteAsync(parameters);
@@ -48,7 +48,7 @@ namespace BBMSRazorPages.Pages
                 TempData["PaymentUnsuccessful"] = ex.Message;
                 var idsString = ex.Message.Trim().Split(':')[1];
                 var idStrings = idsString.Trim().Split(',');
-                if(idStrings.Length == 1)
+                if (idStrings.Length == 1)
                 {
                     var routeValue = new
                     {
@@ -84,7 +84,7 @@ namespace BBMSRazorPages.Pages
                 }
                 return Page();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 TempData["PaymentUnsuccessful"] = ex.Message;
                 var idsString = ex.Message.Trim().Split(':')[1];

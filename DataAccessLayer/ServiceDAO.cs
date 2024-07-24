@@ -23,6 +23,12 @@ namespace DataAccessLayer
             return _context.Services.ToList();
         }
 
+        public static List<Service> GetAllActiveServices()
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            return _context.Services.Where(s => s.IsActive == true).ToList();
+        }
+
         public static Service GetServiceById(int id)
         {
             using var _context = new BadmintonBookingSystemContext();

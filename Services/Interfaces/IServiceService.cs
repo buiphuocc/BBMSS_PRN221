@@ -10,6 +10,7 @@ namespace Services.Interfaces
     public interface IServiceService
     {
         List<Service> GetAllServices();
+        List<Service> GetAllActiveServices();
         Service GetServiceById(int id);
         void AddService(Service service);
         void UpdateService(Service service);

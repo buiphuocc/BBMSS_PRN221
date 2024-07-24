@@ -315,7 +315,8 @@ namespace BBMSRazorPages.Pages
                     EndTime = endTime,
                     TotalPrice = (decimal)((float)pricePerHour * totalHours),
                     PaymentMethod = paymentOption,
-                    Status = "Pending"
+                    Status = "Pending",
+                    BookingType = "Schedule Booking"
                 };
                 var newBookingServices = new List<BusinessObjects.BookingService>();
                 // Get services by selected service id
@@ -386,27 +387,6 @@ namespace BBMSRazorPages.Pages
 
             if (paymentOption.Equals("Online payment"))
             {
-                // Get bookings for payment
-                //var bookings = new List<BusinessObjects.Booking>();
-                //var bookingIdsString = "";
-                //for(int i = 0; i < bookingDays.Count; i++)
-                //{
-                //    var createdBooking = bookingService.GetBookingsByBookingDateAndCourtIdAndStartTimeAndEndTimeAndPaymentMethod(bookingDays[i], SelectedCourtId, startTime, endTime, "Online payment");
-                //    if (createdBooking != null)
-                //    {
-                //        bookings.Add(createdBooking);
-                //        if(i == bookingDays.Count - 1)
-                //        {
-                //            bookingIdsString += createdBooking.BookingId;
-                //            continue;
-                //        }
-                //        bookingIdsString += createdBooking.BookingId + ",";
-                //    }
-                //}
-                //var routesValue = new
-                //{
-                //    ids = bookingIdsString
-                //};
                 var daysOfWeekString = "";
                 for(int i = 0; i < SelectedDaysOfWeek.Count; i++)
                 {
@@ -444,32 +424,6 @@ namespace BBMSRazorPages.Pages
 
                 return RedirectToPage("/ScheduleBookingSuccessful", new { scheduleBookingModelJsonString});
 
-                // VnPay
-                //var paymentUrl = vnPayService.CreatePaymentUrlForBooking(bookings, HttpContext);
-
-                //return Redirect(paymentUrl);
-
-                // Momo
-                //var bookingIdsString = "";
-                //decimal amount = 0;
-                //for (int i = 0; i < bookings.Count; i++)
-                //{
-                //    amount += bookings[i].TotalPrice;
-                //    if (i == bookings.Count - 1)
-                //    {
-                //        bookingIdsString += bookings[i].BookingId;
-                //        continue;
-                //    }
-                //    bookingIdsString += bookings[i].BookingId + ",";
-                //}
-                //var orderInfo = new OrderInfoModel
-                //{
-                //    OrderInfo = bookingIdsString,
-                //    Amount = (double)amount,
-                //    UserId = (int)userId
-                //};
-                //var response = await momoService.CreatePaymentAsync(orderInfo, null);
-                //return Redirect(response.PayUrl);
             }
             TempData["BookingSuccess"] = "Schedule booking successfully.";
             return RedirectToPage();

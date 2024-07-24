@@ -61,5 +61,12 @@ namespace DataAccessLayer
                 _context.SaveChanges();
             }
         }
+
+        public static bool IsUserExist(string email, string username)
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            var user = _context.Users.FirstOrDefault(u => u.Email.Equals(email) || u.Username.Equals(username));
+            return user != null;
+        }
     }
 }

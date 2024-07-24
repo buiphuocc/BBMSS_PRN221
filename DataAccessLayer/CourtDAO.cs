@@ -23,6 +23,12 @@ namespace DataAccessLayer
             return _context.Courts.ToList();
         }
 
+        public static List<Court> GetAllActiveCourts()
+        {
+            using var _context = new BadmintonBookingSystemContext();
+            return _context.Courts.Where(c => c.IsActive == true).ToList();
+        }
+
         public static Court GetCourtById(int id)
         {
             using var _context = new BadmintonBookingSystemContext();

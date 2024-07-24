@@ -50,7 +50,11 @@ public partial class BadmintonBookingSystemContext : DbContext
 
             entity.Property(e => e.BookingId).HasColumnName("BookingID");
             entity.Property(e => e.BookingDate).HasColumnType("date");
+            entity.Property(e => e.BookingType).HasMaxLength(50);
             entity.Property(e => e.CourtId).HasColumnName("CourtID");
+            entity.Property(e => e.PaymentId)
+                .HasMaxLength(36)
+                .IsUnicode(false);
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(10, 2)");
@@ -71,7 +75,7 @@ public partial class BadmintonBookingSystemContext : DbContext
 
         modelBuilder.Entity<BookingService>(entity =>
         {
-            entity.HasKey(e => e.BookingServiceId).HasName("PK__BookingS__43F55CD132E3FA09");
+            entity.HasKey(e => e.BookingServiceId).HasName("PK__BookingS__43F55CD1A8F86582");
 
             entity.ToTable("BookingService");
 
@@ -85,12 +89,12 @@ public partial class BadmintonBookingSystemContext : DbContext
 
             entity.HasOne(d => d.Service).WithMany(p => p.BookingServices)
                 .HasForeignKey(d => d.ServiceId)
-                .HasConstraintName("FK__BookingSe__Servi__5535A963");
+                .HasConstraintName("FK__BookingSe__Servi__44FF419A");
         });
 
         modelBuilder.Entity<Court>(entity =>
         {
-            entity.HasKey(e => e.CourtId).HasName("PK__Court__C3A67CFAE3AF1C0B");
+            entity.HasKey(e => e.CourtId).HasName("PK__Court__C3A67CFA0653DC26");
 
             entity.ToTable("Court");
 
@@ -101,12 +105,13 @@ public partial class BadmintonBookingSystemContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC07595B0913");
+            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC07B26DF2D5");
 
             entity.ToTable("Payment");
 
-            entity.HasIndex(e => e.TransactionId, "UQ__Payment__55433A6A9A03E91C").IsUnique();
-
+            entity.Property(e => e.Id)
+                .HasMaxLength(36)
+                .IsUnicode(false);
             entity.Property(e => e.Date).HasColumnType("datetime");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
@@ -121,7 +126,7 @@ public partial class BadmintonBookingSystemContext : DbContext
 
         modelBuilder.Entity<Service>(entity =>
         {
-            entity.HasKey(e => e.ServiceId).HasName("PK__Service__C51BB0EA1F0E3DCE");
+            entity.HasKey(e => e.ServiceId).HasName("PK__Service__C51BB0EAFE72C453");
 
             entity.ToTable("Service");
 
@@ -132,7 +137,7 @@ public partial class BadmintonBookingSystemContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CCACC4F01847");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CCAC6893D27E");
 
             entity.ToTable("User");
 

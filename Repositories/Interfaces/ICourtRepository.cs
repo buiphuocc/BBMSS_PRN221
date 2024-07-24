@@ -11,6 +11,8 @@ namespace Repositories.Interfaces
     {
         List<Court> GetAllCourts();
 
+        List<Court> GetAllActiveCourts();
+
         Court GetCourtById(int id);
 
         void AddCourt(Court court);
