@@ -25,6 +25,15 @@
                 <span asp-validation-for="Service.ServicePrice" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Service.IsActive" class="control-label">Status</label>
+                <select asp-for="Service.IsActive" class="form-control">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+                <span asp-validation-for="Service.IsActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="margin:20px auto">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>

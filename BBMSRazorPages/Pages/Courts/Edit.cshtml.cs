@@ -44,7 +44,7 @@ namespace BBMSRazorPages.Pages.Courts
             {
                 return Page();
             }
-
+            Court.IsActive = true;
             _courtService.UpdateCourt(Court);
 
             return RedirectToPage("./Index");
