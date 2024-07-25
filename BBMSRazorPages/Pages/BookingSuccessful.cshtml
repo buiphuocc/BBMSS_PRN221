@@ -10,14 +10,14 @@
 <div>
     @if (TempData["BookingSuccessful"] != null)
     {
-        <div id="successNotification" class="success-notification">
+        <div id="successNotification" class="success-notification" style="padding-top: 56px;">
             <span class="notification-icon">&#10004;</span>
             <span class="notification-text">@TempData["BookingSuccessful"]</span>
         </div>
     }
     @if (TempData["BookingUnsuccessful"] != null)
     {
-        <div id="errorNotification" class="error-notification">
+        <div id="errorNotification" class="error-notification" style="padding-top: 56px;">
             <span class="notification-icon">&#10006;</span>
             <span class="notification-text">@TempData["BookingUnsuccessful"]</span>
         </div>
@@ -129,6 +129,7 @@
         display: inline-block;
         opacity: 1;
         transition: opacity 1s ease-out;
+        padding-top: 56px;
     }
 
     .notification-icon {
@@ -182,6 +183,7 @@
         border-radius: 5px;
         margin: 20px;
         font-size: 16px;
+        padding-top: 56px;
     }
 
     .notification-icon {
