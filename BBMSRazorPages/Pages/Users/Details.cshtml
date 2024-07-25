@@ -39,7 +39,9 @@
                     <th>Services</th>
                     <th>Status</th>
                     <th>Payment Method</th>
+                    <th>Note</th>
                     <th>Total Price</th>
+                    <th>Booking Type</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,6 +64,7 @@
                         <td>@booking.PaymentMethod</td>
                         <td>@(booking.Payment?.Success == true ? "Paid" : "Unpaid")</td>
                         <td>@booking.TotalPrice</td>
+                        <td>@booking.BookingType</td>
                     </tr>
                 }
             </tbody>
