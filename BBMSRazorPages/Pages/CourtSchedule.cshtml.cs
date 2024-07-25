@@ -352,47 +352,47 @@ namespace BBMSRazorPages.Pages
                     //};
                     //paymentService.SavePaymentWithBookingIds(payment,bookings);
 
-                    // Send email to user
-                    User user = userService.GetUserById((int) UserId);
+                    // Send email to user  
 
-                    //if (user != null)
-                    //{
-                    //    var bookedCourt = courtService.GetCourtById((int)newBooking.CourtId);
-                    //    var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
-
-                    //    string subject = "Badminton Court Booking Confirmation";
-                    //    string message =
-                    //        $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
-                    //        $"<strong>Booking Details:</strong><br>" +
-                    //        $"Court name: {bookedCourt.CourtName}<br>" +
-                    //        $"On date: {newBooking.BookingDate.ToShortDateString()}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
-
-                    //    if (bookingServices != null && bookingServices.Any())
-                    //    {
-                    //        message += "<br><strong>Additional Services:</strong><br>";
-                    //        foreach (var bookingService in bookingServices)
-                    //        {
-                    //            Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
-                    //            message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        message += "<br><strong>Additional Services:</strong> None.<br>";
-                    //    }
-
-                    //    message +=
-                    //        $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
-                    //        $"Payment method: {newBooking.PaymentMethod}<br><br>" +
-                    //        "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
-
-                    //    await emailSender.SendEmailAsync(user.Email, subject, message);
-
-                    //    Console.WriteLine("Sent email to " + user.Email);
-                    //}
-
-                    if(PaymentMethod.Equals("Pay at Place"))
+                    if (PaymentMethod.Equals("Pay at Place"))
                     {
+                        User user = userService.GetUserById((int)UserId);
+
+                        if (user != null)
+                        {
+                            var bookedCourt = courtService.GetCourtById((int)newBooking.CourtId);
+                            var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
+
+                            string subject = "Badminton Court Booking Confirmation";
+                            string message =
+                                $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                                $"<strong>Booking Details:</strong><br>" +
+                                $"Court name: {bookedCourt.CourtName}<br>" +
+                                $"On date: {newBooking.BookingDate.ToShortDateString()}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
+
+                            if (bookingServices != null && bookingServices.Any())
+                            {
+                                message += "<br><strong>Additional Services:</strong><br>";
+                                foreach (var bookingService in bookingServices)
+                                {
+                                    Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
+                                    message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
+                                }
+                            }
+                            else
+                            {
+                                message += "<br><strong>Additional Services:</strong> None.<br>";
+                            }
+
+                            message +=
+                                $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
+                                $"Payment method: {newBooking.PaymentMethod}<br><br>" +
+                                "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+
+                            await emailSender.SendEmailAsync(user.Email, subject, message);
+
+                            Console.WriteLine("Sent email to " + user.Email);
+                        }
                         return RedirectToPage("/CourtSchedule", new { bookingDate = DateForm, message = "Booked Successfully" });
                     }
 

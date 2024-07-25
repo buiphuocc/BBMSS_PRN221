@@ -17,7 +17,7 @@ namespace Services.Interfaces
 
         string CreatePaymentUrlForBooking(List<Booking> bookings, HttpContext context);
 
-        VnPayPaymentModel PaymentExecute(IQueryCollection collections);
+        Task<VnPayPaymentModel> PaymentExecute(IQueryCollection collections);
 
         VnPayPaymentModel BookingPaymentExecute(IQueryCollection collections);
     }

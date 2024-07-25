@@ -27,12 +27,24 @@ namespace Services
 
         private readonly IServiceRepository serviceRepository;
 
-        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository, IBookingReppository bookingReppository, IServiceRepository serviceRepository)
+        private readonly IEmailSender emailSender;
+
+        private readonly IUserRepository userRepository;
+
+        private readonly ICourtRepository courtRepository;
+
+        private readonly IBookingServiceRepository bookingServiceRepository;
+
+        public VnPayService(IConfiguration configuration, IPaymentRepository paymentRepository, IBookingReppository bookingReppository, IServiceRepository serviceRepository, IEmailSender emailSender, IUserRepository userRepository, ICourtRepository courtRepository, IBookingServiceRepository bookingServiceRepository)
         {
             _configuration = configuration;
             this.paymentRepository = paymentRepository;
             this.bookingReppository = bookingReppository;
             this.serviceRepository = serviceRepository;
+            this.emailSender = emailSender;
+            this.userRepository = userRepository;
+            this.courtRepository = courtRepository;
+            this.bookingServiceRepository = bookingServiceRepository;
         }
 
         public VnPayPaymentModel BookingPaymentExecute(IQueryCollection collections)
@@ -223,7 +235,7 @@ namespace Services
             return paymentUrl;
         }
 
-        public VnPayPaymentModel PaymentExecute(IQueryCollection collections)
+        public async Task<VnPayPaymentModel> PaymentExecute(IQueryCollection collections)
         {
             try
             {
@@ -337,6 +349,45 @@ namespace Services
                     }
                     booking.BookingServices = newBookingServices;
                     bookingReppository.AddBookingWithServices(booking);
+
+                    // Handle send email to user
+                    User user = userRepository.GetUserById((int)booking.UserId);
+
+                    if (user != null)
+                    {
+                        var bookedCourt = courtRepository.GetCourtById((int)booking.CourtId);
+                        //var bookingServices = bookingServiceRepository.GetBookingServicesByBookingId(booking.BookingId);
+
+                        string subject = "Badminton Court Booking Confirmation";
+                        string message =
+                            $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                            $"<strong>Booking Details:</strong><br>" +
+                            $"Court name: {bookedCourt.CourtName}<br>" +
+                            $"On date: {bookingDatesString}, from {booking.StartTime} to {booking.EndTime}<br>";
+
+                        if (bookingServices != null && bookingServices.Any())
+                        {
+                            message += "<br><strong>Additional Services:</strong><br>";
+                            foreach (var bookingService in bookingServices)
+                            {
+                                //Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
+                                message += $"- {bookingService.Service.ServiceName}, quantity: {(double)bookingService.Quantity * (double)bookingDateStrings.Length}<br>";
+                            }
+                        }
+                        else
+                        {
+                            message += "<br><strong>Additional Services:</strong> None.<br>";
+                        }
+
+                        message +=
+                            $"<br>Total booking price: {response.Amount}<br>" +
+                            $"Payment method: Online payment <br><br>" +
+                            "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+
+                        await emailSender.SendEmailAsync(user.Email, subject, message);
+
+                        Console.WriteLine("Sent email to " + user.Email);
+                    }
                 }
 
                 return response;

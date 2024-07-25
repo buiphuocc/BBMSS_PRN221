@@ -46,14 +46,14 @@ namespace BBMSRazorPages.Pages
             return Page();
         }
 
-        public IActionResult OnGetSavePaymentForBooking()
+        public async Task<IActionResult> OnGetSavePaymentForBooking()
         {
             try
             {
                 var parameters = Request.Query;
                 if (parameters != null)
                 {
-                    var response = vnPayService.PaymentExecute(parameters);
+                    var response = await vnPayService.PaymentExecute(parameters);
                     parameters.TryGetValue("userId", out var userIdString);
                     if (!string.IsNullOrEmpty(userIdString))
                     {
