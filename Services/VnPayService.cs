@@ -238,8 +238,7 @@ namespace Services
                 var bookingDates = new List<DateTime>();
                 for (int i = 0; i < bookingDateStrings.Length; i++)
                 {
-                    var date = DateTime.ParseExact(bookingDateStrings[i], "MM/dd/yyyy", CultureInfo.InvariantCulture,
-                        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal);
+                    DateTime date = DateTime.ParseExact(bookingDateStrings[i], "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
                     bookingDates.Add(date);
                 }
                 collections.TryGetValue("daysOfWeekString", out var daysOfWeekString);

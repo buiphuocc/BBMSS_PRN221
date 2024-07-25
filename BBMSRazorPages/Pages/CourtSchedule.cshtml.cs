@@ -218,7 +218,11 @@ namespace BBMSRazorPages.Pages
                         BookingType = "Normal Booking"
                     };
 
-                    //bookingService.AddBooking(newBooking);
+                    if (PaymentMethod.Equals("Pay at Place"))
+                    {
+                        bookingService.AddBooking(newBooking);
+                    }
+                    
                     bookings.Add(newBooking.BookingId);
 
                     
@@ -397,6 +401,7 @@ namespace BBMSRazorPages.Pages
                     var bookingUser = userService.GetUserById((int)newBooking.UserId);
                     newBooking.Court = bookingCourt;
                     newBooking.User = bookingUser;
+                    //newBooking.BookingDate.Hour(0);
                     var bookingJsonString = JsonSerializer.Serialize(newBooking);
                     var routeValue = new
                     {

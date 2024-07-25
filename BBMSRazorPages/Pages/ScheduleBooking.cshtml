@@ -21,14 +21,14 @@
     <div class="container">
         @if (TempData["BookingSuccess"] != null)
         {
-            <div id="successNotification" class="success-notification">
+            <div id="successNotification" class="success-notification" style="padding-top: 56px;">
                 <span class="notification-icon">&#10004;</span>
                 <span class="notification-text">@TempData["BookingSuccess"]</span>
             </div>
         }
         @if (TempData["PaymentUnsucessful"] != null)
         {
-            <div id="errorNotification" class="error-notification">
+            <div id="errorNotification" class="error-notification" style="padding-top: 56px;">
                 <span class="notification-icon">&#10006;</span>
                 <span class="notification-text">@TempData["PaymentUnsucessful"]</span>
             </div>

@@ -24,6 +24,7 @@ else
                 <th>Payment Method</th>
                 <th>Payment status</th>
                 <th>Total Price</th>
+                <th>Booking Type</th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,7 @@ else
                     <td>@booking.PaymentMethod</td>
                     <td>@(booking.Payment?.Success == true ? "Paid" : "Unpaid")</td>
                     <td>@booking.TotalPrice</td>
+                    <td>@booking.BookingType</td>
                 </tr>
             }
         </tbody>
