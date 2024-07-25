@@ -29,39 +29,21 @@ namespace BBMSRazorPages.Pages
 
         public IActionResult OnGet()
         {
-            try
+            var id = HttpContext.Session.GetInt32("UserId");
+            if (id == null || id <= 0)
             {
-                var id = HttpContext.Session.GetInt32("UserId");
-                if (id == null || id <= 0)
-                {
-                    RedirectToPage("/Authentication/Login");
-                }
-                var parameters = Request.Query;
-                if (parameters != null)
-                {
-                    var response = momoService.PaymentExecuteAsync(parameters);
-                }
-                return Page();
+                RedirectToPage("/Authentication/Login");
             }
-            catch (Exception ex)
+            var parameters = Request.Query;
+            if (parameters != null)
             {
-                TempData["PaymentUnsuccessful"] = ex.Message;
-                var idsString = ex.Message.Trim().Split(':')[1];
-                var idStrings = idsString.Trim().Split(',');
-                if (idStrings.Length == 1)
+                parameters.TryGetValue("bookingDatesString", out var bookingDatesString);
+                if(string.IsNullOrEmpty(bookingDatesString) || string.IsNullOrWhiteSpace(bookingDatesString))
                 {
-                    var routeValue = new
-                    {
-                        id = int.Parse(idStrings[0])
-                    };
-                    return RedirectToPage("/BookingSuccessful", routeValue);
+                    return RedirectToPage("/ScheduleBooking");
                 }
-                var routesValue = new
-                {
-                    ids = idsString
-                };
-                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
             }
+            return Page();
         }
 
         public IActionResult OnGetSavePaymentForBooking()
@@ -86,22 +68,8 @@ namespace BBMSRazorPages.Pages
             }
             catch (Exception ex)
             {
-                TempData["PaymentUnsuccessful"] = ex.Message;
-                var idsString = ex.Message.Trim().Split(':')[1];
-                var idStrings = idsString.Trim().Split(',');
-                if (idStrings.Length == 1)
-                {
-                    var routeValue = new
-                    {
-                        id = int.Parse(idStrings[0])
-                    };
-                    return RedirectToPage("/BookingSuccessful", routeValue);
-                }
-                var routesValue = new
-                {
-                    ids = idsString
-                };
-                return RedirectToPage("/ScheduleBookingSuccessful", routesValue);
+                TempData["PaymentUnsucessful"] = "Payment for your booking is unsucess.";
+                return RedirectToPage("/ScheduleBooking");
             }
         }
     }

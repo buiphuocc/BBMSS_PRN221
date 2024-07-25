@@ -10,6 +10,7 @@ using Services.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace BBMSRazorPages.Pages
 {
@@ -217,7 +218,7 @@ namespace BBMSRazorPages.Pages
                         BookingType = "Normal Booking"
                     };
 
-                    bookingService.AddBooking(newBooking);
+                    //bookingService.AddBooking(newBooking);
                     bookings.Add(newBooking.BookingId);
 
                     
@@ -259,7 +260,7 @@ namespace BBMSRazorPages.Pages
                             System.Diagnostics.Debug.WriteLine($"Service ID: {entry.Key}, Quantity: {entry.Value}");
                         }
 
-
+                        var bookingServices = new List<BusinessObjects.BookingService>();
                         if (!selectedServices.IsNullOrEmpty())
                         {
                             decimal totalServicePrice = 0;
@@ -280,93 +281,111 @@ namespace BBMSRazorPages.Pages
                                         Quantity = quantity
                                     };
                                     totalServicePrice += (quantity * serviceService.GetServiceById(serviceId).ServicePrice);
-                                    bookingServiceService.AddBookingService(bookingService);
+                                    if(PaymentMethod.Equals("Pay at Place"))
+                                    {
+                                        bookingServiceService.AddBookingService(bookingService);
+                                    }
+                                    else
+                                    {
+                                        var service = serviceService.GetServiceById(serviceId);
+                                        bookingService.Service = service;
+                                        bookingServices.Add(bookingService);
+                                    }
+                                    
                                 }
 
                             }
                             newBooking.TotalPrice += totalServicePrice;
-                            bookingService.UpdateBooking(newBooking);
+                            if (PaymentMethod.Equals("Pay at Place"))
+                            {
+                                bookingService.UpdateBooking(newBooking);
+                            }
+                            else
+                            {
+                                newBooking.BookingServices = bookingServices;
+                            }
+                            
                         }
 
                     }
 
 
-                    BusinessObjects.Booking forPayment = bookingService.GetBookingById(newBooking.BookingId);
-                    // Check newBooking
-                    if (forPayment == null)
-                    {
-                        throw new NullReferenceException("newBooking is null");
-                    }
+                    //BusinessObjects.Booking forPayment = bookingService.GetBookingById(newBooking.BookingId);
+                    //// Check newBooking
+                    //if (forPayment == null)
+                    //{
+                    //    throw new NullReferenceException("newBooking is null");
+                    //}
 
-                    // Check newBooking.User
-                    if (forPayment.User == null)
-                    {
-                        throw new NullReferenceException("newBooking.User is null");
-                    }
+                    //// Check newBooking.User
+                    //if (forPayment.User == null)
+                    //{
+                    //    throw new NullReferenceException("newBooking.User is null");
+                    //}
 
-                    // Check newBooking.User.Username
-                    if (forPayment.User.Username == null)
-                    {
-                        throw new NullReferenceException("newBooking.User.Username is null");
-                    }
+                    //// Check newBooking.User.Username
+                    //if (forPayment.User.Username == null)
+                    //{
+                    //    throw new NullReferenceException("newBooking.User.Username is null");
+                    //}
 
-                    // Check newBooking.PaymentMethod
-                    if (forPayment.PaymentMethod == null)
-                    {
-                        throw new NullReferenceException("newBooking.PaymentMethod is null");
-                    }
+                    //// Check newBooking.PaymentMethod
+                    //if (forPayment.PaymentMethod == null)
+                    //{
+                    //    throw new NullReferenceException("newBooking.PaymentMethod is null");
+                    //}
 
                     //Add payment for booking
-                    var payment = new Payment()
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Date = DateTime.UtcNow,
-                        Amount = (long)forPayment.TotalPrice,
-                        PaymentMethod = forPayment.PaymentMethod,
-                        Description = forPayment.User.Username + "Paid" + forPayment.TotalPrice,
-                        Success = false,
-                        TransactionId = null
-                    };
-                    paymentService.SavePaymentWithBookingIds(payment,bookings);
+                    //var payment = new Payment()
+                    //{
+                    //    Id = Guid.NewGuid().ToString(),
+                    //    Date = DateTime.UtcNow,
+                    //    Amount = (long)forPayment.TotalPrice,
+                    //    PaymentMethod = forPayment.PaymentMethod,
+                    //    Description = forPayment.User.Username + "Paid" + forPayment.TotalPrice,
+                    //    Success = false,
+                    //    TransactionId = null
+                    //};
+                    //paymentService.SavePaymentWithBookingIds(payment,bookings);
 
                     // Send email to user
                     User user = userService.GetUserById((int) UserId);
 
-                    if (user != null)
-                    {
-                        var bookedCourt = courtService.GetCourtById((int)newBooking.CourtId);
-                        var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
+                    //if (user != null)
+                    //{
+                    //    var bookedCourt = courtService.GetCourtById((int)newBooking.CourtId);
+                    //    var bookingServices = bookingServiceService.GetBookingServicesByBookingId(newBooking.BookingId);
 
-                        string subject = "Badminton Court Booking Confirmation";
-                        string message =
-                            $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
-                            $"<strong>Booking Details:</strong><br>" +
-                            $"Court name: {bookedCourt.CourtName}<br>" +
-                            $"On date: {newBooking.BookingDate.ToShortDateString()}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
+                    //    string subject = "Badminton Court Booking Confirmation";
+                    //    string message =
+                    //        $"Dear {user.Email}, your badminton court booking has been confirmed!<br><br>" +
+                    //        $"<strong>Booking Details:</strong><br>" +
+                    //        $"Court name: {bookedCourt.CourtName}<br>" +
+                    //        $"On date: {newBooking.BookingDate.ToShortDateString()}, from {newBooking.StartTime} to {newBooking.EndTime}<br>";
 
-                        if (bookingServices != null && bookingServices.Any())
-                        {
-                            message += "<br><strong>Additional Services:</strong><br>";
-                            foreach (var bookingService in bookingServices)
-                            {
-                                Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
-                                message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
-                            }
-                        }
-                        else
-                        {
-                            message += "<br><strong>Additional Services:</strong> None.<br>";
-                        }
+                    //    if (bookingServices != null && bookingServices.Any())
+                    //    {
+                    //        message += "<br><strong>Additional Services:</strong><br>";
+                    //        foreach (var bookingService in bookingServices)
+                    //        {
+                    //            Service s = serviceService.GetServiceById((int)bookingService.ServiceId);
+                    //            message += $"- {s.ServiceName}, quantity: {bookingService.Quantity}<br>";
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        message += "<br><strong>Additional Services:</strong> None.<br>";
+                    //    }
 
-                        message +=
-                            $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
-                            $"Payment method: {newBooking.PaymentMethod}<br><br>" +
-                            "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
+                    //    message +=
+                    //        $"<br>Total booking price: {newBooking.TotalPrice}<br>" +
+                    //        $"Payment method: {newBooking.PaymentMethod}<br><br>" +
+                    //        "In case the information is not correct, please contact us by replying to this email to make adjustments as soon as possible.";
 
-                        await emailSender.SendEmailAsync(user.Email, subject, message);
+                    //    await emailSender.SendEmailAsync(user.Email, subject, message);
 
-                        Console.WriteLine("Sent email to " + user.Email);
-                    }
+                    //    Console.WriteLine("Sent email to " + user.Email);
+                    //}
 
                     if(PaymentMethod.Equals("Pay at Place"))
                     {
@@ -374,9 +393,14 @@ namespace BBMSRazorPages.Pages
                     }
 
                     // Send to booking information for payment
+                    var bookingCourt = courtService.GetCourtById((int)newBooking.CourtId);
+                    var bookingUser = userService.GetUserById((int)newBooking.UserId);
+                    newBooking.Court = bookingCourt;
+                    newBooking.User = bookingUser;
+                    var bookingJsonString = JsonSerializer.Serialize(newBooking);
                     var routeValue = new
                     {
-                        id = newBooking.BookingId
+                        bookingJsonString = bookingJsonString
                     };
                     TempData["BookingSuccessful"] = "Your booking has executed successfully.";
                     return RedirectToPage("/BookingSuccessful", routeValue);

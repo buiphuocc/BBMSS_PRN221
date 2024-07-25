@@ -185,6 +185,7 @@ option {
     display: inline-block;
     opacity: 1;
     transition: opacity 1s ease-out;
+    margin-top: 100px;
 }
 
 .notification-icon {
@@ -196,4 +197,23 @@ option {
 .notification-text {
     font-size: 16px;
     color: #4CAF50;
+}
+
+.error-notification {
+    display: flex;
+    align-items: center;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    margin: 20px;
+    font-size: 16px;
+    margin-top: 100px;
+}
+
+.notification-icon {
+    margin-right: 10px;
+    color: red; /* Red color for the error icon */
+    font-size: 20px;
 }

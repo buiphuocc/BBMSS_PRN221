@@ -52,47 +52,6 @@ namespace BBMSRazorPages.Pages
             {
                 RedirectToPage("/ScheduleBooking");
             }
-            //var idStrings = ids.Trim().Split(',');
-            //BookingIds = ids.Trim();
-            //var bookings = new List<BusinessObjects.Booking>();
-            //var daysOfWeek = new HashSet<DayOfWeek>();
-            //decimal totalPrice = 0;
-            //foreach(var idString in idStrings)
-            //{
-            //    if(int.TryParse(idString, out var id))
-            //    {
-            //        var booking = bookingService.GetBookingById(id);
-            //        bookings.Add(booking);
-            //        daysOfWeek.Add(booking.BookingDate.DayOfWeek);
-            //        totalPrice += booking.TotalPrice;
-            //    }
-            //    else
-            //    {
-
-            //    }
-            //}
-            //var bookingDates = bookings.Select(b => DateOnly.FromDateTime(b.BookingDate)).ToList();
-            //var bookingDatesString = "";
-            //foreach(var bookingDate in bookingDates)
-            //{
-            //    bookingDatesString += bookingDate.ToString() + ", ";
-            //}
-            //var daysOfWeekString = "";
-            //foreach(var dayOfWeek in daysOfWeek)
-            //{
-            //    daysOfWeekString += dayOfWeek.ToString() + ", ";
-            //}
-            //var scheduleBooking = new BBMSRazorPages.Models.ScheduleBookingModel
-            //{
-            //    BookingDates = bookingDatesString,
-            //    DaysOfWeek = daysOfWeekString,
-            //    Court = bookings[0].Court,
-            //    User = bookings[0].User,
-            //    StartTime = bookings[0].StartTime,
-            //    EndTime = bookings[0].EndTime,
-            //    TotalPrice = totalPrice
-            //};
-            //ScheduleBookingModel = scheduleBooking;
 
             ScheduleBookingsModel scheduleBookingModel = JsonSerializer.Deserialize<ScheduleBookingsModel>(scheduleBookingModelJsonString);
             ScheduleBookingModel = scheduleBookingModel;

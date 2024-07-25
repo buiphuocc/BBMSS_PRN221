@@ -9,6 +9,7 @@ using BusinessObjects;
 using Services.Interfaces;
 using Services;
 using Services.Models;
+using System.Text.Json;
 
 namespace BBMSRazorPages.Pages
 {
@@ -34,15 +35,26 @@ namespace BBMSRazorPages.Pages
         [BindProperty]
         public int BookingId { get; set; }
 
-        public void OnGet(int id)
+        [BindProperty]
+        public string BookingJsonString { get; set; }
+
+        public void OnGet(string bookingJsonString)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null || userId <= 0)
             {
                 RedirectToPage("/Authentication/Login");
             }
-            var booking = bookingService.GetBookingById(id);
-            //Deposit = (decimal)((double)booking.TotalPrice / 2);
+            if(string.IsNullOrEmpty(bookingJsonString) || string.IsNullOrWhiteSpace(bookingJsonString))
+            {
+                RedirectToPage("/CourtSchedule", new { bookingDate = DateTime.UtcNow, message = "You did not booked any court." });
+            }
+            BookingJsonString = bookingJsonString;
+            BusinessObjects.Booking booking = JsonSerializer.Deserialize<BusinessObjects.Booking>(bookingJsonString);
+            if (booking == null)
+            {
+                RedirectToPage("/CourtSchedule", new { bookingDate = DateTime.UtcNow, message = "You did not booked any court." });
+            }
             Booking = booking;
         }
 
@@ -51,8 +63,10 @@ namespace BBMSRazorPages.Pages
             try
             {
                 // Code for VnPay payment execution
-                var newBooking = bookingService.GetBookingById(BookingId);
-                var response = vnPayService.CreatePaymentUrlForBooking(new List<BusinessObjects.Booking> { newBooking }, HttpContext);
+                //var newBooking = bookingService.GetBookingById(BookingId);
+                //var response = vnPayService.CreatePaymentUrlForBooking(new List<BusinessObjects.Booking> { newBooking }, HttpContext);
+                BusinessObjects.Booking booking = JsonSerializer.Deserialize<BusinessObjects.Booking>(BookingJsonString);
+                var response = vnPayService.CreatePaymentUrlDailyBooking(booking, HttpContext);
                 return Redirect(response);
             }
             catch (Exception ex)

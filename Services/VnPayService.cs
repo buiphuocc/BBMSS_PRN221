@@ -1,6 +1,7 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Repositories;
 using Repositories.Interfaces;
 using Services.Interfaces;
@@ -104,6 +105,60 @@ namespace Services
                 }
                 bookingServicesString += scheduleBookingModel.BookingServices[i].Service.ServiceId + ":" + scheduleBookingModel.BookingServices[i].Quantity + "; ";
             }
+            if(string.IsNullOrEmpty(bookingServicesString) || string.IsNullOrWhiteSpace(bookingServicesString))
+            {
+                bookingServicesString = "No service";
+            }
+            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
+            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
+            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_Amount", (price).ToString());
+            pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
+            pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
+            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
+            pay.AddRequestData("vnp_OrderInfo", $"{bookingServicesString}");
+            pay.AddRequestData("vnp_OrderType", "other");
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+            pay.AddRequestData("vnp_TxnRef", guid);
+
+            var paymentUrl =
+                pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+
+            return paymentUrl;
+        }
+
+        public string CreatePaymentUrlDailyBooking(Booking booking, HttpContext context)
+        {
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+            var tick = DateTime.Now.Ticks.ToString();
+            var guid = Guid.NewGuid().ToString();
+            var pay = new VnPayLibrary();
+            var urlCallBack = _configuration["PaymentCallBack:ReturnUrl"] + "&userId=" + booking.UserId + "&bookingDatesString=" + booking.BookingDate.ToString("MM/dd/yyyy")
+                + "&courtId=" + booking.Court.CourtId + "&startTime=" + booking.StartTime.ToString()
+                + "&endTime=" + booking.EndTime.ToString();
+
+            ulong price = (ulong)booking.TotalPrice * 100;
+
+
+
+            var bookingServicesJsonString = JsonSerializer.Serialize(booking.BookingServices);
+            var bookingServicesList = booking.BookingServices.ToList();
+            var bookingServicesString = "";
+            for (int i = 0; i < bookingServicesList.Count; i++)
+            {
+                if (i == bookingServicesList.Count - 1)
+                {
+                    bookingServicesString += bookingServicesList[i].Service.ServiceId + ":" + bookingServicesList[i].Quantity;
+                    continue;
+                }
+                bookingServicesString += bookingServicesList[i].Service.ServiceId + ":" + bookingServicesList[i].Quantity + "; ";
+            }
+            if (string.IsNullOrEmpty(bookingServicesString) || string.IsNullOrWhiteSpace(bookingServicesString))
+            {
+                bookingServicesString = "No service";
+            }
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
             pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
             pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
@@ -188,11 +243,17 @@ namespace Services
                     bookingDates.Add(date);
                 }
                 collections.TryGetValue("daysOfWeekString", out var daysOfWeekString);
-                var dayOfWeekStrings = daysOfWeekString.ToString().Trim().Split(", ");
+                var bookingType = "Schedule Booking";
+                if(string.IsNullOrEmpty(daysOfWeekString) || string.IsNullOrWhiteSpace(daysOfWeekString))
+                {
+                    bookingType = "Normal Booking";
+                }
                 collections.TryGetValue("startTime", out var startTimeString);
                 var startTime = TimeSpan.Parse(startTimeString);
                 collections.TryGetValue("endTime", out var endTimeString);
                 var endTime = TimeSpan.Parse(endTimeString);
+
+
 
                 var payment = new Payment
                 {
@@ -202,7 +263,7 @@ namespace Services
                     Date = response.PayDate,
                     Success = response.Success,
                     PaymentMethod = "VnPay",
-                    Description = "Payment for schedule booking."
+                    Description = "Payment for " + bookingType + "."
                 };
                 
                 if (!response.Success)
@@ -213,20 +274,34 @@ namespace Services
 
                 //List<BusinessObjects.BookingService> bookingServices = JsonSerializer.Deserialize<List<BusinessObjects.BookingService>>(response.Description);
                 var bookingServicesString = response.Description;
-                var bookingServiceStrings = bookingServicesString.Trim().Split("; ");
                 var bookingServices = new List<BusinessObjects.BookingService>();
-                for(int i = 0; i < bookingServiceStrings.Length; i++)
+                if (!bookingServicesString.Equals("No service"))
                 {
-                    var serviceQuantity = bookingServiceStrings[i].Trim().Split(':');
-                    var serviceId = int.Parse(serviceQuantity[0]);
-                    var service = serviceRepository.GetServiceById(serviceId);
-                    bookingServices.Add(new BusinessObjects.BookingService
+                    var bookingServiceStrings = bookingServicesString.Trim().Split("; ");
+                    
+                    for (int i = 0; i < bookingServiceStrings.Length; i++)
                     {
-                        Service = service,
-                        ServiceId = serviceId,
-                        Quantity = int.Parse(serviceQuantity[1])
-                    });
+                        var serviceQuantity = bookingServiceStrings[i].Trim().Split(':');
+                        var serviceId = int.Parse(serviceQuantity[0]);
+                        var service = serviceRepository.GetServiceById(serviceId);
+                        bookingServices.Add(new BusinessObjects.BookingService
+                        {
+                            Service = service,
+                            ServiceId = serviceId,
+                            Quantity = int.Parse(serviceQuantity[1])
+                        });
+                    }
                 }
+                decimal pricePerBooking = 0;
+                if (bookingType.Equals("Schedule Booking"))
+                {
+                    pricePerBooking = (decimal)((double)response.Amount / (double)bookingDates.Count);
+                }
+                else
+                {
+                    pricePerBooking = response.Amount;
+                }
+                
 
                 foreach(var bookingDate in bookingDates)
                 {
@@ -237,23 +312,29 @@ namespace Services
                         BookingDate = bookingDate,
                         StartTime = startTime,
                         EndTime = endTime,
-                        TotalPrice = (decimal) response.Amount,
+                        TotalPrice = (decimal) pricePerBooking,
                         PaymentMethod = "Online payment",
                         Status = "Confirmed",
-                        PaymentId = payment.Id
+                        PaymentId = payment.Id,
+                        BookingType = bookingType
                     };
                     var newBookingServices = new List<BusinessObjects.BookingService>();
-                    foreach (var bookingService in bookingServices)
+                    if (!bookingServices.IsNullOrEmpty())
                     {
-                        var newBookingService = new BusinessObjects.BookingService
+                        
+                        foreach (var bookingService in bookingServices)
                         {
-                            ServiceId = bookingService.ServiceId,
-                            Quantity = bookingService.Quantity,
-                            Booking = booking
-                        };
-                        newBookingServices.Add(newBookingService);
-                        var price = bookingService.Service.ServicePrice;
-                        booking.TotalPrice += (price * bookingService.Quantity);
+                            var newBookingService = new BusinessObjects.BookingService
+                            {
+                                ServiceId = bookingService.ServiceId,
+                                Quantity = bookingService.Quantity,
+                                Booking = booking
+                            };
+                            newBookingServices.Add(newBookingService);
+                            //var price = bookingService.Service.ServicePrice;
+                            //booking.TotalPrice += (price * bookingService.Quantity);
+                        }
+                        
                     }
                     booking.BookingServices = newBookingServices;
                     bookingReppository.AddBookingWithServices(booking);

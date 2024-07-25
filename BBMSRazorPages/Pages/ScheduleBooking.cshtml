@@ -26,6 +26,13 @@
                 <span class="notification-text">@TempData["BookingSuccess"]</span>
             </div>
         }
+        @if (TempData["PaymentUnsucessful"] != null)
+        {
+            <div id="errorNotification" class="error-notification">
+                <span class="notification-icon">&#10006;</span>
+                <span class="notification-text">@TempData["PaymentUnsucessful"]</span>
+            </div>
+        }
         <p style="color: red">@TempData["PropertyRequired"]</p>
         <form method="post">
             <div class="month-year-picker">
@@ -33,7 +40,15 @@
                 <select id="month" name="Month">
                     @for (int i = 1; i <= 12; i++)
                     {
-                        bool isSelected = i - 1 == DateTime.Now.Month;
+                        bool isSelected = false;
+                        var currentDate = DateTime.UtcNow;
+                        var currentMonth = currentDate.Month;
+                        var lastDay = DateTime.DaysInMonth(currentDate.Year, currentMonth) - 7;
+                        if (currentMonth + 2 == i)
+                        {
+                            isSelected = true;
+                        }
+                        
                         @if (isSelected)
                         {
                             <option value="@i" selected>@(new DateTime(Model.Year, i, 1).Month)</option>
@@ -567,6 +582,16 @@
 
         setTimeout(function () {
             var notification = document.getElementById('successNotification');
+            if (notification) {
+                notification.style.opacity = '0';
+                setTimeout(function () {
+                    notification.style.display = 'none';
+                }, 1000); // Fade out animation time
+            }
+        }, 3000);
+
+        setTimeout(function () {
+            var notification = document.getElementById('errorNotification');
             if (notification) {
                 notification.style.opacity = '0';
                 setTimeout(function () {

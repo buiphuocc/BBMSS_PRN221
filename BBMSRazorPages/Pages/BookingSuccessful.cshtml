@@ -25,31 +25,31 @@
     
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.BookingDate)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.BookingDate)
         </dd>
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.StartTime)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.StartTime)
         </dd>
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.EndTime)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.EndTime)
         </dd>
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.TotalPrice)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.TotalPrice) VND
         </dd>
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.PaymentMethod)
         </dt>
         <dd class="col-sm-10">
@@ -61,7 +61,7 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.Status)
         </dd> *@
-        <dt class="col-sm-2">
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.Court)
         </dt>
         <dd class="col-sm-10">
@@ -73,20 +73,30 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.Payment.Id)
         </dd> *@
-        <dt class="col-sm-2">
+
+        @if (Model.Booking.BookingServices.Any())
+        {
+            <label for="services" style="font-weight: bold">Services: </label>
+            <ul id="services">
+                @foreach (var bookingService in Model.Booking.BookingServices)
+                {
+                    <li>@bookingService.Service.ServiceName: @(bookingService.Quantity)</li>
+                }
+            </ul>
+        }
+
+        <dt class="col-sm-2" style="font-weight: bold">
             @Html.DisplayNameFor(model => model.Booking.User)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.User.Email)
         </dd>
     </dl>
-    @* <h4>Please pay 50% of the booking total price as deposit.</h4>
-    <p style="color: blue">Your deposit is: @(Model.Deposit * 1000) VND</p> *@
     <div class="button-container">
         <form method="post">
-            <input type="hidden" name="BookingId" value="@Model.Booking.BookingId" />
-            <button type="submit" asp-page-handler="VnPayPayment">Payment with VnPay</button>
-            <button type="submit" asp-page-handler="MomoPayment">Payment with Momo Wallet</button>
+            <input asp-for="BookingJsonString" value="@Model.BookingJsonString" class="form-control" type="hidden" />
+
+            <button type="submit" asp-page-handler="VnPayPayment" style="font-weight: bold">Payment with VnPay</button>
         </form>
     </div>
 </div>
