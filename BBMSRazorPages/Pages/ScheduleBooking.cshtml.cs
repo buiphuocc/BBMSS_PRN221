@@ -134,7 +134,7 @@ namespace BBMSRazorPages.Pages
             };
 
             //dataa for menu
-            var services = serviceService.GetAllServices();
+            var services = serviceService.GetAllActiveServices();
             var courts = courtService.GetAllCourts();
             Pricing = new PricingViewModel
             {
@@ -438,7 +438,7 @@ namespace BBMSRazorPages.Pages
 
         public IActionResult OnGetServiceOptions()
         {
-            var services = serviceService.GetAllServices();
+            var services = serviceService.GetAllActiveServices();
             return new JsonResult(services);
         }
 
